@@ -1,0 +1,35 @@
+{
+    "name": "tkkr.dev",
+    "version": "0.0.0",
+    "description": "website hosted on tkkr.dev",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "tw": "npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thaddeuskkr/tkkr.dev.git"
+    },
+    "keywords": [
+        "website"
+    ],
+    "author": "thaddeus kuah <tk@tkkr.dev> (https://tkkr.dev)",
+    "license": "GPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/thaddeuskkr/tkkr.dev/issues"
+    },
+    "homepage": "https://github.com/thaddeuskkr/tkkr.dev#readme",
+    "devDependencies": {
+        "@catppuccin/tailwindcss": "^0.1.6",
+        "@eslint/js": "^9.7.0",
+        "eslint": "9.x",
+        "eslint-config-prettier": "^9.1.0",
+        "globals": "^15.8.0",
+        "prettier": "^3.3.3",
+        "prettier-plugin-tailwindcss": "^0.6.5",
+        "tailwindcss": "^3.4.5"
+    },
+    "dependencies": {
+        "jquery": "^3.7.1"
+    }
+}
