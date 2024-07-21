@@ -31,6 +31,30 @@ $(() => {
     $('#website-open').on('click', function () {
         sendAlert('Why are you clicking this? ', 'You literally have it open.');
     });
+    $('#contact-form').on('submit', function (event) {
+        event.preventDefault();
+        const email = $('#email').val();
+        const subject = $('#subject').val();
+        const message = $('#message').val();
+        $('#email').val('');
+        $('#subject').val('');
+        $('#message').val('');
+        fetch('https://discord.com/api/webhooks/1264592141490061373/zndiiua5ZsL1d-c1koZriWbGIeWKnWK1s5i8DOkti3KD7HlfEmT70mh1pmY0m1BgaLwU?wait=true', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                content: `**Email:** \`${email}\`\n**Subject:** \`${subject}\`\n**Message:**\n\`\`\`${message}\`\`\``
+            })
+        })
+            .then(() => {
+                sendAlert('Submitted! ', `You'll get a response at ${email} within 7 working days.`);
+            })
+            .catch(() => {
+                sendAlert('Error! ', 'Something went wrong. Try again later.');
+            });
+    });
     function sendAlert(title, data) {
         $('#alert-title').text(title);
         $('#alert-data').text(data);
