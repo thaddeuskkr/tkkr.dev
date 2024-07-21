@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>thaddeus kuah • tkkr.dev</title>
+        <link rel="shortcut icon" type="image/x-icon" href="./assets/favicon.ico" />
+        <link href="./css/output.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        <script>
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                $(document.documentElement).addClass('mocha');
+            } else {
+                $(document.documentElement).removeClass('mocha');
+            }
+        </script>
+        <script src="./js/index.js"></script>
+    </head>
+
+    <body class="bg-base text-text">
+        <nav class="fixed top-0 z-10 w-full bg-crust">
+            <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+                <div class="relative flex h-16 items-center justify-between">
+                    <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                        <button
+                            type="button"
+                            class="relative inline-flex items-center justify-center rounded-md p-2 text-subtext0 hover:bg-surface0 hover:text-text focus:outline-none focus:ring-2 focus:ring-inset focus:ring-text"
+                            aria-controls="mobile-menu"
+                            aria-expanded="false"
+                        >
+                            <span class="absolute -inset-0.5"></span>
+                            <span class="sr-only">Open main menu</span>
+                            <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                            <svg class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                        <div class="flex flex-shrink-0 items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-8 w-auto fill-yellow">
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813A3.75 3.75 0 0 0 7.466 7.89l.813-2.846A.75.75 0 0 1 9 4.5ZM18 1.5a.75.75 0 0 1 .728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 0 1 0 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 0 1-1.456 0l-.258-1.036a2.625 2.625 0 0 0-1.91-1.91l-1.036-.258a.75.75 0 0 1 0-1.456l1.036-.258a2.625 2.625 0 0 0 1.91-1.91l.258-1.036A.75.75 0 0 1 18 1.5ZM16.5 15a.75.75 0 0 1 .712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 0 1 0 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 0 1-1.422 0l-.395-1.183a1.5 1.5 0 0 0-.948-.948l-1.183-.395a.75.75 0 0 1 0-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0 1 16.5 15Z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </div>
+                        <div class="hidden sm:ml-6 sm:block">
+                            <div class="flex space-x-4">
+                                <a href="./index.html" class="rounded-md px-3 py-2 text-sm font-medium text-subtext0 hover:bg-surface1 hover:text-text">Home</a>
+                                <a href="./about.html" class="rounded-md px-3 py-2 text-sm font-medium text-subtext0 hover:bg-surface1 hover:text-text">About</a>
+                                <a href="./portfolio.html" class="rounded-md bg-surface0 px-3 py-2 text-sm font-medium text-text" aria-current="page">Portfolio</a>
+                                <a href="./contact.html" class="rounded-md px-3 py-2 text-sm font-medium text-subtext0 hover:bg-surface1 hover:text-text">Contact</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                        <button id="theme-toggle" type="button" class="relative rounded-full bg-crust p-1 text-subtext0 hover:text-text focus:outline-none">
+                            <span class="absolute -inset-1.5"></span>
+                            <span class="sr-only">Toggle light/dark theme</span>
+                            <svg
+                                id="light-theme"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="hidden size-6"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                                />
+                            </svg>
+                            <svg
+                                id="dark-theme"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="hidden size-6"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden sm:hidden" id="mobile-menu">
+                <div class="space-y-1 px-2 pb-3 pt-2">
+                    <a href="./index.html" class="block rounded-md px-3 py-2 text-base font-medium text-subtext0 hover:bg-surface1 hover:text-text">Home</a>
+                    <a href="./about.html" class="block rounded-md px-3 py-2 text-base font-medium text-subtext0 hover:bg-surface1 hover:text-text">About</a>
+                    <a href="./portfolio.html" class="block rounded-md bg-surface0 px-3 py-2 text-base font-medium text-text" aria-current="page">Portfolio</a>
+                    <a href="./contact.html" class="block rounded-md px-3 py-2 text-base font-medium text-subtext0 hover:bg-surface1 hover:text-text">Contact</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="mx-auto my-3.5 flex max-w-6xl flex-col px-5 pt-16 md:my-14">
+            <h1 class="pb-5 text-2xl font-bold underline md:text-3xl">Open Source Projects</h1>
+            <div class="w-fit overflow-hidden rounded-lg border border-subtext0">
+                <table class="divide-y divide-subtext0">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium uppercase text-subtext1">Project Name</th>
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium uppercase text-subtext1">Short Description</th>
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium uppercase text-subtext1">Creation Date & Status</th>
+                            <th scope="col" class="px-6 py-3 text-end text-xs font-medium uppercase text-subtext1">Links</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-subtext0">
+                        <tr>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-text">Website @ tkkr.dev</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">A personal website (you're looking at it)</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">Jun 2024 • Active</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-end text-sm font-medium">
+                                <a id="website-open" class="cursor-pointer text-blue">Website</a>
+                                •
+                                <a target="_blank" rel="noopener noreferrer" href="https://github.com/thaddeuskkr/tkkr.dev" class="text-blue">GitHub</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-text">Celerity</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">A fully-free Discord music bot</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">May 2023 • Active</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-end text-sm font-medium">
+                                <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    href="https://discord.com/api/oauth2/authorize?client_id=1063698207793762406&permissions=279176399888&scope=bot%20applications.commands"
+                                    class="text-blue"
+                                    >Invite</a
+                                >
+                                •
+                                <a target="_blank" rel="noopener noreferrer" href="https://github.com/thaddeuskkr/Celerity" class="text-blue">GitHub</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-text">Dev Container</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">An Ubuntu development container</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">Feb 2024 • Active</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-end text-sm font-medium">
+                                <a target="_blank" rel="noopener noreferrer" href="https://github.com/thaddeuskkr/dev-container" class="text-blue">GitHub</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-text">Last.fm Widgets</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">A widget generation tool for Last.fm profiles</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">Mar 2024 • Inactive</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-end text-sm font-medium">
+                                <a target="_blank" rel="noopener noreferrer" href="https://github.com/thaddeuskkr/lastfm" class="text-blue">GitHub</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-text">osu!drive</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">A terminal-based osu! account manager</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-text">Aug 2021 • Obsolete</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-end text-sm font-medium">
+                                <a target="_blank" rel="noopener noreferrer" href="https://github.com/thaddeuskkr/osudrive" class="text-blue">GitHub</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h1 class="pb-5 pt-10 text-2xl font-bold underline md:text-3xl">Work Experience</h1>
+            <div class="flex flex-row">
+                <div class="my-auto size-fit">
+                    <img src="./assets/logo-noelgifts.png" class="size-16 min-h-16 min-w-16" />
+                </div>
+                <div class="ml-5 flex flex-col">
+                    <span class="text-sm font-semibold text-subtext0">Dec 2023 - Mar 2024 • Part-time</span>
+                    <span class="font-bold text-text">Operations Assistant @ Noel Gifts International Ltd</span>
+                    <span class="text-sm font-normal text-text"
+                        >Assisted in preparation, packing, transferring and clearance of gifts, updating of stock, housekeeping and storage, as well as various other tasks assigned
+                        to me.</span
+                    >
+                </div>
+            </div>
+        </div>
+
+        <div id="alert" class="fixed right-0 top-0 z-20 m-2 hidden rounded bg-blue px-4 py-3 text-crust opacity-0 transition duration-500 ease-in-out" role="alert">
+            <strong id="alert-title" class="font-bold"></strong>
+            <span id="alert-data" class="block sm:inline"></span>
+        </div>
+    </body>
+</html>
