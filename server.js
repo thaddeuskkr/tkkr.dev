@@ -1,8 +1,8 @@
 import { WebSocketServer } from 'ws';
 import crypto from 'node:crypto';
 
-const SERVER_HOST = '0.0.0.0';
-const SERVER_PORT = 2006;
+const SERVER_HOST = String(process.env.HOST || '0.0.0.0');
+const SERVER_PORT = Number(process.env.PORT || 8080);
 
 const wss = new WebSocketServer({
     host: SERVER_HOST,
