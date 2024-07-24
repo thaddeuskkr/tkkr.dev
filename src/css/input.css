@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Manrope:wght@200..800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,7 +6,6 @@
 :root {
     --font-main: 'Manrope', sans-serif;
     --font-code: 'JetBrains Mono', monospace;
-    --font-cursive: 'Comic Neue', sans-serif;
 }
 
 * {
@@ -20,10 +19,6 @@ code,
 
 span {
     font-family: inherit;
-}
-
-.cursive {
-    font-family: var(--font-cursive);
 }
 
 .bg-image {
