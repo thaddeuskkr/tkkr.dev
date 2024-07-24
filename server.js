@@ -15,12 +15,12 @@ wss.on('listening', () => console.log(`WebSocket server started on ${SERVER_HOST
 wss.on('error', console.error);
 wss.on('connection', (ws, req) => {
     ws.on('error', console.error);
-    console.log(`Connection established from ${req.socket.remoteAddress}`);
+    console.log(`Connection established from ${req.headers['cf-connecting-ip']}`);
     const id = crypto.randomBytes(2).toString('hex');
     ws.playerId = id;
     ws.inGame = false;
     ws.on('close', () => {
-        console.log(`Connection closed from ${req.socket.remoteAddress}`);
+        console.log(`Connection closed from ${req.headers['cf-connecting-ip']}`);
         const game = games.find((game) => game.player1.ws === ws || game.player2.ws === ws);
         if (game) {
             game.player1.ws.inGame = false;
