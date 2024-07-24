@@ -35,6 +35,8 @@ $(() => {
                 $('.pregame').addClass('hidden');
                 $('.game').addClass('flex');
                 $('.game').removeClass('hidden');
+                $('#connectionRequests').html('');
+                $('#multiId').val('');
                 if (player === 2) sendAlert(`Player ${player}: `, 'Opponent is making the first move');
                 break;
             }
@@ -89,6 +91,13 @@ $(() => {
     $('#connect').on('click', () => {
         ws.send(JSON.stringify({ type: 'connect', id: $('#multiId').val() }));
         $('#multiId').val('');
+    });
+
+    $('#multiId').on('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $('#connect').trigger('click');
+        }
     });
 
     function sendAlert(title, data) {
