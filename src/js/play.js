@@ -102,7 +102,7 @@ $(() => {
     });
 
     function keepAlive(timeout = 20000) {
-        if (ws.readyState === WebSocket.OPEN) ws.send({ type: 'ping' });
+        if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping' }));
         setTimeout(keepAlive, timeout);
     }
 
