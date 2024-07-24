@@ -2,3 +2,4 @@ deleted_*
 node_modules
 .vscode
 .idea
+.env
