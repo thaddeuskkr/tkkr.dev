@@ -92,6 +92,8 @@ $(() => {
     });
 
     function sendAlert(title, data) {
+        // eslint-disable-next-line no-undef
+        clearTimeout(alertTimeout);
         $('#alert-title').text(title);
         $('#alert-data').text(data);
         $('#alert').removeClass('hidden');

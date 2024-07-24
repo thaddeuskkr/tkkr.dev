@@ -56,6 +56,7 @@ $(() => {
             });
     });
     function sendAlert(title, data) {
+        clearTimeout(alertTimeout);
         $('#alert-title').text(title);
         $('#alert-data').text(data);
         $('#alert').removeClass('hidden');
