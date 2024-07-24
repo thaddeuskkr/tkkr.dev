@@ -106,6 +106,6 @@ $(() => {
                 // eslint-disable-next-line no-undef
                 clearTimeout(alertTimeout);
             });
-        }, 2000);
+        }, 1500);
     }
 });
