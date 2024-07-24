@@ -1,4 +1,4 @@
-const WEBSOCKET_URL = 'wss://tk.is-a.dev';
+const WEBSOCKET_URL = 'wss://ws.tkkr.dev';
 let player = 0;
 $(() => {
     const ws = new WebSocket(WEBSOCKET_URL);
