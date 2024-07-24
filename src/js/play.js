@@ -7,6 +7,7 @@ $(() => {
         console.log(`Connected to WebSocket server @ ${WEBSOCKET_URL}`);
         $('.websocket-connected').removeClass('hidden');
         $('.websocket-disconnected').addClass('hidden');
+        keepAlive(20000);
     });
     ws.addEventListener('close', () => {
         console.log(`Disconnected from WebSocket server @ ${WEBSOCKET_URL}`);
@@ -99,6 +100,11 @@ $(() => {
             $('#connect').trigger('click');
         }
     });
+
+    function keepAlive(timeout = 20000) {
+        if (ws.readyState === WebSocket.OPEN) ws.send({ type: 'ping' });
+        setTimeout(keepAlive, timeout);
+    }
 
     function sendAlert(title, data) {
         // eslint-disable-next-line no-undef
