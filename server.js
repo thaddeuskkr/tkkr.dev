@@ -129,6 +129,9 @@ wss.on('connection', (ws, req) => {
     });
 });
 
+for (const event of ['unhandledRejection', 'uncaughtException']) process.on(event, (err) => console.error(err));
+process.on('SIGTERM', () => process.exit(0));
+
 function checkWinner(board) {
     for (let i = 0; i < 3; i++) {
         if (board[i][0] !== 0 && board[i][0] === board[i][1] && board[i][0] === board[i][2]) return board[i][0];
