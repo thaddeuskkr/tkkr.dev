@@ -5,8 +5,8 @@
     "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "tw": "npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
-        "tw:build": "npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify"
+        "tw:dev": "npx tailwindcss -i ./src/css/input.css -o ./src/css/build.css --watch --minify",
+        "tw:build": "npx tailwindcss -i ./src/css/input.css -o ./src/css/build.css --minify && npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css"
     },
     "repository": {
         "type": "git",
