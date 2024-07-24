@@ -35,6 +35,7 @@ $(() => {
                 $('.pregame').addClass('hidden');
                 $('.game').addClass('flex');
                 $('.game').removeClass('hidden');
+                if (player === 2) sendAlert(`Player ${player}: `, 'Opponent is making the first move');
                 break;
             }
             case 'endGame': {
