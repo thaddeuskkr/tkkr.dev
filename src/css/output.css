@@ -1423,6 +1423,10 @@ span {
   background-repeat: no-repeat;
 }
 
+.youtube-iframe {
+  aspect-ratio: 16 / 9;
+}
+
 .hover\:scale-105:hover{
   --tw-scale-x: 1.05;
   --tw-scale-y: 1.05;

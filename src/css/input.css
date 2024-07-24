@@ -28,3 +28,7 @@ span {
     background-size: cover;
     background-repeat: no-repeat;
 }
+
+.youtube-iframe {
+    aspect-ratio: 16 / 9;
+}
