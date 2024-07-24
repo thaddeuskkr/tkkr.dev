@@ -1,0 +1,11 @@
+services:
+    server:
+        container_name: tkkr-backend
+        image: ghcr.io/thaddeuskkr/tkkr.dev:latest
+        restart: unless-stopped
+        networks:
+            - default
+        environment:
+            TZ: Asia/Singapore
+            HOST: 0.0.0.0
+            PORT: 8220
