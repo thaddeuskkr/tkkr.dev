@@ -124,6 +124,11 @@ wss.on('connection', (ws, req) => {
                     game.player2.ws.send(JSON.stringify({ type: 'endGame', reason: winner === 3 ? 'Draw' : `Player ${winner} (${winner === 1 ? 'X' : 'O'}) won` }));
                     games.splice(games.indexOf(game), 1);
                 }
+                break;
+            }
+            case 'ping': {
+                ws.send(JSON.stringify({ type: 'pong' }));
+                break;
             }
         }
     });
