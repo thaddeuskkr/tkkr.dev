@@ -2,6 +2,7 @@
     "name": "tkkr.dev",
     "version": "0.0.0",
     "description": "website hosted on tkkr.dev",
+    "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "tw": "npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch"
@@ -30,6 +31,7 @@
         "tailwindcss": "^3.4.5"
     },
     "dependencies": {
-        "jquery": "^3.7.1"
+        "jquery": "^3.7.1",
+        "ws": "^8.18.0"
     }
 }
