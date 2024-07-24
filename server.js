@@ -43,6 +43,7 @@ wss.on('connection', (ws, req) => {
                 if (data.id === ws.playerId) return ws.send(JSON.stringify({ type: 'error', message: 'You cannot play with yourself' }));
                 const client = clients.find((client) => client.playerId.toLowerCase() === data.id.toLowerCase());
                 client.send(JSON.stringify({ type: 'requestConnection', id: ws.playerId }));
+                ws.send(JSON.stringify({ type: 'alert', title: 'Sent: ', message: `Connection request sent to ${data.id}` }));
                 break;
             }
             case 'acceptConnection': {
