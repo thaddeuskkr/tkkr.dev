@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Manrope:wght@200..800&display=swap');
 
 /*
-! tailwindcss v3.4.6 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.7 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -894,6 +894,10 @@ video {
   flex-shrink: 0;
 }
 
+.border-collapse{
+  border-collapse: collapse;
+}
+
 .cursor-pointer{
   cursor: pointer;
 }
@@ -1415,10 +1419,6 @@ span {
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-}
-
-.youtube-iframe {
-  aspect-ratio: 16 / 9;
 }
 
 .hover\:scale-105:hover{
