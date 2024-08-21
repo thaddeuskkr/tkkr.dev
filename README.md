@@ -9,7 +9,7 @@ This is a repository containing code for a personal website hosted at [tkkr.dev]
 
 ## Features
 
-* Light and dark theme
-* Responsive design - can be viewed on mobile perfectly fine
-* Multiplayer tic-tac-toe game via WebSocket
-* Contact form that sends form data to a Discord webhook
+- Light and dark theme
+- Responsive design - can be viewed on mobile perfectly fine
+- Multiplayer tic-tac-toe game via WebSocket
+- Contact form that sends form data to a Discord webhook

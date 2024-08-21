@@ -1,7 +1,8 @@
 @font-face {
     font-family: 'Brass Mono';
     src: url('BrassMono-BoldItalic.eot');
-    src: url('BrassMono-BoldItalic.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMono-BoldItalic.eot?#iefix') format('embedded-opentype'),
         url('BrassMono-BoldItalic.woff2') format('woff2'),
         url('BrassMono-BoldItalic.woff') format('woff'),
         url('BrassMono-BoldItalic.ttf') format('truetype'),
@@ -14,7 +15,8 @@
 @font-face {
     font-family: 'Brass Mono';
     src: url('BrassMono-Bold.eot');
-    src: url('BrassMono-Bold.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMono-Bold.eot?#iefix') format('embedded-opentype'),
         url('BrassMono-Bold.woff2') format('woff2'),
         url('BrassMono-Bold.woff') format('woff'),
         url('BrassMono-Bold.ttf') format('truetype'),
@@ -27,7 +29,8 @@
 @font-face {
     font-family: 'Brass Mono';
     src: url('BrassMono-Italic.eot');
-    src: url('BrassMono-Italic.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMono-Italic.eot?#iefix') format('embedded-opentype'),
         url('BrassMono-Italic.woff2') format('woff2'),
         url('BrassMono-Italic.woff') format('woff'),
         url('BrassMono-Italic.ttf') format('truetype'),
@@ -40,7 +43,8 @@
 @font-face {
     font-family: 'Brass Mono Code';
     src: url('BrassMonoCode-Regular.eot');
-    src: url('BrassMonoCode-Regular.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMonoCode-Regular.eot?#iefix') format('embedded-opentype'),
         url('BrassMonoCode-Regular.woff2') format('woff2'),
         url('BrassMonoCode-Regular.woff') format('woff'),
         url('BrassMonoCode-Regular.ttf') format('truetype'),
@@ -53,7 +57,8 @@
 @font-face {
     font-family: 'Brass Mono Code';
     src: url('BrassMonoCode-Italic.eot');
-    src: url('BrassMonoCode-Italic.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMonoCode-Italic.eot?#iefix') format('embedded-opentype'),
         url('BrassMonoCode-Italic.woff2') format('woff2'),
         url('BrassMonoCode-Italic.woff') format('woff'),
         url('BrassMonoCode-Italic.ttf') format('truetype'),
@@ -66,7 +71,8 @@
 @font-face {
     font-family: 'Brass Mono Code';
     src: url('BrassMonoCode-BoldItalic.eot');
-    src: url('BrassMonoCode-BoldItalic.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMonoCode-BoldItalic.eot?#iefix') format('embedded-opentype'),
         url('BrassMonoCode-BoldItalic.woff2') format('woff2'),
         url('BrassMonoCode-BoldItalic.woff') format('woff'),
         url('BrassMonoCode-BoldItalic.ttf') format('truetype'),
@@ -79,7 +85,8 @@
 @font-face {
     font-family: 'Brass Mono';
     src: url('BrassMono-Regular.eot');
-    src: url('BrassMono-Regular.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMono-Regular.eot?#iefix') format('embedded-opentype'),
         url('BrassMono-Regular.woff2') format('woff2'),
         url('BrassMono-Regular.woff') format('woff'),
         url('BrassMono-Regular.ttf') format('truetype'),
@@ -92,7 +99,8 @@
 @font-face {
     font-family: 'Brass Mono Code';
     src: url('BrassMonoCode-Bold.eot');
-    src: url('BrassMonoCode-Bold.eot?#iefix') format('embedded-opentype'),
+    src:
+        url('BrassMonoCode-Bold.eot?#iefix') format('embedded-opentype'),
         url('BrassMonoCode-Bold.woff2') format('woff2'),
         url('BrassMonoCode-Bold.woff') format('woff'),
         url('BrassMonoCode-Bold.ttf') format('truetype'),
@@ -101,4 +109,3 @@
     font-style: normal;
     font-display: swap;
 }
-
