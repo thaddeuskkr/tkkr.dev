@@ -6,7 +6,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "tw:dev": "npx tailwindcss -i ./src/css/input.css -o ./src/css/build.css --watch --minify",
-        "tw:build": "npx tailwindcss -i ./src/css/input.css -o ./src/css/build.css --minify && npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css"
+        "tw:build": "npx tailwindcss -i ./src/css/input.css -o ./src/css/build.css --minify && npx tailwindcss -i ./src/css/input.css -o ./src/css/output.css",
+        "prettier": "npx prettier --write ."
     },
     "repository": {
         "type": "git",
