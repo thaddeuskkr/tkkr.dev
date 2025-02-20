@@ -1,0 +1,18 @@
+---
+import Meta from "../components/Meta.astro";
+import "../styles/global.css";
+const { title } = Astro.props;
+---
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <title>{title}</title>
+        <Meta />
+    </head>
+    <body class="bg-zinc-950">
+        <slot />
+    </body>
+</html>
