@@ -1,0 +1,10 @@
+---
+import Navigation from "../components/Navigation.astro";
+import Layout from "../layouts/BaseLayout.astro";
+import "../styles/global.css";
+const path = Astro.url.pathname.replace(/\//g, "");
+---
+
+<Layout title=`thaddeus kuah • ${path}`>
+    <Navigation active={path} />
+</Layout>

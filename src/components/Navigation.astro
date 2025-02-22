@@ -1,0 +1,27 @@
+---
+const { active } = Astro.props;
+---
+
+<nav>
+    <div class="fixed w-screen bg-zinc-900 px-4 py-2">
+        <div class="m-auto flex max-w-5xl justify-between">
+            <a href="/" class="p-2 font-bold">tkkr.dev</a>
+            <ul class="flex items-center space-x-2">
+                <li>
+                    <a
+                        href="/about"
+                        class=`${active === "about" ? "bg-zinc-700" : "text-zinc-300"} rounded-md p-2 transition-colors hover:bg-zinc-700`>
+                        About
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="/projects"
+                        class=`${active === "projects" ? "bg-zinc-700" : "text-zinc-300"} rounded-md p-2 transition-colors hover:bg-zinc-700`>
+                        Projects
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
