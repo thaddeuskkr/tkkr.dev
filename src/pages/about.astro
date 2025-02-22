@@ -9,7 +9,7 @@ const path = Astro.url.pathname.replace(/\//g, "");
 
 <Layout title=`thaddeus kuah • ${path}`>
     <Navigation active={path} />
-    <div class="mx-auto mt-8 max-w-6xl px-4">
+    <div class="mx-auto my-8 max-w-6xl px-4">
         <div class="flex flex-col items-center justify-center md:flex-row">
             <Image
                 src={portraitImage}
@@ -80,7 +80,20 @@ const path = Astro.url.pathname.replace(/\//g, "");
                 and I've built extensive hands-on experience in full-stack web development and systems administration,
                 while also dabbling in various other emerging tools and frameworks.
             </p>
-            <p>I'm currently learning Astro (which I used to build this website).</p>
+            <h2 class="mt-2 text-xl font-bold">Experience</h2>
+            <h3 class="font-semibold">Programming Languages</h3>
+            <ul class="list-inside list-disc">
+                <li>Astro (HTML/CSS)</li>
+                <li>Node.js & Bun (TypeScript/JavaScript)</li>
+                <li>Python</li>
+                <li>Bash</li>
+            </ul>
+            <h3 class="font-semibold">Tools</h3>
+            <ul class="list-inside list-disc">
+                <li>Docker</li>
+                <li>Caddy</li>
+                <li>Git & SSH</li>
+            </ul>
         </div>
     </div>
 </Layout>
