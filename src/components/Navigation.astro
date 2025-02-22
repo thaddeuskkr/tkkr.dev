@@ -2,18 +2,19 @@
 const { active } = Astro.props;
 ---
 
-<div class="w-screen bg-red-400 py-1 text-zinc-950">
-    <p class="mx-auto text-center">
-        This site is a work-in-progress. See the source code on GitHub
-        <a href="https://github.com/thaddeuskkr/tkkr.dev" class="underline" target="_blank" rel="noopener noreferrer"
-            >here</a
-        >.
-    </p>
-</div>
-<nav class="pb-14">
+<nav class="z-10 pb-14">
     <div class="fixed w-screen bg-zinc-900 px-4 py-2">
         <div class="m-auto flex max-w-5xl justify-between">
             <a href="/" class="px-2 py-1.5 text-lg font-bold">tkkr.dev</a>
+            <p class="m-auto hidden text-center text-red-400 md:block">
+                This site is a work-in-progress. See the source code on GitHub
+                <a
+                    href="https://github.com/thaddeuskkr/tkkr.dev"
+                    class="underline"
+                    target="_blank"
+                    rel="noopener noreferrer">here</a
+                >.
+            </p>
             <ul class="flex items-center space-x-2">
                 <li>
                     <a
