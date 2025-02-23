@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import noelGiftsLogo from "../assets/noel-logo.png";
 import portraitImage from "../assets/portrait.jpg";
 import Navigation from "../components/Navigation.astro";
 import Layout from "../layouts/BaseLayout.astro";
@@ -9,7 +10,7 @@ const path = Astro.url.pathname.replace(/\//g, "");
 
 <Layout title=`thaddeus kuah • ${path}`>
     <Navigation active={path} />
-    <div class="mx-auto my-8 max-w-6xl px-4">
+    <div class="mx-auto mb-16 max-w-5xl px-6">
         <div class="flex flex-col items-center justify-center md:flex-row">
             <Image
                 src={portraitImage}
@@ -73,13 +74,16 @@ const path = Astro.url.pathname.replace(/\//g, "");
             </div>
         </div>
         <hr class="mx-auto my-8 text-zinc-700" />
-        <div class="flex flex-col gap-2">
+        <div class="mb-4 flex flex-col gap-2">
             <h2 class="text-xl font-bold">About Me</h2>
             <p>
-                I'm a first-year student at Nanyang Polytechnic's School of IT. I have a strong passion for technology,
-                and I've built extensive hands-on experience in full-stack web development and systems administration,
-                while also dabbling in various other emerging tools and frameworks.
+                I'm a first-year student at Nanyang Polytechnic's School of IT, currently enrolled in the Common ICT
+                Programme. I have a strong passion for technology, and I've built extensive hands-on experience in
+                full-stack web development and systems administration, while also dabbling in various other emerging
+                tools and frameworks to keep myself up-to-date with the latest industry trends.
             </p>
+        </div>
+        <div class="mb-4 flex flex-col gap-2">
             <h2 class="mt-2 text-xl font-bold">Experience</h2>
             <h3 class="font-semibold">Programming Languages</h3>
             <ul class="list-inside list-disc">
@@ -94,6 +98,18 @@ const path = Astro.url.pathname.replace(/\//g, "");
                 <li>Caddy</li>
                 <li>Git & SSH</li>
             </ul>
+        </div>
+        <hr class="mx-auto my-8 text-zinc-700" />
+        <div class="mb-4 flex flex-col gap-4">
+            <h2 class="text-xl font-bold">Work Experience</h2>
+            <div class="flex flex-row items-center gap-4">
+                <Image src={noelGiftsLogo} alt="Noel Gifts Logo" class="aspect-square size-18" />
+                <div class="flex flex-col justify-center">
+                    <span class="font-semibold text-zinc-100">Operations Assistant</span>
+                    <span class="text-zinc-200">Noel Gifts International Ltd</span>
+                    <span class="text-zinc-400">Dec 2023 - Mar 2024</span>
+                </div>
+            </div>
         </div>
     </div>
 </Layout>
