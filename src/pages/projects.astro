@@ -7,4 +7,37 @@ const path = Astro.url.pathname.replace(/\//g, "");
 
 <Layout title=`thaddeus kuah • ${path}`>
     <Navigation active={path} />
+    <div class="mx-auto mb-16 max-w-5xl px-6">
+        <div class="mb-4 flex flex-col gap-1">
+            <h1 class="text-lg font-semibold">pay2live</h1>
+            <span class="text-zinc-400">Nov 2024 - Feb 2025 • Nanyang Polytechnic</span>
+            <p>
+                I developed a web application designed to streamline patient management for small clinics. The solution
+                incorporates an appointment booking system, queue management, an administrative portal, and an online
+                store with cart functionality. It also leverages WhatsApp for OTP-based login/identity verification and
+                patient notifications. The tech stack — Flask, Jinja, MongoDB, Tailwind CSS, and jQuery — is organized
+                into a clear, modular code base.
+            </p>
+        </div>
+        <div class="mb-4 flex flex-col gap-1">
+            <h1 class="text-lg font-semibold">Garbage Detect</h1>
+            <span class="text-zinc-400">Jun 2021 - Feb 2022 • AWS Accelerator</span>
+            <p>
+                A comprehensive litter detection, monitoring, and notification system built with AWS services and camera
+                technology. It employs AI/ML to identify litter and notifies relevant personnel once a specified
+                threshold is reached, ensuring timely clean-up before it accumulates. The solution features a robust
+                backend and a streamlined frontend.
+            </p>
+        </div>
+        <div class="mb-4 flex flex-col gap-1">
+            <h1 class="text-lg font-semibold">Anti-Scam Student Champions</h1>
+            <span class="text-zinc-400">Feb 2020 - Jan 2021 • St. Joseph's Institution</span>
+            <p>
+                Secured 1st place (team category) among 14 participating schools in the Community Safety and Security
+                Programme (CSSP) project. Responsibilities included researching scam prevention strategies, raising
+                anti-scam awareness among schoolmates, and producing educational video clips, which were showcased in a
+                friendly competition.
+            </p>
+        </div>
+    </div>
 </Layout>
