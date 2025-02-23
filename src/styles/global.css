@@ -5,6 +5,7 @@ html {
     font-family: "Geist", sans-serif;
 }
 
-code {
+code,
+.code {
     font-family: "Geist Mono", monospace;
 }
