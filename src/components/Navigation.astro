@@ -2,12 +2,24 @@
 const { active } = Astro.props;
 ---
 
-<nav class="z-10 pb-14">
-    <div class="fixed w-screen bg-zinc-900 px-4 py-2">
-        <div class="m-auto flex max-w-5xl justify-between">
-            <a href="/" class="px-2 py-1.5 text-lg font-bold">tkkr.dev</a>
-            <p class="m-auto hidden text-center text-red-400 md:block">
-                This site is a work-in-progress. See the source code on GitHub
+<nav class="flex w-screen justify-center pb-26">
+    <div
+        class="fixed z-50 flex w-screen flex-row items-center justify-between rounded-md border border-zinc-800/30 bg-zinc-900/40 px-3 py-3 backdrop-blur-md md:mt-6 md:w-[95%] lg:w-5xl">
+        <a href="/" class="px-2 text-lg font-bold">tkkr.dev</a>
+        <div class="hidden items-center justify-center space-x-2 overflow-clip md:flex">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                class="size-6 stroke-red-400">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"></path>
+            </svg>
+            <p class="m-auto text-center text-nowrap text-red-400">
+                This site is not yet complete. See the source code on GitHub
                 <a
                     href="https://github.com/thaddeuskkr/tkkr.dev"
                     class="underline"
@@ -15,22 +27,22 @@ const { active } = Astro.props;
                     rel="noopener noreferrer">here</a
                 >.
             </p>
-            <ul class="flex items-center space-x-2">
-                <li>
-                    <a
-                        href="/about"
-                        class=`${active === "about" ? "bg-zinc-700" : "text-zinc-300"} rounded-md p-2 transition-colors hover:bg-zinc-700`>
-                        About
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="/projects"
-                        class=`${active === "projects" ? "bg-zinc-700" : "text-zinc-300"} rounded-md p-2 transition-colors hover:bg-zinc-700`>
-                        Projects
-                    </a>
-                </li>
-            </ul>
         </div>
+        <ul class="flex items-center space-x-2">
+            <li>
+                <a
+                    href="/about"
+                    class=`${active === "about" ? "bg-zinc-700/40" : "text-zinc-300/80 transition-colors hover:bg-zinc-800/80"} rounded-md p-2`>
+                    About
+                </a>
+            </li>
+            <li>
+                <a
+                    href="/projects"
+                    class=`${active === "projects" ? "bg-zinc-700/40" : "text-zinc-300/80 transition-colors hover:bg-zinc-800/80"} rounded-md p-2`>
+                    Projects
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>
