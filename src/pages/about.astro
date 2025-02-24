@@ -1,5 +1,5 @@
 ---
-import { Image } from "astro:assets";
+import { Picture } from "astro:assets";
 import noelGiftsLogo from "../assets/noel-logo.png";
 import portraitImage from "../assets/portrait.jpg";
 import Navigation from "../components/Navigation.astro";
@@ -12,11 +12,12 @@ const path = Astro.url.pathname.replace(/\//g, "");
     <Navigation active={path} />
     <div class="mx-auto mb-16 max-w-5xl px-6">
         <div class="flex flex-col items-center justify-center md:flex-row">
-            <Image
+            <Picture
                 src={portraitImage}
                 alt="Portrait"
                 class="mb-6 aspect-square max-w-80 rounded-xl md:mr-6 md:mb-0"
                 loading="eager"
+                width="500"
                 densities={[1, 1.5, 2, 2.5, 3]}
             />
             <div class="text-center md:text-left">
@@ -112,7 +113,13 @@ const path = Astro.url.pathname.replace(/\//g, "");
         <div class="mb-4 flex flex-col gap-4">
             <h2 class="text-xl font-bold">Work Experience</h2>
             <div class="flex flex-row items-center gap-4">
-                <Image src={noelGiftsLogo} alt="Noel Gifts Logo" class="aspect-square size-18" loading="eager" />
+                <Picture
+                    src={noelGiftsLogo}
+                    alt="Noel Gifts Logo"
+                    class="aspect-square size-18"
+                    width="72"
+                    loading="eager"
+                />
                 <div class="flex flex-col justify-center">
                     <span class="font-semibold text-zinc-100">Operations Assistant</span>
                     <span class="text-zinc-200">Noel Gifts International Ltd</span>
