@@ -6,8 +6,6 @@ import Navigation from "../components/Navigation.astro";
 import Layout from "../layouts/BaseLayout.astro";
 import "../styles/global.css";
 const path = Astro.url.pathname.replace(/\//g, "");
-const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
-const discordPresence = await response.json();
 ---
 
 <Layout title=`thaddeus kuah • ${path}`>
@@ -28,9 +26,7 @@ const discordPresence = await response.json();
                         Time in Singapore:<span id="time" class="code ml-1.5 font-normal">Loading...</span>
                     </p>
                     <p>
-                        I'm currently <span class="font-semibold"
-                            >{discordPresence.success ? discordPresence.data.discord_status : "offline"}</span
-                        > on Discord.
+                        I'm currently <span id="discord-status" class="font-semibold"></span> on Discord.
                     </p>
                 </div>
                 <div class="flex flex-row flex-wrap justify-center gap-2 md:justify-start">
@@ -127,6 +123,13 @@ const discordPresence = await response.json();
 </Layout>
 
 <script>
+    async function updateDiscordStatus() {
+        const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
+        const discordPresence = await response.json();
+        if (!discordPresence.success) return;
+        const discordStatusEl = document.getElementById("discord-status");
+        if (discordStatusEl) discordStatusEl.textContent = discordPresence.data.discord_status || "offline";
+    }
     function updateTime() {
         const timeEl = document.getElementById("time");
         if (timeEl)
@@ -139,5 +142,7 @@ const discordPresence = await response.json();
                 .toUpperCase();
     }
     updateTime();
+    updateDiscordStatus();
     setInterval(updateTime, 1000);
+    setInterval(updateDiscordStatus, 30000);
 </script>
