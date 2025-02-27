@@ -96,14 +96,23 @@ const path = Astro.url.pathname.replace(/\//g, "");
         </div>
         <div class="mb-4 flex flex-col gap-2">
             <h2 class="mt-2 text-xl font-bold">Skills</h2>
-            <div class="flex flex-col gap-2 md:flex-row md:gap-10">
+            <div class="flex flex-col gap-2 md:flex-row md:gap-12">
                 <div class="flex flex-col gap-2">
                     <h3 class="font-semibold">Programming Languages</h3>
                     <ul class="list-inside list-disc">
-                        <li>Astro (HTML/CSS)</li>
-                        <li>Node.js & Bun (TypeScript/JavaScript)</li>
+                        <li>HTML & CSS</li>
+                        <li>TypeScript & JavaScript</li>
                         <li>Python</li>
                         <li>Bash</li>
+                    </ul>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <h3 class="font-semibold">Frameworks</h3>
+                    <ul class="list-inside list-disc">
+                        <li>Astro</li>
+                        <li>Tailwind CSS</li>
+                        <li>Vue</li>
+                        <li>Flask & Jinja</li>
                     </ul>
                 </div>
                 <div class="flex flex-col gap-2">
@@ -137,29 +146,29 @@ const path = Astro.url.pathname.replace(/\//g, "");
             </div>
         </div>
     </div>
-</Layout>
 
-<script>
-    async function updateDiscordStatus() {
-        const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
-        const discordPresence = await response.json();
-        if (!discordPresence.success) return;
-        const discordStatusEl = document.getElementById("discord-status");
-        if (discordStatusEl) discordStatusEl.textContent = discordPresence.data.discord_status || "offline";
-    }
-    function updateTime() {
-        const timeEl = document.getElementById("time");
-        if (timeEl)
-            timeEl.textContent = new Date()
-                .toLocaleTimeString("en-SG", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                })
-                .toUpperCase();
-    }
-    updateTime();
-    updateDiscordStatus();
-    setInterval(updateTime, 1000);
-    setInterval(updateDiscordStatus, 30000);
-</script>
+    <script>
+        async function updateDiscordStatus() {
+            const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
+            const discordPresence = await response.json();
+            if (!discordPresence.success) return;
+            const discordStatusEl = document.getElementById("discord-status");
+            if (discordStatusEl) discordStatusEl.textContent = discordPresence.data.discord_status || "offline";
+        }
+        function updateTime() {
+            const timeEl = document.getElementById("time");
+            if (timeEl)
+                timeEl.textContent = new Date()
+                    .toLocaleTimeString("en-SG", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                    })
+                    .toUpperCase();
+        }
+        updateTime();
+        updateDiscordStatus();
+        setInterval(updateTime, 1000);
+        setInterval(updateDiscordStatus, 30000);
+    </script>
+</Layout>
