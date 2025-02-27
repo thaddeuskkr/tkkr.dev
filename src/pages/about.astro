@@ -89,20 +89,30 @@ const path = Astro.url.pathname.replace(/\//g, "");
             <p>
                 I'm a first-year student at Nanyang Polytechnic's School of IT, currently enrolled in the Common ICT
                 Programme. I have a strong passion for technology, and I've built extensive hands-on experience in
-                full-stack web development and systems administration, while also dabbling in various other emerging
-                tools and frameworks to keep myself up-to-date with the latest industry trends.
+                full-stack web development and systems administration, while also exploring various emerging tools and
+                frameworks to stay current with the latest industry trends. In my free time, I enjoy gaming,
+                photography, listening to music, and experimenting with personal coding projects.
             </p>
         </div>
         <div class="mb-4 flex flex-col gap-2">
-            <h2 class="mt-2 text-xl font-bold">Experience</h2>
-            <div class="flex flex-col gap-2 md:flex-row md:gap-10">
+            <h2 class="mt-2 text-xl font-bold">Skills</h2>
+            <div class="flex flex-col gap-2 md:flex-row md:gap-12">
                 <div class="flex flex-col gap-2">
                     <h3 class="font-semibold">Programming Languages</h3>
                     <ul class="list-inside list-disc">
-                        <li>Astro (HTML/CSS)</li>
-                        <li>Node.js & Bun (TypeScript/JavaScript)</li>
+                        <li>HTML & CSS</li>
+                        <li>TypeScript & JavaScript</li>
                         <li>Python</li>
                         <li>Bash</li>
+                    </ul>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <h3 class="font-semibold">Frameworks</h3>
+                    <ul class="list-inside list-disc">
+                        <li>Astro</li>
+                        <li>Tailwind CSS</li>
+                        <li>Vue</li>
+                        <li>Flask & Jinja</li>
                     </ul>
                 </div>
                 <div class="flex flex-col gap-2">
@@ -110,7 +120,8 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     <ul class="list-inside list-disc">
                         <li>Docker</li>
                         <li>Caddy</li>
-                        <li>Git & SSH</li>
+                        <li>Git</li>
+                        <li>SSH</li>
                     </ul>
                 </div>
             </div>
@@ -135,29 +146,29 @@ const path = Astro.url.pathname.replace(/\//g, "");
             </div>
         </div>
     </div>
-</Layout>
 
-<script>
-    async function updateDiscordStatus() {
-        const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
-        const discordPresence = await response.json();
-        if (!discordPresence.success) return;
-        const discordStatusEl = document.getElementById("discord-status");
-        if (discordStatusEl) discordStatusEl.textContent = discordPresence.data.discord_status || "offline";
-    }
-    function updateTime() {
-        const timeEl = document.getElementById("time");
-        if (timeEl)
-            timeEl.textContent = new Date()
-                .toLocaleTimeString("en-SG", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                })
-                .toUpperCase();
-    }
-    updateTime();
-    updateDiscordStatus();
-    setInterval(updateTime, 1000);
-    setInterval(updateDiscordStatus, 30000);
-</script>
+    <script>
+        async function updateDiscordStatus() {
+            const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
+            const discordPresence = await response.json();
+            if (!discordPresence.success) return;
+            const discordStatusEl = document.getElementById("discord-status");
+            if (discordStatusEl) discordStatusEl.textContent = discordPresence.data.discord_status || "offline";
+        }
+        function updateTime() {
+            const timeEl = document.getElementById("time");
+            if (timeEl)
+                timeEl.textContent = new Date()
+                    .toLocaleTimeString("en-SG", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                    })
+                    .toUpperCase();
+        }
+        updateTime();
+        updateDiscordStatus();
+        setInterval(updateTime, 1000);
+        setInterval(updateDiscordStatus, 30000);
+    </script>
+</Layout>
