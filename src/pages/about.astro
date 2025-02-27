@@ -95,19 +95,25 @@ const path = Astro.url.pathname.replace(/\//g, "");
         </div>
         <div class="mb-4 flex flex-col gap-2">
             <h2 class="mt-2 text-xl font-bold">Experience</h2>
-            <h3 class="font-semibold">Programming Languages</h3>
-            <ul class="list-inside list-disc">
-                <li>Astro (HTML/CSS)</li>
-                <li>Node.js & Bun (TypeScript/JavaScript)</li>
-                <li>Python</li>
-                <li>Bash</li>
-            </ul>
-            <h3 class="font-semibold">Tools</h3>
-            <ul class="list-inside list-disc">
-                <li>Docker</li>
-                <li>Caddy</li>
-                <li>Git & SSH</li>
-            </ul>
+            <div class="flex flex-col gap-2 md:flex-row md:gap-10">
+                <div>
+                    <h3 class="font-semibold">Programming Languages</h3>
+                    <ul class="list-inside list-disc">
+                        <li>Astro (HTML/CSS)</li>
+                        <li>Node.js & Bun (TypeScript/JavaScript)</li>
+                        <li>Python</li>
+                        <li>Bash</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold">Tools</h3>
+                    <ul class="list-inside list-disc">
+                        <li>Docker</li>
+                        <li>Caddy</li>
+                        <li>Git & SSH</li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <hr class="mx-auto my-8 text-zinc-700" />
         <div class="mb-4 flex flex-col gap-4">
