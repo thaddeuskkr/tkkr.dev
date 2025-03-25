@@ -5,16 +5,15 @@
     "scripts": {
         "dev": "astro dev",
         "build": "astro build",
-        "preview": "astro build && wrangler dev",
-        "astro": "astro",
-        "deploy": "astro build && wrangler deploy",
-        "cf-typegen": "wrangler types"
+        "preview": "astro preview",
+        "astro": "astro"
     },
     "dependencies": {
-        "@astrojs/cloudflare": "^12.3.0",
-        "@tailwindcss/vite": "^4.0.15",
-        "astro": "5.5.4",
-        "tailwindcss": "^4.0.15"
+        "@tailwindcss/vite": "^4.0.10",
+        "@vercel/analytics": "^1.5.0",
+        "@vercel/speed-insights": "^1.2.0",
+        "astro": "5.5.2",
+        "tailwindcss": "^4.0.10"
     },
     "devDependencies": {
         "prettier": "^3.5.3",
