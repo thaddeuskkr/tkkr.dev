@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import koiLogo from "../assets/koi-logo.jpg";
 import noelGiftsLogo from "../assets/noel-logo.png";
 import portraitImage from "../assets/portrait.jpg";
 import Navigation from "../components/Navigation.astro";
@@ -131,9 +132,24 @@ const path = Astro.url.pathname.replace(/\//g, "");
             <h2 class="text-xl font-bold">Work Experience</h2>
             <div class="flex flex-row items-center gap-4">
                 <Image
+                    src={koiLogo}
+                    alt="KOI Thé Logo"
+                    class="aspect-square size-18 rounded-md"
+                    loading="eager"
+                    format="avif"
+                    quality={"mid"}
+                />
+                <div class="flex flex-col justify-center">
+                    <span class="font-semibold text-zinc-100">Part Time Tea Barista</span>
+                    <span class="text-zinc-200">KOI Thé Singapore</span>
+                    <span class="text-zinc-400">Mar 2025 - Current</span>
+                </div>
+            </div>
+            <div class="flex flex-row items-center gap-4">
+                <Image
                     src={noelGiftsLogo}
                     alt="Noel Gifts Logo"
-                    class="aspect-square size-18"
+                    class="aspect-square size-18 rounded-md"
                     loading="eager"
                     format="avif"
                     quality={"mid"}
