@@ -153,7 +153,16 @@ const path = Astro.url.pathname.replace(/\//g, "");
             const discordPresence = await response.json();
             if (!discordPresence.success) return;
             const discordStatusEl = document.getElementById("discord-status");
-            if (discordStatusEl) discordStatusEl.textContent = discordPresence.data.discord_status || "offline";
+            const statusMap = {
+                dnd: "do not disturb",
+                online: "online",
+                idle: "idle",
+                offline: "offline",
+            };
+            if (discordStatusEl)
+                discordStatusEl.textContent =
+                    statusMap[discordPresence.data.discord_status as "online" | "idle" | "dnd" | "offline"] ||
+                    "offline";
         }
         function updateTime() {
             const timeEl = document.getElementById("time");
