@@ -1,0 +1,88 @@
+---
+import Navigation from "../components/Navigation.astro";
+import Layout from "../layouts/BaseLayout.astro";
+import "../styles/global.css";
+const path = Astro.url.pathname.replace(/\//g, "");
+---
+
+<Layout title=`privacy policy • tkkr.dev`>
+    <Navigation active={path} />
+    <div class="mx-auto mb-16 max-w-5xl px-6">
+        <div class="mb-8 flex flex-col gap-2">
+            <h1 class="text-3xl font-bold">Privacy Policy</h1>
+            <p class="text-sm">Last updated on <span class="font-semibold">15 April 2025</span></p>
+        </div>
+        <div class="mb-4 flex flex-col gap-2">
+            <h2 class="text-2xl font-bold">Introduction</h2>
+            <p>
+                Welcome! This Privacy Policy outlines the types of personal information I collect, how I use it, and the
+                steps I take to protect your data when you use my services or visit my websites. I'm committed to
+                safeguarding your privacy and ensuring that your personal information is handled responsibly. This
+                applies to any service hosted on <span class="font-semibold">tkkr.dev</span> or
+                <span class="font-semibold">tkkr.link</span> (including subdomains).
+            </p>
+            <p>
+                <span class="font-semibold">TL;DR:</span>
+                I don't sell your data and I don't track you.
+            </p>
+
+            <h2 class="mt-4 text-2xl font-bold">1. Information Collected</h2>
+            <p>
+                When you visit my websites and use my services, your IP address and device information are logged. These
+                logs are automatically deleted when the service restarts (typically every few days) and aren't
+                persistently stored on my servers unless explicitly stated otherwise. This site uses Vercel Speed
+                Insights and Vercel Analytics, which may collect and store info about your device and IP address. You
+                can learn more about how Vercel handles data in their <a
+                    href="https://vercel.com/legal/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-purple-300">Privacy Policy</a
+                >. No cookies are set by me.
+            </p>
+
+            <h2 class="mt-4 text-2xl font-bold">2. Data Security</h2>
+            <p>
+                I take the security of your data seriously. I implement appropriate technical and organizational
+                measures to protect your personal information from unauthorized access, use, or disclosure. That said,
+                no method of transmission over the internet or method of electronic storage is 100% secure. While I do
+                my best to use commercially acceptable means to protect your data, I can't guarantee absolute security.
+            </p>
+
+            <h2 class="mt-4 text-2xl font-bold">3. External Links</h2>
+            <p>
+                My websites and services may link to external sites that I don't own or operate. I'm not responsible for
+                the content or privacy practices of those sites, so I recommend reviewing their privacy policies before
+                sharing any personal info.
+            </p>
+
+            <h2 class="mt-4 text-2xl font-bold">4. Changes to This Privacy Policy</h2>
+            <p>
+                I may update this Privacy Policy from time to time. If I do, I'll post the changes on this page.
+                Continued use of my sites and services after updates means you accept the new terms.
+            </p>
+
+            <h2 class="mt-4 text-2xl font-bold">5. Contact Information</h2>
+            <p>
+                If you have any questions or concerns about this Privacy Policy or anything else related to my websites
+                or services, feel free to reach out, and I'll do my best to help you out.
+            </p>
+            <ul class="list-inside list-disc">
+                <li>
+                    Email: <a
+                        href="mailto:tk@tkkr.dev"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-purple-300">
+                        tk@tkkr.dev
+                    </a>
+                </li>
+            </ul>
+
+            <h2 class="mt-4 text-2xl font-bold">6. Your Rights</h2>
+            <p>
+                Curious about what data (if any) I might have on you? You're welcome to reach out. You can request to
+                review, update, or delete your personal info at any time by emailing me.
+            </p>
+        </div>
+    </div>
+</Layout>
