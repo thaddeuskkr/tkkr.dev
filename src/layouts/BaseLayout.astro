@@ -1,6 +1,7 @@
 ---
 import Analytics from "@vercel/analytics/astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
+import { Font } from "astro:assets";
 import Meta from "../components/Meta.astro";
 import "../styles/global.css";
 const { title } = Astro.props;
@@ -16,6 +17,17 @@ const { title } = Astro.props;
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/icons/site.webmanifest" />
         <title>{title}</title>
+        <Font cssVariable="--font-geist" preload />
+        <Font cssVariable="--font-geist-mono" preload />
+        <style>
+            html {
+                font-family: var(--font-geist);
+            }
+            code,
+            .code {
+                font-family: var(--font-geist-mono);
+            }
+        </style>
         <Meta />
     </head>
     <body class="bg-zinc-950 text-zinc-100">
