@@ -1,5 +1,8 @@
 ---
 import { Image } from "astro:assets";
+import nypLogo from "../assets/nyp-logo.webp";
+import sjiLogo from "../assets/sji-logo.png";
+import shLogo from "../assets/sh-logo.jpg";
 import koiLogo from "../assets/koi-logo.jpg";
 import noelGiftsLogo from "../assets/noel-logo.png";
 import portraitImage from "../assets/portrait.jpg";
@@ -125,6 +128,55 @@ const path = Astro.url.pathname.replace(/\//g, "");
                         <li>Git</li>
                         <li>SSH</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+        <hr class="mx-auto my-8 text-zinc-700" />
+        <div class="mb-4 flex flex-col gap-4">
+            <h2 class="text-xl font-bold">Education</h2>
+            <div class="flex flex-row items-center gap-4">
+                <Image
+                    src={nypLogo}
+                    alt="Nanyang Polytechnic Logo"
+                    class="aspect-square size-18 rounded-md"
+                    loading="eager"
+                    format="avif"
+                    quality={"mid"}
+                />
+                <div class="flex flex-col justify-center">
+                    <span class="font-semibold text-zinc-100">Nanyang Polytechnic</span>
+                    <span class="text-zinc-200">Diploma in Information Technology</span>
+                    <span class="text-zinc-400">2024 - 2027</span>
+                </div>
+            </div>
+            <div class="flex flex-row items-center gap-4">
+                <Image
+                    src={sjiLogo}
+                    alt="St. Joseph's Institution Logo"
+                    class="aspect-square size-18 rounded-md"
+                    loading="eager"
+                    format="avif"
+                    quality={"mid"}
+                />
+                <div class="flex flex-col justify-center">
+                    <span class="font-semibold text-zinc-100">St. Joseph's Institution</span>
+                    <span class="text-zinc-200">O Level Programme</span>
+                    <span class="text-zinc-400">2019 - 2023</span>
+                </div>
+            </div>
+            <div class="flex flex-row items-center gap-4">
+                <Image
+                    src={shLogo}
+                    alt="St. Hilda's Logo"
+                    class="aspect-square size-18 rounded-md"
+                    loading="eager"
+                    format="avif"
+                    quality={"mid"}
+                />
+                <div class="flex flex-col justify-center">
+                    <span class="font-semibold text-zinc-100">St. Hilda's Primary School</span>
+                    <span class="text-zinc-200">Primary Education (PSLE)</span>
+                    <span class="text-zinc-400">2013 - 2018</span>
                 </div>
             </div>
         </div>
