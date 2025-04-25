@@ -1,0 +1,37 @@
+[
+    {
+        "name": "Anti-Scam Student Champions",
+        "url": null,
+        "dates": "Feb 2020 - Jan 2021",
+        "association": "St. Joseph's Institution",
+        "description": "Secured 1st place (team category) among 14 participating schools in the Community Safety and Security Programme (CSSP) project. Responsibilities included researching scam prevention strategies, raising anti-scam awareness among schoolmates, and producing educational video clips, which were showcased in a friendly competition."
+    },
+    {
+        "name": "Garbage Detect",
+        "url": null,
+        "dates": "Jun 2021 - Feb 2022",
+        "association": "AWS Accelerator",
+        "description": "A comprehensive litter detection, monitoring, and notification system built with AWS services and camera technology. It employs AI/ML to identify litter and notifies relevant personnel once a specified threshold is reached, ensuring timely clean-up before it accumulates. The solution features a robust backend and a streamlined frontend."
+    },
+    {
+        "name": "pay2live",
+        "url": "https://github.com/thaddeuskkr/pay2live",
+        "dates": "Nov 2024 - Feb 2025",
+        "association": "Nanyang Polytechnic",
+        "description": "I led the development of a web application designed to streamline patient management for small clinics. The solution incorporates an appointment booking system, queue management, an administrative portal, and an online store with cart functionality. It also leverages WhatsApp for OTP-based login/identity verification and patient notifications. The tech stack — Flask, Jinja, MongoDB, Tailwind CSS, and jQuery — is organized into a clear, modular code base. Deployed via Docker in the cloud, it uses GitHub Actions for seamless automated image builds. As project leader, I oversaw both the hosting environment and database logic, ensuring efficient workflows across the team. I also structured the overall code base, developed the administrative dashboards, implemented login and user management, and provided guidance when my teammates needed it."
+    },
+    {
+        "name": "dev-container",
+        "url": "https://github.com/thaddeuskkr/dev-container",
+        "dates": "Feb 2024 - Present",
+        "association": null,
+        "description": "A secure, portable, and configurable Ubuntu-based development environment packaged as a Docker container, purpose-built for remote development workflows. It features an inbuilt SSH server and seamless Visual Studio Code Tunnel integration for secure remote access. The container includes a wide suite of preinstalled tools (e.g., Docker, Swift, Bun, Deno, Node.js, Python, GitHub CLI) and supports passthrough of SSH/GPG keys and Git configurations. Designed with containerization in mind, it offers isolated, consistent, and reproducible environments that enhance both development productivity and system security. Pre-built for multiple architectures with publicly accessible daily automated builds and simple setup via Docker or Docker Compose. Ideal for rapid onboarding, consistent dev environments, and cloud-based development."
+    },
+    {
+        "name": "Nova",
+        "url": "https://github.com/thaddeuskkr/nova",
+        "dates": "Aug 2024 - Present",
+        "association": null,
+        "description": "An open-source, self-hosted URL shortener built with TypeScript and Bun, designed for both ease of use and powerful functionality. It offers a simple web interface and an intuitive API for seamless URL shortening, with features like password-protected links, customizable slugs (including multiple per URL), and expiration-based short URLs. It is easy to deploy with Docker, making it a great choice for developers and businesses looking for a simple, fast, and flexible self-hosted solution."
+    }
+]
