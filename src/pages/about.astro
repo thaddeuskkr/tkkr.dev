@@ -240,10 +240,10 @@ const path = Astro.url.pathname.replace(/\//g, "");
                 idle: "idle",
                 offline: "offline",
             };
-            if (discordStatusEl)
-                discordStatusEl.textContent =
-                    statusMap[discordPresence.data.discord_status as "online" | "idle" | "dnd" | "offline"] ||
-                    "offline";
+            let statusText =
+                statusMap[discordPresence.data.discord_status as "online" | "idle" | "dnd" | "offline"] || "offline";
+            if (discordPresence.data.active_on_discord_mobile as boolean) statusText += " (mobile)";
+            if (discordStatusEl) discordStatusEl.textContent = statusText;
         }
         function updateTime() {
             const timeEl = document.getElementById("time");
