@@ -31,9 +31,9 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     <p class="font-semibold">
                         Time in Singapore:<span id="time" class="code ml-1.5 font-normal">Loading...</span>
                     </p>
-                    <p>
-                        I'm currently <span id="discord-status" class="font-semibold">offline</span> on Discord.
-                    </p>
+                    <p class="hidden" id="discord-status"></p>
+                    <p class="hidden" id="discord-spotify"></p>
+                    <p class="hidden" id="discord-activity"></p>
                 </div>
                 <div class="flex flex-row flex-wrap justify-center gap-2 md:justify-start">
                     <a
@@ -270,16 +270,47 @@ const path = Astro.url.pathname.replace(/\//g, "");
             const discordPresence = await response.json();
             if (!discordPresence.success) return;
             const discordStatusEl = document.getElementById("discord-status");
-            const statusMap = {
-                dnd: "do not disturb",
-                online: "online",
-                idle: "idle",
-                offline: "offline",
-            };
-            let statusText =
-                statusMap[discordPresence.data.discord_status as "online" | "idle" | "dnd" | "offline"] || "offline";
-            if (discordPresence.data.active_on_discord_mobile as boolean) statusText += " (mobile)";
-            if (discordStatusEl) discordStatusEl.textContent = statusText;
+            const discordSpotifyEl = document.getElementById("discord-spotify");
+            const discordActivityEl = document.getElementById("discord-activity");
+
+            if (discordStatusEl) {
+                const statusMap = {
+                    dnd: "do not disturb",
+                    online: "online",
+                    idle: "idle",
+                    offline: "offline",
+                };
+                let statusText =
+                    statusMap[discordPresence.data.discord_status as "online" | "idle" | "dnd" | "offline"] ||
+                    "offline";
+                if (discordPresence.data.active_on_discord_mobile as boolean) statusText += " (mobile)";
+                if (discordPresence.data.discord_status) {
+                    discordStatusEl.innerHTML = `Currently <span class="font-semibold">${statusText}</span> on Discord.`;
+                    discordStatusEl.classList.remove("hidden");
+                } else {
+                    discordStatusEl.classList.add("hidden");
+                }
+            }
+            if (discordSpotifyEl) {
+                const spotify = discordPresence.data.spotify;
+                if (spotify) {
+                    discordSpotifyEl.innerHTML = `Listening to <span class="font-semibold">${spotify.song}</span> by <span class="font-semibold">${spotify.artist}</span>.`;
+                    discordSpotifyEl.classList.remove("hidden");
+                } else {
+                    discordSpotifyEl.classList.add("hidden");
+                }
+            }
+            if (discordActivityEl) {
+                const activities = discordPresence.data.activities;
+                if (activities?.length) {
+                    const filtered = activities.filter((a: { type: number }) => a.type !== 2);
+                    const firstActivity = filtered[0];
+                    discordActivityEl.innerHTML = `Playing <span class="font-semibold">${firstActivity.name}</span>.`;
+                    discordActivityEl.classList.remove("hidden");
+                } else {
+                    discordActivityEl.classList.add("hidden");
+                }
+            }
         }
         function updateTime() {
             const timeEl = document.getElementById("time");
