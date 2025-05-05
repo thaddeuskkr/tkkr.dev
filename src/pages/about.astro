@@ -302,7 +302,7 @@ const path = Astro.url.pathname.replace(/\//g, "");
             if (discordActivityEl) {
                 const activities = discordPresence.data.activities;
                 if (activities?.length) {
-                    const filtered = activities.filter((a: { type: number }) => a.type !== 2);
+                    const filtered = activities.filter((a: { type: number }) => a.type !== 2 && a.type !== 4);
                     const firstActivity = filtered[0];
                     discordActivityEl.innerHTML = `Playing <span class="font-semibold">${firstActivity.name}</span>.`;
                     discordActivityEl.classList.remove("hidden");
