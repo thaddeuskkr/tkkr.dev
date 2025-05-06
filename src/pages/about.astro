@@ -284,7 +284,15 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     "offline";
                 if (discordPresence.data.active_on_discord_mobile as boolean) statusText += " (mobile)";
                 if (discordPresence.data.discord_status) {
-                    discordStatusEl.innerHTML = `Currently <span class="font-semibold">${statusText}</span> on Discord.`;
+                    const filtered = [];
+                    if (discordPresence.data.activities?.length) {
+                        filtered.push(
+                            ...discordPresence.data.activities?.filter(
+                                (a: { type: number }) => a.type !== 2 && a.type !== 4,
+                            ),
+                        );
+                    }
+                    discordStatusEl.innerHTML = `Currently <span class="font-semibold">${statusText}</span> on Discord${filtered.length ? ` and playing <span class="font-semibold">${filtered[0].name}</span>.` : "."}`;
                     discordStatusEl.classList.remove("hidden");
                 } else {
                     discordStatusEl.classList.add("hidden");
@@ -297,17 +305,6 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     discordSpotifyEl.classList.remove("hidden");
                 } else {
                     discordSpotifyEl.classList.add("hidden");
-                }
-            }
-            if (discordActivityEl) {
-                const activities = discordPresence.data.activities;
-                if (activities?.length) {
-                    const filtered = activities.filter((a: { type: number }) => a.type !== 2 && a.type !== 4);
-                    const firstActivity = filtered[0];
-                    discordActivityEl.innerHTML = `Playing <span class="font-semibold">${firstActivity.name}</span>.`;
-                    discordActivityEl.classList.remove("hidden");
-                } else {
-                    discordActivityEl.classList.add("hidden");
                 }
             }
         }
