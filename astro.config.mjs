@@ -1,10 +1,12 @@
 // @ts-check
-import { defineConfig, fontProviders } from "astro/config";
-
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig, fontProviders } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
+    image: {
+        domains: ["*.tkkr.dev", "tkkr.dev"],
+    },
     vite: {
         plugins: [tailwindcss()],
     },

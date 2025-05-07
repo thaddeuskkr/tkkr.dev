@@ -33,7 +33,6 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     </p>
                     <p class="hidden" id="discord-status"></p>
                     <p class="hidden" id="discord-spotify"></p>
-                    <p class="hidden" id="discord-activity"></p>
                 </div>
                 <div class="flex flex-row flex-wrap justify-center gap-2 md:justify-start">
                     <a
@@ -265,49 +264,70 @@ const path = Astro.url.pathname.replace(/\//g, "");
     </div>
 
     <script>
-        async function updateDiscordStatus() {
-            const response = await fetch("https://lanyard.tkkr.dev/v1/users/275830234262142978");
-            const discordPresence = await response.json();
-            if (!discordPresence.success) return;
-            const discordStatusEl = document.getElementById("discord-status");
-            const discordSpotifyEl = document.getElementById("discord-spotify");
-            const discordActivityEl = document.getElementById("discord-activity");
-            if (discordStatusEl) {
-                const statusMap = {
-                    dnd: "do not disturb",
-                    online: "online",
-                    idle: "idle",
-                    offline: "offline",
-                };
-                let statusText =
-                    statusMap[discordPresence.data.discord_status as "online" | "idle" | "dnd" | "offline"] ||
-                    "offline";
-                if (discordPresence.data.active_on_discord_mobile as boolean) statusText += " (mobile)";
-                if (discordPresence.data.discord_status) {
-                    const filtered = [];
-                    if (discordPresence.data.activities?.length) {
-                        filtered.push(
-                            ...discordPresence.data.activities?.filter(
-                                (a: { type: number }) => a.type !== 2 && a.type !== 4,
-                            ),
-                        );
+        const url = "wss://lanyard.tkkr.dev/socket";
+        const ws = new WebSocket(url);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            switch (data.op) {
+                case 0: {
+                    const discordStatusEl = document.getElementById("discord-status");
+                    const discordSpotifyEl = document.getElementById("discord-spotify");
+                    if (discordStatusEl) {
+                        const statusMap = {
+                            dnd: "do not disturb",
+                            online: "online",
+                            idle: "idle",
+                            offline: "offline",
+                        };
+                        let statusText =
+                            statusMap[data.d.discord_status as "online" | "idle" | "dnd" | "offline"] || "offline";
+                        if (data.d.active_on_discord_mobile as boolean) statusText += " (mobile)";
+                        if (data.d.discord_status) {
+                            const filtered = [];
+                            if (data.d.activities?.length) {
+                                filtered.push(
+                                    ...data.d.activities?.filter((a: { type: number }) => a.type !== 2 && a.type !== 4),
+                                );
+                            }
+                            discordStatusEl.innerHTML = `Currently <span class="font-semibold">${statusText}</span> on Discord${filtered.length ? ` and playing <span class="font-semibold">${filtered[0].name}</span>.` : "."}`;
+                            discordStatusEl.classList.remove("hidden");
+                        } else {
+                            discordStatusEl.classList.add("hidden");
+                        }
                     }
-                    discordStatusEl.innerHTML = `Currently <span class="font-semibold">${statusText}</span> on Discord${filtered.length ? ` and playing <span class="font-semibold">${filtered[0].name}</span>.` : "."}`;
-                    discordStatusEl.classList.remove("hidden");
-                } else {
-                    discordStatusEl.classList.add("hidden");
+                    if (discordSpotifyEl) {
+                        const spotify = data.d.spotify;
+                        if (spotify) {
+                            discordSpotifyEl.innerHTML = `Listening to <span class="font-semibold">${spotify.song}</span> by <span class="font-semibold">${spotify.artist}</span>.`;
+                            discordSpotifyEl.classList.remove("hidden");
+                        } else {
+                            discordSpotifyEl.classList.add("hidden");
+                        }
+                    }
+                    break;
+                }
+                case 1: {
+                    ws.send(
+                        JSON.stringify({
+                            op: 2,
+                            d: {
+                                subscribe_to_id: "275830234262142978",
+                            },
+                        }),
+                    );
+                    setInterval(() => {
+                        ws.send(JSON.stringify({ op: 3 }));
+                    }, data.d.heartbeat_interval);
+                }
+                default: {
+                    console.warn("[Lanyard] Unknown opcode", data);
+                    break;
                 }
             }
-            if (discordSpotifyEl) {
-                const spotify = discordPresence.data.spotify;
-                if (spotify) {
-                    discordSpotifyEl.innerHTML = `Listening to <span class="font-semibold">${spotify.song}</span> by <span class="font-semibold">${spotify.artist}</span>.`;
-                    discordSpotifyEl.classList.remove("hidden");
-                } else {
-                    discordSpotifyEl.classList.add("hidden");
-                }
-            }
-        }
+        };
+        ws.onerror = (error) => {
+            console.error("[Lanyard] WebSocket error", error);
+        };
         function updateTime() {
             const timeEl = document.getElementById("time");
             if (timeEl)
@@ -320,8 +340,6 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     .toUpperCase();
         }
         updateTime();
-        updateDiscordStatus();
         setInterval(updateTime, 1000);
-        setInterval(updateDiscordStatus, 10000);
     </script>
 </Layout>

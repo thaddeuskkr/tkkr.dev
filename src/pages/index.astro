@@ -1,6 +1,5 @@
 ---
 import { Image } from "astro:assets";
-import profileImage from "../assets/profile.jpg";
 import Navigation from "../components/Navigation.astro";
 import Layout from "../layouts/BaseLayout.astro";
 import "../styles/global.css";
@@ -13,7 +12,9 @@ const path = Astro.url.pathname.replace(/\//g, "");
         <div class="m-auto flex flex-col items-center justify-center">
             <div class="flex max-w-min flex-col items-center justify-center">
                 <Image
-                    src={profileImage}
+                    src="https://lanyard.tkkr.dev/275830234262142978.gif"
+                    width="1016"
+                    height="1016"
                     alt="Profile"
                     class="mb-5 aspect-square w-full max-w-full rounded-xl transition-transform"
                     loading="eager"
