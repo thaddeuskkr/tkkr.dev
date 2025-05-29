@@ -318,6 +318,7 @@ const path = Astro.url.pathname.replace(/\//g, "");
                     setInterval(() => {
                         ws.send(JSON.stringify({ op: 3 }));
                     }, data.d.heartbeat_interval);
+                    break;
                 }
                 default: {
                     console.warn("[Lanyard] Unknown opcode", data);
