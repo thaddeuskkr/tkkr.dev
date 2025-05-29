@@ -9,11 +9,11 @@
         "astro": "astro"
     },
     "dependencies": {
-        "@tailwindcss/vite": "^4.1.4",
+        "@tailwindcss/vite": "^4.1.8",
         "@vercel/analytics": "^1.5.0",
         "@vercel/speed-insights": "^1.2.0",
-        "astro": "5.7.9",
-        "tailwindcss": "^4.1.4"
+        "astro": "5.8.0",
+        "tailwindcss": "^4.1.8"
     },
     "devDependencies": {
         "prettier": "^3.5.3",
