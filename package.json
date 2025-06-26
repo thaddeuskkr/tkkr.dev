@@ -13,7 +13,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "astro": "5.10.1",
-    "tailwindcss": "^4.1.10"
+    "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
     "prettier": "^3.6.1",
