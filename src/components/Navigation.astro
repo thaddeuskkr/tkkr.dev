@@ -4,20 +4,20 @@ const { active } = Astro.props;
 
 <nav class=`w-[calc(100vw - (100vw - 100%))] flex justify-center ${active && 'pb-20 md:pb-28'}`>
     <div
-        class="fixed z-50 flex w-screen flex-row items-center justify-between border border-zinc-800/30 bg-zinc-900/40 px-3 py-3 backdrop-blur-md md:mt-6 md:w-[95%] md:rounded-md lg:w-5xl">
-        <a href="/" class="px-2 text-lg font-bold">tkkr.dev</a>
+        class="fixed z-50 flex w-screen flex-row items-center justify-between border border-zinc-800/30 bg-zinc-900/40 px-3 py-1 backdrop-blur-md md:mt-6 md:w-[95%] md:rounded-md lg:w-5xl">
+        <a href="/" class="px-2 py-1.5 text-lg font-bold">tkkr.dev</a>
         <ul class="flex items-center space-x-2">
             <li>
                 <a
                     href="/about"
-                    class=`${active === "about" ? "bg-zinc-700/40" : "text-zinc-300/80 transition-colors hover:bg-zinc-800/80"} rounded-md p-2`>
+                    class=`${active === "about" ? "bg-zinc-700/40" : "text-zinc-300/80 transition-colors hover:bg-zinc-800/80"} inline-flex rounded-md p-2`>
                     About
                 </a>
             </li>
             <li>
                 <a
                     href="/projects"
-                    class=`${active === "projects" ? "bg-zinc-700/40" : "text-zinc-300/80 transition-colors hover:bg-zinc-800/80"} rounded-md p-2`>
+                    class=`${active === "projects" ? "bg-zinc-700/40" : "text-zinc-300/80 transition-colors hover:bg-zinc-800/80"} inline-flex rounded-md p-2`>
                     Projects
                 </a>
             </li>
