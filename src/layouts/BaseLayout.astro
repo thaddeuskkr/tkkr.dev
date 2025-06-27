@@ -1,6 +1,4 @@
 ---
-import Analytics from "@vercel/analytics/astro";
-import SpeedInsights from "@vercel/speed-insights/astro";
 import { Font } from "astro:assets";
 import Meta from "../components/Meta.astro";
 import "../styles/global.css";
@@ -32,7 +30,5 @@ const { title } = Astro.props;
     </head>
     <body class="bg-zinc-950 text-zinc-100">
         <slot />
-        <SpeedInsights />
-        <Analytics />
     </body>
 </html>
