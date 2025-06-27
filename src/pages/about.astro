@@ -333,8 +333,9 @@ const path = Astro.url.pathname.replace(/\//g, "");
                         const songTitleRegex =
                             /\s*[\(\[\{][^)\]}]*(?:\b(?:ft\.?|feat\.?|featuring|from)\b)[^)\]}]*[\)\]\}]/gi;
                         const filteredTitle = spotify.song.replace(songTitleRegex, "").trim();
+                        const filteredArtist = spotify.artist.match(/^[^;]*/)[0].trim();
                         if (spotify) {
-                            discordSpotifyTextEl.innerHTML = `Listening to <span class="font-semibold">${filteredTitle}</span> by <span class="font-semibold">${spotify.artist}</span>.`;
+                            discordSpotifyTextEl.innerHTML = `Listening to <span class="font-semibold">${filteredTitle}</span> by <span class="font-semibold">${filteredArtist}</span>.`;
                             discordSpotifyEl.classList.remove("hidden");
                             discordSpotifyEl.classList.add("flex");
                         } else {
