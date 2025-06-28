@@ -282,9 +282,55 @@ const path = Astro.url.pathname.replace(/\//g, "");
                 </div>
             </div>
         </div>
+        <hr class="mx-auto my-8 text-zinc-700" />
+        <div class="mb-4 flex flex-col gap-4">
+            <h2 class="text-xl font-bold">
+                Games <span class="text-sm font-normal">(click to copy usernames)</span>
+            </h2>
+            <div class="flex flex-col gap-2 md:flex-row md:gap-12">
+                <div class="flex flex-col gap-2">
+                    <h3 class="font-semibold">Online</h3>
+                    <ul class="list-inside list-disc">
+                        <li><a data-copy="TeamThaddeus#1224" class="copy cursor-pointer">Overwatch 2</a></li>
+                        <li><a data-copy="thaddeuskkr" class="copy cursor-pointer">Marvel Rivals</a></li>
+                        <li><a data-copy="rumination#0609" class="copy cursor-pointer">League of Legends</a></li>
+                        <li><a data-copy="901612356" class="copy cursor-pointer">Wuthering Waves</a></li>
+                    </ul>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <h3 class="font-semibold">Arcade</h3>
+                    <ul class="list-inside list-disc">
+                        <li><a data-copy="101317497430011" class="copy cursor-pointer">maimai DX</a></li>
+                        <li><a data-copy="101515427232071" class="copy cursor-pointer">CHUNITHM</a></li>
+                        <li><a data-copy="tkkr" class="copy cursor-pointer">WANGAN MIDNIGHT MAXIMUM TUNE</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        document.querySelectorAll(".copy").forEach((el) => {
+            el.addEventListener("click", () => {
+                const data = el.getAttribute("data-copy");
+                const originalText = el.textContent;
+                if (data) {
+                    navigator.clipboard
+                        .writeText(data)
+                        .then(() => {
+                            el.textContent = "Copied!";
+                            el.classList.add("text-green-400", "font-bold");
+                            setTimeout(() => {
+                                el.textContent = originalText;
+                                el.classList.remove("text-green-400", "font-bold");
+                            }, 2000);
+                        })
+                        .catch((err) => {
+                            console.error("Failed to copy text: ", err);
+                        });
+                }
+            });
+        });
         const url = "wss://lanyard.tkkr.dev/socket";
         const ws = new WebSocket(url);
         ws.onmessage = (event) => {
