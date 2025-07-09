@@ -70,5 +70,20 @@
             "GitHub Actions",
             "MongoDB"
         ]
+    },
+    {
+        "name": "StayInTouch!",
+        "url": "https://github.com/thaddeuskkr/stayintouch",
+        "dates": "May 2025 - Aug 2025",
+        "association": "Nanyang Polytechnic",
+        "description": "I led a five-person team to deliver a full-stack, AI-augmented client-relationship platform built with Next.js 14 (App Router) + React/TypeScript, Tailwind CSS, shadcn/ui, and a serverless Neon Postgres backend: users can scan business cards via in-browser OCR, organise contacts into dynamic groups, schedule smart reminders, and craft or broadcast personalised updates by email or WhatsApp using AI-powered content generation—all behind secure NextAuth authentication with role-based access, wrapped in a responsive dark/light UI and real-time admin dashboard, and served through edge-optimised API routes for low-latency performance.",
+        "skills": [
+            "Next.js",
+            "React",
+            "TypeScript",
+            "Vercel",
+            "OAuth2",
+            "PostgreSQL"
+        ]
     }
 ]
