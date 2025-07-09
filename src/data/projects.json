@@ -92,7 +92,7 @@
         "url": "https://github.com/thaddeuskkr/tkkr.dev",
         "dates": "Dec 2023 - Present",
         "association": null,
-        "description": "My open-source personal site and portfolio, built with Astro's pre-rendered island architecture and a Bun-powered build chain for sub-second loads and perfect Lighthouse scores. A lean Tailwind design system delivers dark/light theming and just-enough interactivity while shipping almost zero client-side JavaScript. Type-safe Markdown/MDX collections (validated by Zod) flow through GitHub Actions to Cloudflare Pages' edge network, turning each commit into a global deploy in under a minute.",
+        "description": "My open-source personal site and portfolio, built with Astro's pre-rendered island architecture and a Bun-powered build chain for sub-second loads and perfect Lighthouse scores. A lean Tailwind design system delivers dark/light theming and just-enough interactivity while shipping almost zero client-side JavaScript. Automated GitHub Actions deploy each commit to Cloudflare Pages and serve it through Cloudflare Workers, pushing fresh content to edge POPs worldwide in under a minute.",
         "skills": [
             "Astro",
             "Cloudflare Workers",
