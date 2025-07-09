@@ -18,10 +18,10 @@
         "description": "A comprehensive litter detection, monitoring, and notification system built with AWS services and camera technology. It employs AI/ML to identify litter and notifies relevant personnel once a specified threshold is reached, ensuring timely clean-up before it accumulates. The solution features a robust backend and a streamlined frontend.",
         "skills": [
             "Python",
+            "Flask",
             "Amazon Web Services (AWS)",
             "Machine Learning",
-            "Computer Vision",
-            "Flask"
+            "Computer Vision"
         ]
     },
     {
