@@ -29,7 +29,7 @@
         "url": "https://github.com/thaddeuskkr/pay2live",
         "dates": "Nov 2024 - Feb 2025",
         "association": "Nanyang Polytechnic",
-        "description": "I led the development of a web application designed to streamline patient management for small clinics. The solution incorporates an appointment booking system, queue management, an administrative portal, and an online store with cart functionality. It also leverages WhatsApp for OTP-based login/identity verification and patient notifications. The tech stack — Flask, Jinja, MongoDB, Tailwind CSS, and jQuery — is organized into a clear, modular code base. Deployed via Docker in the cloud, it uses GitHub Actions for seamless automated image builds. As project leader, I oversaw both the hosting environment and database logic, ensuring efficient workflows across the team. I also structured the overall code base, developed the administrative dashboards, implemented login and user management, and provided guidance when my teammates needed it.",
+        "description": "I led the development of a web application designed to streamline patient management for small clinics, which incorporates an appointment booking system, queue management, an administrative portal, and an online store with cart functionality. It also leverages WhatsApp for OTP-based login/identity verification and patient notifications. The tech stack is organized into a clear, modular code base. Deployed in the cloud, it features seamless automated image builds and deployments using GitHub Actions.",
         "skills": [
             "Docker",
             "Flask",
@@ -46,7 +46,7 @@
         "url": "https://github.com/thaddeuskkr/stayintouch",
         "dates": "May 2025 - Aug 2025",
         "association": "Nanyang Polytechnic",
-        "description": "I led a five-person team to deliver a full-stack, AI-augmented client-relationship platform built with Next.js 14 (App Router) + React/TypeScript, Tailwind CSS, shadcn/ui, and a serverless Neon Postgres backend: users can scan business cards via in-browser OCR, organise contacts into dynamic groups, schedule smart reminders, and craft or broadcast personalised updates by email or WhatsApp using AI-powered content generation—all behind secure NextAuth authentication with role-based access, wrapped in a responsive dark/light UI and real-time admin dashboard, and served through edge-optimised API routes for low-latency performance.",
+        "description": "I led a five-person team to deliver a full-stack, AI-augmented client-relationship platform: users can scan business cards via in-browser OCR, organise contacts into dynamic groups, schedule smart reminders, and craft or broadcast personalised updates by email or WhatsApp using AI-powered content generation—all behind secure Google OIDC authentication with role-based access, wrapped in a responsive dark/light UI and real-time admin dashboard.",
         "skills": [
             "Next.js",
             "OAuth2",
@@ -62,7 +62,7 @@
         "url": "https://github.com/thaddeuskkr/dev-container",
         "dates": "Feb 2024 - Present",
         "association": null,
-        "description": "A secure, portable, and configurable Ubuntu-based development environment packaged as a Docker container, purpose-built for remote development workflows. It features an inbuilt SSH server and seamless Visual Studio Code Tunnel integration for secure remote access. The container includes a wide suite of preinstalled tools (e.g., Docker, Swift, Bun, Deno, Node.js, Python, GitHub CLI) and supports passthrough of SSH/GPG keys and Git configurations. Designed with containerization in mind, it offers isolated, consistent, and reproducible environments that enhance both development productivity and system security. Pre-built for multiple architectures with publicly accessible daily automated builds and simple setup via Docker or Docker Compose. Ideal for rapid onboarding, consistent dev environments, and cloud-based development.",
+        "description": "A secure, portable, and configurable Ubuntu-based development environment packaged as a Docker container, purpose-built for remote development workflows. Designed with containerization in mind, it offers isolated, consistent, and reproducible environments that enhance both development productivity and system security. Pre-built for multiple architectures with publicly accessible daily automated builds and a simple setup process. Ideal for rapid onboarding and consistent dev environments.",
         "skills": [
             "Bash",
             "Docker",
