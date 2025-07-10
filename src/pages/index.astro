@@ -8,7 +8,7 @@ const path = Astro.url.pathname.replace(/\//g, "");
 
 <Layout title="thaddeus kuah">
     <Navigation active={path} />
-    <div class="flex h-screen w-screen overflow-x-hidden">
+    <div class="flex h-screen w-screen flex-col justify-between">
         <div class="m-auto flex flex-col items-center justify-center">
             <div class="flex max-w-min flex-col items-center justify-center">
                 <Image
@@ -60,12 +60,12 @@ const path = Astro.url.pathname.replace(/\//g, "");
                 </a>
             </div>
         </div>
-    </div>
-    <div class="flex w-screen pb-2">
-        <a
-            class="mx-auto mt-3 p-1 text-center text-sm whitespace-nowrap text-zinc-400 transition-colors hover:text-zinc-500"
-            href="/privacy">
-            privacy policy
-        </a>
+        <div class="flex w-screen pb-2">
+            <a
+                class="mx-auto mt-3 p-1 text-center text-sm whitespace-nowrap text-zinc-400 transition-colors hover:text-zinc-500"
+                href="/privacy">
+                privacy policy
+            </a>
+        </div>
     </div>
 </Layout>
