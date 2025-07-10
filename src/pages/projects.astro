@@ -7,10 +7,42 @@ const projectImages = import.meta.glob("../assets/projects/*.{png,jpg,jpeg,webp,
     string,
     { default: ImageMetadata }
 >;
-const projects = Object.values(import.meta.glob("../projects/*.md", { eager: true })) as {
-    frontmatter: Record<string, any>;
+
+type Project = {
+    frontmatter: {
+        name: string;
+        start: string;
+        end: string;
+        association?: string;
+        skills: string[];
+        images?: string[];
+        links?: { url: string; label: string }[];
+    };
     compiledContent: () => string;
-}[];
+};
+
+const projects = Object.values(import.meta.glob("../projects/*.md", { eager: true })) as Project[];
+const getResponsiveClass = (index: number): string => {
+    if (index === 0) return "";
+    if (index === 1) return "hidden md:block";
+    if (index === 2) return "hidden lg:block";
+    return "hidden";
+};
+
+const renderGalleryText = (imageCount: number): string => {
+    if (imageCount <= 1) return "";
+
+    const mobileText = `+${imageCount - 1} more in gallery`;
+    const tabletText = imageCount > 2 ? `+${imageCount - 2} more in gallery` : "Click to view in gallery";
+    const desktopText = imageCount > 3 ? `+${imageCount - 3} more in gallery` : "Click to view in gallery";
+
+    return `
+        <span class="md:hidden">${mobileText}</span>
+        <span class="hidden md:block lg:hidden">${tabletText}</span>
+        <span class="hidden lg:block">${desktopText}</span>
+    `;
+};
+
 const path = Astro.url.pathname.replace(/\//g, "");
 ---
 
@@ -20,22 +52,28 @@ const path = Astro.url.pathname.replace(/\//g, "");
         {
             projects.reverse().map((project) => {
                 const { frontmatter } = project;
+
                 return (
                     <div class="mb-4 flex flex-col gap-1">
-                        <h1 class="text-lg font-semibold">
-                            {frontmatter.url ?
-                                <a href={frontmatter.url} class="transition-colors hover:text-zinc-400">
-                                    {frontmatter.name}
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="text-lg font-semibold">{frontmatter.name}</h1>
+                            {frontmatter.links?.map((link) => (
+                                <a
+                                    href={link.url}
+                                    class="rounded-full border border-zinc-600 bg-zinc-800/50 px-3 py-1 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-zinc-700/50 hover:text-white"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+                                    {link.label}
                                 </a>
-                            :   frontmatter.name}
-                        </h1>
+                            ))}
+                        </div>
                         <span class="text-zinc-400">
                             {frontmatter.start} - {frontmatter.end}
-                            {frontmatter.association ? ` • ${frontmatter.association}` : ""}
+                            {frontmatter.association && ` • ${frontmatter.association}`}
                         </span>
                         <div set:html={project.compiledContent()} />
                         <div class="flex flex-wrap gap-2">
-                            {frontmatter.skills.map((skill: string) => (
+                            {frontmatter.skills.map((skill) => (
                                 <span class="rounded-full bg-zinc-800 px-2 py-1 text-xs font-semibold text-zinc-300">
                                     {skill}
                                 </span>
@@ -44,17 +82,10 @@ const path = Astro.url.pathname.replace(/\//g, "");
                         {frontmatter.images && frontmatter.images.length > 0 && (
                             <div class="mt-4">
                                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {frontmatter.images.map((imageName: string, index: number) => {
+                                    {frontmatter.images.map((imageName, index) => {
                                         const imageKey = `../assets/projects/${imageName}`;
                                         const imageData = projectImages[imageKey]?.default;
                                         if (!imageData) return null;
-
-                                        const getResponsiveClass = (index: number) => {
-                                            if (index === 0) return "";
-                                            if (index === 1) return "hidden md:block";
-                                            if (index === 2) return "hidden lg:block";
-                                            return "hidden";
-                                        };
 
                                         return (
                                             <div
@@ -90,19 +121,10 @@ const path = Astro.url.pathname.replace(/\//g, "");
                                     })}
                                 </div>
                                 {frontmatter.images.length > 1 && (
-                                    <p class="mt-2 text-sm text-zinc-400">
-                                        <span class="md:hidden">+{frontmatter.images.length - 1} more in gallery</span>
-                                        <span class="hidden md:block lg:hidden">
-                                            {frontmatter.images.length > 2 ?
-                                                `+${frontmatter.images.length - 2} more in gallery`
-                                            :   "Click to view in gallery"}
-                                        </span>
-                                        <span class="hidden lg:block">
-                                            {frontmatter.images.length > 3 ?
-                                                `+${frontmatter.images.length - 3} more in gallery`
-                                            :   "Click to view in gallery"}
-                                        </span>
-                                    </p>
+                                    <p
+                                        class="mt-2 text-sm text-zinc-400"
+                                        set:html={renderGalleryText(frontmatter.images.length)}
+                                    />
                                 )}
                             </div>
                         )}
