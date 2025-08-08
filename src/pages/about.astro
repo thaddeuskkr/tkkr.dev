@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import appleLogo from "../assets/logos/apple-logo.png";
 import nypLogo from "../assets/logos/nyp-logo.webp";
 import sjiLogo from "../assets/logos/sji-logo.png";
 import shLogo from "../assets/logos/sh-logo.jpg";
@@ -265,6 +266,21 @@ const path = Astro.url.pathname.replace(/\//g, "");
         <hr class="mx-auto my-8 text-zinc-700" />
         <div class="mb-4 flex flex-col gap-4">
             <h2 class="text-xl font-bold">Work Experience</h2>
+            <div class="flex flex-row items-center gap-4">
+                <Image
+                    src={appleLogo}
+                    alt="Apple Logo"
+                    class="aspect-square size-18 rounded-md"
+                    loading="eager"
+                    format="avif"
+                    quality={"mid"}
+                />
+                <div class="flex flex-col justify-center">
+                    <span class="font-semibold text-zinc-100">Specialist</span>
+                    <span class="text-zinc-200">Apple</span>
+                    <span class="text-zinc-400">Aug 2025 - Present</span>
+                </div>
+            </div>
             <div class="flex flex-row items-center gap-4">
                 <Image
                     src={koiLogo}
