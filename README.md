@@ -1,6 +1,6 @@
 # tkkr.dev
 
-This repository contains code for a personal website hosted at [tkkr.dev](https://www.tkkr.dev).
+This repository contains code for the first version of my personal website hosted at [tkkr.dev](https://www.tkkr.dev).
 
 ## 🧞 Commands
 
