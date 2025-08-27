@@ -1,5 +1,3 @@
-"use client";
-
 export default function Summary() {
     const linkProps = {
         target: "_blank",

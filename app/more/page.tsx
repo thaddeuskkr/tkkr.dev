@@ -1,9 +1,11 @@
-"use client";
-import { motion } from "motion/react";
+import { CopyButton } from "@/components/CopyButton";
+import * as motion from "motion/react-client";
 import Link from "next/link";
-import { toast } from "sonner";
 
-const usernames: { game: string; username?: string; url?: string }[] = [
+const usernames: (
+    | { game: string; username: string; url: string }
+    | { game: string; username: string }
+)[] = [
     {
         game: "discord",
         username: "thad (@t.kkr)",
@@ -40,7 +42,7 @@ export default function More() {
                                 <div>
                                     <span className="font-medium">{game.game}</span>
                                     <p className="text-neutral-600 transition-colors dark:text-neutral-400">
-                                        {game.url ?
+                                        {"url" in game ?
                                             <a
                                                 href={game.url}
                                                 className="text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -48,14 +50,11 @@ export default function More() {
                                                 rel="noopener noreferrer">
                                                 {game.username}
                                             </a>
-                                        :   <a
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(game.username);
-                                                    toast.success("Copied to clipboard!");
-                                                }}
-                                                className="cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
-                                                {game.username}
-                                            </a>
+                                        :   <CopyButton text={game.username}>
+                                                <span className="cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
+                                                    {game.username}
+                                                </span>
+                                            </CopyButton>
                                         }
                                     </p>
                                 </div>
@@ -66,9 +65,9 @@ export default function More() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">link shortener</span>
                     <Link
-                        href="/shorten"
-                        className="max-w-fit text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
-                        sign in with google
+                        className="max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                        href="/shorten">
+                        requires sign in
                     </Link>
                 </div>
             </motion.div>

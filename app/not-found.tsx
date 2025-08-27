@@ -1,5 +1,4 @@
-"use client";
-import { motion } from "motion/react";
+import * as motion from "motion/react-client";
 
 export default function NotFound() {
     return (
@@ -11,7 +10,7 @@ export default function NotFound() {
                 transition={{ duration: 0.2 }}>
                 <p className="font-medium">404 - not found</p>
                 <p>
-                    sorry, the page you&apos;re looking for doesn&apos;t exist.
+                    sorry, the page you’re looking for doesn’t exist.
                     <br />
                     if you think this is a mistake, please{" "}
                     <a

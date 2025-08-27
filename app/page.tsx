@@ -1,5 +1,4 @@
-"use client";
-import { motion } from "motion/react";
+import * as motion from "motion/react-client";
 
 const experience: { company: string; position: string; from: string; to: string; type: string }[] =
     [
