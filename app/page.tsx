@@ -37,7 +37,7 @@ const education: { institution: string; course: string; from: string; to: string
         institution: "nanyang polytechnic",
         course: "diploma in information technology",
         from: "2024",
-        to: "2027",
+        to: "present",
     },
 ].reverse();
 
