@@ -9,58 +9,15 @@ const projects: {
     links: { name: string; url: string }[];
 }[] = [
     {
-        name: "tkkr.dev",
+        name: "anti-scam student champions",
         description:
-            "my personal website, built with next.js and a bunch of love. you’re looking at it!",
-        from: "december 2023",
-        to: "present",
+            "researched scam prevention strategies and raised anti-scam awareness using an educational video. secured 1st place out of 14 participating schools.",
+        from: "february 2020",
+        to: "january 2021",
         links: [
             {
-                name: "live",
-                url: "https://tkkr.dev",
-            },
-            {
-                name: "github",
-                url: "https://github.com/thaddeuskkr/tkkr.dev",
-            },
-        ],
-    },
-    {
-        name: "nova",
-        description:
-            "a self-hosted link shortener built with typescript and bun, designed to be fast and powerful yet easy to set up and use.",
-        from: "august 2024",
-        to: "august 2025",
-        links: [
-            {
-                name: "github",
-                url: "https://github.com/thaddeuskkr/nova",
-            },
-        ],
-    },
-    {
-        name: "dev-container",
-        description:
-            "an ubuntu-based development environment packaged as a docker container, purpose-built for remote development workflows.",
-        from: "february 2024",
-        to: "june 2025",
-        links: [
-            {
-                name: "github",
-                url: "https://github.com/thaddeuskkr/dev-container",
-            },
-        ],
-    },
-    {
-        name: "pay2live",
-        description:
-            "a web application designed to streamline patient management for small clinics, feature-rich and cloud-native. built for a school project.",
-        from: "november 2024",
-        to: "february 2025",
-        links: [
-            {
-                name: "github",
-                url: "https://github.com/thaddeuskkr/pay2live",
+                name: "video",
+                url: "https://drive.google.com/file/d/1vDW8ynUtmJHooHRkLkQ_n7V55_HvCfrJ/view",
             },
         ],
     },
@@ -82,19 +39,54 @@ const projects: {
         ],
     },
     {
-        name: "anti-scam student champions",
+        name: "pay2live",
         description:
-            "researched scam prevention strategies and raised anti-scam awareness using an educational video. secured 1st place out of 14 participating schools.",
-        from: "february 2020",
-        to: "january 2021",
+            "a web application designed to streamline patient management for small clinics, feature-rich and cloud-native. built for a school project.",
+        from: "november 2024",
+        to: "february 2025",
         links: [
             {
-                name: "video",
-                url: "https://drive.google.com/file/d/1vDW8ynUtmJHooHRkLkQ_n7V55_HvCfrJ/view",
+                name: "github",
+                url: "https://github.com/thaddeuskkr/pay2live",
             },
         ],
     },
-];
+    {
+        name: "dev-container",
+        description:
+            "an ubuntu-based development environment packaged as a docker container, purpose-built for remote development workflows.",
+        from: "february 2024",
+        to: "june 2025",
+        links: [
+            {
+                name: "github",
+                url: "https://github.com/thaddeuskkr/dev-container",
+            },
+        ],
+    },
+    {
+        name: "nova",
+        description:
+            "a self-hosted link shortener built with typescript and bun, designed to be fast and powerful yet easy to set up and use.",
+        from: "august 2024",
+        to: "august 2025",
+        links: [{ name: "github", url: "https://github.com/thaddeuskkr/nova" }],
+    },
+    {
+        name: "tkkr.dev",
+        description:
+            "my personal website, built with next.js and a bunch of love. you’re looking at it!",
+        from: "december 2023",
+        to: "present",
+        links: [
+            { name: "live", url: "https://tkkr.dev" },
+            {
+                name: "github",
+                url: "https://github.com/thaddeuskkr/tkkr.dev",
+            },
+        ],
+    },
+].reverse();
 
 export default function Projects() {
     return (

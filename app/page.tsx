@@ -24,7 +24,7 @@ const experience: { company: string; position: string; from: string; to: string;
             to: "present",
             type: "part-time",
         },
-    ];
+    ].reverse();
 
 const education: { institution: string; course: string; from: string; to: string }[] = [
     {
@@ -39,7 +39,7 @@ const education: { institution: string; course: string; from: string; to: string
         from: "2024",
         to: "2027",
     },
-];
+].reverse();
 
 export default function Home() {
     return (
@@ -69,7 +69,7 @@ export default function Home() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">experience</span>
                     <ul className="flex flex-col gap-1">
-                        {experience.reverse().map((exp, idx) => (
+                        {experience.map((exp, idx) => (
                             <li key={idx} className="pl-3">
                                 <div>
                                     <span className="font-medium">{exp.company}</span>{" "}
@@ -87,7 +87,7 @@ export default function Home() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">education</span>
                     <ul className="flex flex-col gap-1">
-                        {education.reverse().map((edu, idx) => (
+                        {education.map((edu, idx) => (
                             <li key={idx} className="pl-3">
                                 <div>
                                     <span className="font-medium">{edu.institution}</span>{" "}
