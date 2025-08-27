@@ -6,5 +6,6 @@ logs
 .DS_Store
 .idea
 .next
-.env
+.env.*
+!.env.example
 .open-next

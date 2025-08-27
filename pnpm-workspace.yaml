@@ -1,6 +1,10 @@
-onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
-  - sharp
-  - unrs-resolver
 packages:
   - .
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - argon2
+  - esbuild
+  - sharp
+  - unrs-resolver
+  - workerd
