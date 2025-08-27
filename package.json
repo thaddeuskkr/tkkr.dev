@@ -3,8 +3,8 @@
     "version": "2.0.0",
     "description": "the second iteration of my personal website!",
     "scripts": {
-        "dev": "next dev --turbopack",
-        "build": "next build --turbopack",
+        "dev": "next dev",
+        "build": "next build",
         "start": "next start",
         "lint": "eslint .",
         "test": "echo \"Error: no test specified\" && exit 1",
