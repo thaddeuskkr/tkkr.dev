@@ -11,6 +11,7 @@
         "cf:build": "opennextjs-cloudflare build",
         "cf:preview": "opennextjs-cloudflare preview",
         "cf:deploy": "opennextjs-cloudflare deploy",
+        "cf:upload": "opennextjs-cloudflare upload",
         "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
     },
     "repository": {
