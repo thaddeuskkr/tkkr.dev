@@ -30,7 +30,7 @@
     "dependencies": {
         "@opennextjs/cloudflare": "^1.6.5",
         "@tailwindcss/postcss": "^4.1.12",
-        "mongodb": "^6.18.0",
+        "mongodb": "^6.19.0",
         "motion": "^12.23.12",
         "nanoid": "^5.1.5",
         "next": "^15.5.0",
