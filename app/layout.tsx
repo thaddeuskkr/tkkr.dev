@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {children}
                 <Toaster
                     toastOptions={{
-                        descriptionClassName: "!text-neutral-700 dark:!text-neutral-400 ",
+                        descriptionClassName: "!text-neutral-700 dark:!text-neutral-400",
                         className:
                             "dark:!bg-neutral-900 !bg-neutral-100 !text-neutral-900 dark:!text-neutral-100 !border !border-neutral-300 dark:!border-neutral-700 !shadow-md",
                     }}
