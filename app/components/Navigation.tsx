@@ -15,6 +15,8 @@ export default function Navigation() {
         setIsDark(isDarkFromDOM);
         setMounted(true);
 
+        document.documentElement.classList.remove("theme-preload");
+
         const stored = readStoredTheme();
         if (!stored) {
             return subscribeSystemTheme((isDark) => {
