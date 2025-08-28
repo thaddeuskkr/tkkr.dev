@@ -8,4 +8,3 @@ logs
 .next
 .env.*
 !.env.example
-.open-next
