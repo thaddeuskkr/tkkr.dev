@@ -69,7 +69,7 @@ export async function shortenUrl({
 
         const currentDate = new Date();
 
-        await collection.deleteMany({ expiry: { $lt: currentDate } });
+        await collection.deleteMany({ expiry: { $lte: currentDate } });
 
         const newUrlDoc = {
             url,
