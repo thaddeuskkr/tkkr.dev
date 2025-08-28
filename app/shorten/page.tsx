@@ -20,7 +20,7 @@ export default async function Shorten() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}>
                 <div className="flex flex-col gap-1">
-                    <span className="font-bold">url shortener</span>
+                    <span className="font-bold">link shortener</span>
                     {hasPermission ?
                         <ShortenForm />
                     :   <p>this service is private, and requires an authorised user account.</p>}
