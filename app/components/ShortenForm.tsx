@@ -62,7 +62,7 @@ export default function ShortenForm() {
                 type="submit"
                 disabled={pending}
                 className="max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
-                shorten
+                {pending ? "shortening..." : "shorten"}
             </button>
         </form>
     );
