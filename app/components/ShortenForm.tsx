@@ -13,17 +13,25 @@ export default function ShortenForm() {
 
     useEffect(() => {
         if (!pending && state.success) {
-            toast.success("URL shortened successfully!", {
-                action: {
-                    label: "Copy short URLs",
-                    onClick: () =>
-                        navigator.clipboard.writeText(
-                            state.slugs
-                                .map((slug) => `${window.location.origin}/${slug}`)
-                                .join(", ") || "",
-                        ),
-                },
-            });
+            navigator.clipboard.writeText(`${window.location.origin}/${state.slugs[0]}`);
+            if (state.slugs.length > 1) {
+                toast.success("URL shortened successfully!", {
+                    description: "Copied first short URL to clipboard",
+                    action: {
+                        label: "Copy All",
+                        onClick: () =>
+                            navigator.clipboard.writeText(
+                                state.slugs
+                                    .map((slug) => `${window.location.origin}/${slug}`)
+                                    .join("\n") || "",
+                            ),
+                    },
+                });
+            } else {
+                toast.success("URL shortened successfully!", {
+                    description: "Copied short URL to clipboard",
+                });
+            }
         } else if (!pending && state.issues.length > 0) {
             state.issues.forEach((iss: string) => toast.error(iss));
         }
