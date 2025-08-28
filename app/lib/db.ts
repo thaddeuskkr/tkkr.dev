@@ -29,11 +29,14 @@ export async function getUrlBySlug(slug: string, password: string) {
         const db = client.db(process.env.MONGODB_DB || "tkkr");
         const collection = db.collection(process.env.MONGODB_COLLECTION || "urls");
 
-        const urlDoc = await collection.findOneAndUpdate(
-            { slugs: slug, password: password, expiry: { $gt: new Date() } },
-            { $inc: { clicks: 1 } },
-            { returnDocument: "after" },
-        );
+        const urlDoc = await collection.findOne({
+            slugs: slug,
+            $or: [{ expiry: null }, { expiry: { $gt: new Date() } }],
+        });
+
+        if (!urlDoc || (urlDoc.password && urlDoc.password.length && urlDoc.password !== password))
+            return null;
+
         return urlDoc;
     } catch (error) {
         console.error("Database error:", error);
@@ -78,7 +81,6 @@ export async function shortenUrl({
             password: password || null,
             createdBy,
             createdAt: currentDate,
-            clicks: 0,
         };
 
         await collection.insertOne(newUrlDoc);

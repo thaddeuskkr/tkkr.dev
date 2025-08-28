@@ -55,5 +55,4 @@ export interface ShortUrl {
     expiry: Date | null;
     createdBy: string;
     createdAt: Date;
-    clicks: number;
 }
