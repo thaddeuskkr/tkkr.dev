@@ -72,8 +72,6 @@ export async function shortenUrl({
 
         const currentDate = new Date();
 
-        await collection.deleteMany({ expiry: { $lte: currentDate } });
-
         const newUrlDoc = {
             url,
             slugs,
