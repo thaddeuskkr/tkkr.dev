@@ -23,8 +23,9 @@ export function AuthButton({
                     signOut();
                 }}
                 type="button"
-                disabled={pending}>
-                sign out
+                disabled={pending}
+                aria-busy={pending}>
+                {pending ? "signing out..." : "sign out"}
             </button>
         );
     }
@@ -37,8 +38,9 @@ export function AuthButton({
                 signIn("auth0");
             }}
             type="button"
-            disabled={pending}>
-            sign in
+            disabled={pending}
+            aria-busy={pending}>
+            {pending ? "signing in..." : "sign in"}
         </button>
     );
 }
