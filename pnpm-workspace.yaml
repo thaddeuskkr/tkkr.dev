@@ -1,10 +1,5 @@
-packages:
-  - .
-
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
-  - argon2
-  - esbuild
+  - '@vercel/speed-insights'
   - sharp
   - unrs-resolver
-  - workerd
