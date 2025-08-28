@@ -19,7 +19,7 @@ export default function ShortenForm() {
                     onClick: () =>
                         navigator.clipboard.writeText(
                             state.slugs
-                                .map((slug) => `${process.env.NEXT_PUBLIC_BASE_URL || ""}/${slug}`)
+                                .map((slug) => `${window.location.origin}/${slug}`)
                                 .join(", ") || "",
                         ),
                 },
