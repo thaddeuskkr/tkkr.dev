@@ -30,7 +30,7 @@ export async function getUrlBySlug(slug: string, password: string) {
         const collection = db.collection(process.env.MONGODB_COLLECTION || "urls");
 
         const urlDoc = await collection.findOneAndUpdate(
-            { slugs: slug, password: password, expiry: { $lt: new Date() } },
+            { slugs: slug, password: password, expiry: { $gt: new Date() } },
             { $inc: { clicks: 1 } },
             { returnDocument: "after" },
         );
