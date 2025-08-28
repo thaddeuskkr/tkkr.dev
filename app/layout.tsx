@@ -5,10 +5,20 @@ import Summary from "@/components/Summary";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
 
 const font = Instrument_Sans({
     subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+    title: "Thaddeus Kuah",
+    applicationName: "tkkr.dev",
+    authors: [{ name: "Thaddeus Kuah", url: "https://tkkr.dev" }],
+    creator: "Thaddeus Kuah",
+    description:
+        "hi! i’m thaddeus, a 19 year-old self-taught hobbyist programmer studying in singapore.",
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -23,11 +33,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         __html: `(()=>{try{const r=document.documentElement,s=localStorage.getItem('theme'),d=s?s==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.classList[d?'add':'remove']('dark');r.classList.remove('theme-preload')}catch{}})()`,
                     }}
                 />
-                <title>Thaddeus Kuah</title>
-                <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
-                <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
-                <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
-                <link rel="manifest" href="/site.webmanifest" />
             </head>
             <body className="m-10 flex max-w-xl flex-col">
                 <Navigation />
