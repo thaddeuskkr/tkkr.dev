@@ -7,9 +7,3 @@
     --text-base: 0.9rem;
     --default-transition-duration: 200ms;
 }
-
-/* Avoid transition flicker on initial theme application */
-html.theme-preload *,
-html.theme-preload {
-    transition: none !important;
-}

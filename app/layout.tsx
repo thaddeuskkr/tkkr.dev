@@ -27,10 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html
             lang="en"
             suppressHydrationWarning
-            className={`${font.className} theme-preload bg-neutral-50 text-base text-neutral-900 transition-colors dark:bg-neutral-950 dark:text-neutral-100`}>
+            className={`${font.className} bg-neutral-50 text-base text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100`}>
             <head>
-                <Script strategy="beforeInteractive" id="activate-transitions">
-                    {`document.documentElement.classList.remove('theme-preload');`}
+                <Script strategy="afterInteractive" id="activate-transitions">
+                    {`document.documentElement.classList.add('transition-colors');`}
                 </Script>
             </head>
             <body className="m-10 flex max-w-xl flex-col">
