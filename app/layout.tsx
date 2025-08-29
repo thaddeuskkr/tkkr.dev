@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             suppressHydrationWarning
             className={`${font.className} theme-preload bg-neutral-50 text-base text-neutral-900 transition-colors dark:bg-neutral-950 dark:text-neutral-100`}>
             <head>
-                <Script strategy="afterInteractive" id="remove-theme-preload-class">
+                <Script strategy="beforeInteractive" id="activate-transitions">
                     {`document.documentElement.classList.remove('theme-preload');`}
                 </Script>
             </head>
