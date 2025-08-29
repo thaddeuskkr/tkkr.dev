@@ -21,6 +21,8 @@ export default function ThemeToggle() {
             onClick={() => {
                 setTheme(nextTheme);
             }}
+            type="button"
+            aria-label={`Switch to ${nextTheme} mode`}
             className={`cursor-pointer text-neutral-600 transition-all hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100 ${
                 mounted ? "opacity-100" : "opacity-0"
             }`}>

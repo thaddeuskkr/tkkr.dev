@@ -109,6 +109,7 @@ export default function ShortenForm() {
             <button
                 type="submit"
                 disabled={pending}
+                aria-busy={pending}
                 className="max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
                 {pending ? "shortening..." : "shorten"}
             </button>

@@ -14,33 +14,35 @@ export function AuthButton({
     const defaultClassName =
         "max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200";
 
-    if (session?.user) {
-        return (
-            <button
-                className={className || defaultClassName}
-                onClick={() => {
-                    setPending(true);
-                    signOut();
-                }}
-                type="button"
-                disabled={pending}
-                aria-busy={pending}>
-                {pending ? "signing out..." : "sign out"}
-            </button>
-        );
-    }
+    const isSignedIn = Boolean(session?.user);
+    const label =
+        pending ?
+            isSignedIn ? "signing out..."
+            :   "signing in..."
+        : isSignedIn ? "sign out"
+        : "sign in";
+
+    const handleClick = async () => {
+        try {
+            setPending(true);
+            if (isSignedIn) {
+                await signOut();
+            } else {
+                await signIn("auth0");
+            }
+        } finally {
+            setPending(false);
+        }
+    };
 
     return (
         <button
             className={className || defaultClassName}
-            onClick={() => {
-                setPending(true);
-                signIn("auth0");
-            }}
+            onClick={handleClick}
             type="button"
             disabled={pending}
             aria-busy={pending}>
-            {pending ? "signing in..." : "sign in"}
+            {label}
         </button>
     );
 }
