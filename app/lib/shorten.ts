@@ -46,6 +46,17 @@ export async function shorten(_: unknown, formData: FormData) {
     if (!session) {
         return { success: false, issues: ["Unauthorized"], slugs: [] };
     }
+
+    const permittedRoles =
+        process.env.AUTH_ALLOWED_ROLES?.split(",").map((role) => role.trim()) || [];
+
+    const hasPermission =
+        session?.user?.roles?.some((role: string) => permittedRoles.includes(role)) || false;
+
+    if (permittedRoles.length > 0 && !hasPermission) {
+        return { success: false, issues: ["Forbidden"], slugs: [] };
+    }
+
     const validatedFields = schema.safeParse({
         url: formData.get("url"),
         slugs: formData.get("slugs"),

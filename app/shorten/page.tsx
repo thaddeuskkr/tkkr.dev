@@ -21,7 +21,7 @@ export default async function Shorten() {
                 transition={{ duration: 0.2 }}>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">link shortener</span>
-                    {hasPermission ?
+                    {permittedRoles.length > 0 && hasPermission ?
                         <ShortenForm />
                     :   <p>this service is private, and requires an authorised user account.</p>}
                 </div>
