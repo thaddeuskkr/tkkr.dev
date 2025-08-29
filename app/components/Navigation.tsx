@@ -2,28 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { readStoredTheme, subscribeSystemTheme, toggleTheme } from "@/lib/theme";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Navigation() {
     const pathname = usePathname();
-    const [mounted, setMounted] = useState(false);
-    const [isDark, setIsDark] = useState(false);
-
-    useEffect(() => {
-        const isDarkFromDOM = document.documentElement.classList.contains("dark");
-        setIsDark(isDarkFromDOM);
-        setMounted(true);
-
-        document.documentElement.classList.remove("theme-preload");
-
-        const stored = readStoredTheme();
-        if (!stored) {
-            return subscribeSystemTheme((isDark) => {
-                setIsDark(isDark);
-            });
-        }
-    }, []);
 
     const linkClass = (href: string) =>
         `transition-colors ${
@@ -45,20 +27,7 @@ export default function Navigation() {
                     <Link href="/more" className={linkClass("/more")}>
                         more
                     </Link>
-                    <button
-                        onClick={() => {
-                            const nextTheme = toggleTheme(isDark);
-                            setIsDark(nextTheme === "dark");
-                        }}
-                        className={`${linkClass("")} cursor-pointer transition-opacity ${
-                            mounted ? "opacity-100" : "opacity-0"
-                        }`}>
-                        {mounted ?
-                            isDark ?
-                                "light"
-                            :   "dark"
-                        :   "dark"}
-                    </button>
+                    <ThemeToggle />
                 </div>
             </div>
         </nav>
