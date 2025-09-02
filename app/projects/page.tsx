@@ -98,8 +98,8 @@ export default function Projects() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">projects</span>
                     <ul className="flex flex-col gap-1">
-                        {projects.map((project, idx) => (
-                            <li key={idx} className="pl-3">
+                        {projects.map((project) => (
+                            <li key={project.name} className="pl-3">
                                 <div>
                                     <span className="font-medium">{project.name}</span>{" "}
                                     <span className="text-neutral-700 transition-colors dark:text-neutral-300">
@@ -110,7 +110,7 @@ export default function Projects() {
                                     </p>
                                     <p className="text-neutral-500 transition-colors dark:text-neutral-500">
                                         {project.links.map((link, linkIdx) => (
-                                            <span key={linkIdx}>
+                                            <span key={link.name}>
                                                 <a
                                                     href={link.url}
                                                     className="text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-300"

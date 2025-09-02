@@ -37,8 +37,8 @@ export default function More() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">gaming & socials</span>
                     <ul className="flex flex-col gap-1">
-                        {usernames.map((game, idx) => (
-                            <li key={idx} className="pl-3">
+                        {usernames.map((game) => (
+                            <li key={game.game} className="pl-3">
                                 <div>
                                     <span className="font-medium">{game.game}</span>
                                     <p className="text-neutral-600 transition-colors dark:text-neutral-400">
