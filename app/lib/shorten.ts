@@ -4,6 +4,7 @@ import { z } from "zod";
 import parse from "parse-duration";
 import { auth } from "@/auth";
 import { shortenUrl } from "@/lib/db";
+import { userHasPermittedRoles } from "@/lib/roles";
 
 const schema = z.object({
     url: z.preprocess(
@@ -47,13 +48,7 @@ export async function shorten(_: unknown, formData: FormData) {
         return { success: false, issues: ["Unauthorized"], slugs: [] };
     }
 
-    const permittedRoles =
-        process.env.AUTH_ALLOWED_ROLES?.split(",").map((role) => role.trim()) || [];
-
-    const hasPermission =
-        session?.user?.roles?.some((role: string) => permittedRoles.includes(role)) || false;
-
-    if (permittedRoles.length > 0 && !hasPermission) {
+    if (!userHasPermittedRoles(session)) {
         return { success: false, issues: ["Forbidden"], slugs: [] };
     }
 
