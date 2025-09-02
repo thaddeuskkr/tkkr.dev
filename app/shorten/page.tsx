@@ -1,16 +1,12 @@
 import { auth } from "@/auth";
 import { AuthButton } from "@/components/AuthButton";
 import ShortenForm from "@/components/ShortenForm";
+import { userHasPermittedRoles } from "@/lib/roles";
 import * as motion from "motion/react-client";
 
 export default async function Shorten() {
     const session = await auth();
-
-    const permittedRoles =
-        process.env.AUTH_ALLOWED_ROLES?.split(",").map((role) => role.trim()) || [];
-
-    const hasPermission =
-        session?.user?.roles?.some((role: string) => permittedRoles.includes(role)) || false;
+    const hasPermission = userHasPermittedRoles(session);
 
     return (
         <main>
@@ -21,9 +17,11 @@ export default async function Shorten() {
                 transition={{ duration: 0.2 }}>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">link shortener</span>
-                    {permittedRoles.length > 0 && hasPermission ?
+                    {hasPermission ? (
                         <ShortenForm />
-                    :   <p>this service is private, and requires an authorised user account.</p>}
+                    ) : (
+                        <p>this service is private, and requires an authorised user account.</p>
+                    )}
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">authentication</span>
