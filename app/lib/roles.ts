@@ -12,7 +12,5 @@ export function userHasPermittedRoles(session: SessionWithRoles): boolean {
     if (permittedRoles.length === 0) {
         return true;
     }
-    return (
-        session?.user?.roles?.some((role) => permittedRoles.includes(role)) ?? false
-    );
+    return session?.user?.roles?.some((role) => permittedRoles.includes(role)) ?? false;
 }
