@@ -68,8 +68,8 @@ export default function Home() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">experience</span>
                     <ul className="flex flex-col gap-1">
-                        {experience.map((exp, idx) => (
-                            <li key={idx} className="pl-3">
+                        {experience.map((exp) => (
+                            <li key={exp.company} className="pl-3">
                                 <div>
                                     <span className="font-medium">{exp.company}</span>{" "}
                                     <span className="text-neutral-700 transition-colors dark:text-neutral-300">
@@ -86,8 +86,8 @@ export default function Home() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">education</span>
                     <ul className="flex flex-col gap-1">
-                        {education.map((edu, idx) => (
-                            <li key={idx} className="pl-3">
+                        {education.map((edu) => (
+                            <li key={edu.institution} className="pl-3">
                                 <div>
                                     <span className="font-medium">{edu.institution}</span>{" "}
                                     <span className="text-neutral-700 transition-colors dark:text-neutral-300">
