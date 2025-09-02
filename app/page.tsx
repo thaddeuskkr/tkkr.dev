@@ -47,7 +47,7 @@ export default function Home() {
                 className="flex flex-col gap-5"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}>
+                transition={{ duration: 0.15 }}>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">about me</span>
                     <p>

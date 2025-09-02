@@ -14,14 +14,12 @@ export default async function Shorten() {
                 className="flex flex-col gap-5"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}>
+                transition={{ duration: 0.15 }}>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">link shortener</span>
-                    {hasPermission ? (
+                    {hasPermission ?
                         <ShortenForm />
-                    ) : (
-                        <p>this service is private, and requires an authorised user account.</p>
-                    )}
+                    :   <p>this service is private, and requires an authorised user account.</p>}
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">authentication</span>
