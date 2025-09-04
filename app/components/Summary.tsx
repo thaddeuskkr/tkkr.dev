@@ -29,7 +29,7 @@ export default function Summary() {
                     </a>
                 </li>
                 <li>
-                    <a href="mailto:hi@tkkr.dev" {...linkProps}>
+                    <a href="mailto:tk@tkkr.dev" {...linkProps}>
                         email
                     </a>
                 </li>
