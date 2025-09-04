@@ -14,7 +14,7 @@ export default function NotFound() {
                     <br />
                     if you think this is a mistake, please{" "}
                     <a
-                        href="mailto:hi@tkkr.dev"
+                        href="mailto:tk@tkkr.dev"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline transition-colors hover:text-purple-800 dark:hover:text-purple-300">
