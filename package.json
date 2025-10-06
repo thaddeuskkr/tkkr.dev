@@ -44,7 +44,7 @@
         "@eslint/eslintrc": "^3.3.1",
         "@next/eslint-plugin-next": "^15.5.2",
         "@thaddeuskkr/prettier-config": "^1.1.5",
-        "@types/node": "^24.3.0",
+        "@types/node": "^24.7.0",
         "@types/react": "^19.1.12",
         "eslint": "^9.34.0",
         "eslint-config-next": "^15.5.2",
