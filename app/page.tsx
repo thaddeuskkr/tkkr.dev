@@ -50,15 +50,15 @@ export default function Home() {
                 transition={{ duration: 0.15 }}>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">about me</span>
-                    <p>
+                    <p className="pl-3">
                         i’m highly tech-savvy and passionate about technology, with extensive
                         hands-on experience in full-stack web development and systems
-                        administration.
+                        administration, currently pursuing a diploma in information technology.
                     </p>
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">hobbies</span>
-                    <ul className="list-inside list-['-_']">
+                    <ul className="list-inside list-['-_'] pl-3">
                         <li>gaming</li>
                         <li>programming</li>
                         <li>photography</li>
