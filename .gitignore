@@ -8,3 +8,4 @@ logs
 .next
 .env.*
 !.env.example
+.vercel
