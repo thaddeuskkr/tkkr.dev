@@ -20,7 +20,7 @@ const experience: { company: string; position: string; from: string; to: string;
             company: "apple",
             position: "specialist",
             from: "august 2025",
-            to: "present",
+            to: "march 2026",
             type: "part-time",
         },
     ].reverse();
