@@ -10,7 +10,7 @@ export default function Summary() {
             <h1 className="pb-1 text-3xl font-semibold">Thaddeus Kuah</h1>
             <div className="pb-2 font-medium">
                 <p>avid gamer, self-taught hobbyist programmer</p>
-                <p>full-time student at nanyang polytechnic, part-time specialist at apple</p>
+                <p>full-time student at nanyang polytechnic</p>
             </div>
             <ul className="flex gap-5 pb-5">
                 <li>
