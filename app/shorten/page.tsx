@@ -22,7 +22,9 @@ export default async function Shorten() {
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">authentication</span>
                     {session?.user ?
-                        <p>you’re signed in as {session.user.email}.</p>
+                        <p>
+                            you’re signed in as {session.user.name} ({session.user.email}).
+                        </p>
                     :   <p>you’re not currently signed in.</p>}
                     <AuthButton session={session} />
                 </div>
