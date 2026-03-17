@@ -28,7 +28,7 @@ export function AuthButton({
             if (isSignedIn) {
                 await signOut();
             } else {
-                await signIn("auth0");
+                await signIn("tkkr");
             }
         } finally {
             setPending(false);

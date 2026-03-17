@@ -4,7 +4,6 @@ import { z } from "zod";
 import parse from "parse-duration";
 import { auth } from "@/auth";
 import { shortenUrl } from "@/lib/db";
-import { userHasPermittedRoles } from "@/lib/roles";
 
 const schema = z.object({
     url: z.preprocess(
@@ -44,12 +43,8 @@ const schema = z.object({
 
 export async function shorten(_: unknown, formData: FormData) {
     const session = await auth();
-    if (!session) {
+    if (!session || !session.user) {
         return { success: false, issues: ["Unauthorized"], slugs: [] };
-    }
-
-    if (!userHasPermittedRoles(session)) {
-        return { success: false, issues: ["Forbidden"], slugs: [] };
     }
 
     const validatedFields = schema.safeParse({
@@ -69,7 +64,7 @@ export async function shorten(_: unknown, formData: FormData) {
         url: validatedFields.data.url,
         slugs: validatedFields.data.slugs || [],
         expiry: validatedFields.data.expiry || null,
-        createdBy: session.user.email || session.user.sub || session.user.id || "unknown",
+        createdBy: session.user.email || session.user.id || "unknown",
         password: validatedFields.data.password || null,
     });
     if (!res.success) {
