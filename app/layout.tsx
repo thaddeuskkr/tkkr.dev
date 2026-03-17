@@ -2,6 +2,7 @@ import "@/globals.css";
 import { Instrument_Sans } from "next/font/google";
 import Navigation from "@/components/Navigation";
 import Summary from "@/components/Summary";
+import ClockFooter from "@/components/ClockFooter";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -39,11 +40,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 async={true}
                 type="text/javascript"
             />
-            <body className="m-10 flex max-w-xl flex-col">
+            <body className="m-10 flex min-h-[calc(100vh-5rem)] max-w-xl flex-col">
                 <ThemeProvider attribute="class" storageKey="theme" enableSystem={true}>
                     <Navigation />
                     <Summary />
                     {children}
+                    <ClockFooter />
                     <Toaster
                         toastOptions={{
                             descriptionClassName: "!text-neutral-700 dark:!text-neutral-400",
