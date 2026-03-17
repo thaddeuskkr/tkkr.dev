@@ -6,7 +6,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: "tkkr",
             name: "tkkr.dev",
             type: "oidc",
-            issuer: "https://id.tkkr.dev",
+            issuer: process.env.AUTH_ISSUER,
             clientId: process.env.AUTH_CLIENT_ID,
             clientSecret: process.env.AUTH_CLIENT_SECRET,
             authorization: { params: { scope: "openid email profile" } },
