@@ -24,6 +24,10 @@ const usernames: (
         game: "maimai dx",
         username: "101317497430011",
     },
+    {
+        game: "riot games",
+        username: "rumination#0609",
+    }
 ];
 
 export default function More() {

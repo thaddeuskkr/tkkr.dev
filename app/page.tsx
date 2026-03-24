@@ -34,7 +34,7 @@ const education: { institution: string; course: string; from: string; to: string
     },
     {
         institution: "nanyang polytechnic",
-        course: "diploma in information technology",
+        course: "diploma in information technology • year 3",
         from: "2024",
         to: "present",
     },
