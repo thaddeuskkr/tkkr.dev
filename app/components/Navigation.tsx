@@ -1,37 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const MORE_PRESS_KEY = "more-nav-press-count";
 const UNLOCK_PRESSES = 6;
 const HINT_THRESHOLD = 3;
+const unlockedLinks = [{ href: "/shorten", label: "shorten" }];
+const navRowClass = "flex items-center gap-5";
 
 export default function Navigation() {
     const pathname = usePathname();
-    const router = useRouter();
     const [morePresses, setMorePresses] = useState(0);
-
-    useEffect(() => {
-        const storedCount = window.sessionStorage.getItem(MORE_PRESS_KEY);
-        if (storedCount) {
-            const parsed = Number.parseInt(storedCount, 10);
-            if (!Number.isNaN(parsed)) {
-                setMorePresses(parsed);
-            }
-        }
-    }, []);
+    const [secretNavUnlocked, setSecretNavUnlocked] = useState(false);
+    const isOnUnlockedRoute = unlockedLinks.some((link) => pathname === link.href);
+    const showSecretNav = secretNavUnlocked || isOnUnlockedRoute;
 
     const updatePressCount = (nextCount: number) => {
         setMorePresses(nextCount);
-        window.sessionStorage.setItem(MORE_PRESS_KEY, `${nextCount}`);
+    };
+
+    const unlockSecretNav = () => {
+        setSecretNavUnlocked(true);
     };
 
     const onMoreClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (pathname !== "/more") {
             updatePressCount(0);
+            return;
+        }
+
+        if (secretNavUnlocked) {
             return;
         }
 
@@ -41,13 +41,12 @@ export default function Navigation() {
 
         if (nextCount >= UNLOCK_PRESSES) {
             updatePressCount(0);
-            router.push("/shorten");
-            return;
+            unlockSecretNav();
         }
     };
 
     const hintDots =
-        pathname === "/more" && morePresses >= HINT_THRESHOLD ?
+        pathname === "/more" && !showSecretNav && morePresses >= HINT_THRESHOLD ?
             ".".repeat(morePresses - HINT_THRESHOLD + 1)
         :   "";
 
@@ -60,8 +59,8 @@ export default function Navigation() {
 
     return (
         <nav>
-            <div className="flex max-w-xl justify-between pb-5">
-                <div className="flex items-center gap-5">
+            <div className="flex max-w-xl flex-col gap-2 pb-5">
+                <div className={navRowClass}>
                     <Link href="/" className={linkClass("/")}>
                         home
                     </Link>
@@ -82,6 +81,15 @@ export default function Navigation() {
                     </Link>
                     <ThemeToggle />
                 </div>
+                {showSecretNav && (
+                    <div className={navRowClass}>
+                        {unlockedLinks.map((link) => (
+                            <Link key={link.href} href={link.href} className={linkClass(link.href)}>
+                                {link.label}
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
         </nav>
     );
