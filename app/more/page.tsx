@@ -1,6 +1,5 @@
 import { CopyButton } from "@/components/CopyButton";
 import * as motion from "motion/react-client";
-import Link from "next/link";
 
 const usernames: (
     | { game: string; username: string; url: string }
@@ -65,14 +64,6 @@ export default function More() {
                             </li>
                         ))}
                     </ul>
-                </div>
-                <div className="flex flex-col gap-1">
-                    <span className="font-bold">link shortener</span>
-                    <Link
-                        className="max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
-                        href="/shorten">
-                        requires sign in
-                    </Link>
                 </div>
             </motion.div>
         </main>
