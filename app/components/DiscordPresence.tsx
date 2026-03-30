@@ -121,7 +121,7 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
     const [discordStatus, setDiscordStatus] = useState<DiscordStatus>("offline");
     const [presenceInfo, setPresenceInfo] = useState<PresenceInfo>({
         kind: "text",
-        text: "Currently offline",
+        text: "Currently not doing anything",
     });
     const [isMultiLine, setIsMultiLine] = useState(false);
     const presenceTextRef = useRef<HTMLSpanElement | null>(null);
@@ -282,8 +282,8 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
                 <span ref={presenceTextRef} className="leading-5">
                     Currently listening to{" "}
                     <span className={highlightClassName}>{presenceInfo.song}</span> by{" "}
-                    <span className={highlightClassName}>{presenceInfo.artist}</span> while
-                    playing <span className={highlightClassName}>{presenceInfo.game}</span>
+                    <span className={highlightClassName}>{presenceInfo.artist}</span> while playing{" "}
+                    <span className={highlightClassName}>{presenceInfo.game}</span>
                 </span>
             : presenceInfo.kind === "listening" ?
                 <span ref={presenceTextRef} className="leading-5">
@@ -293,7 +293,8 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
                 </span>
             :   <span ref={presenceTextRef} className="leading-5">
                     {presenceInfo.text}
-                </span>}
+                </span>
+            }
         </div>
     );
 }
