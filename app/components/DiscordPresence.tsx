@@ -81,7 +81,7 @@ function getPresenceInfo(data: LanyardData): PresenceInfo {
         return { kind: "playing", game: activeGame.name };
     }
 
-    return { kind: "text", text: "Currently offline" };
+    return { kind: "text", text: "Currently not doing anything" };
 }
 
 function normalizeStatus(status: string): DiscordStatus {
@@ -121,7 +121,7 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
     const [discordStatus, setDiscordStatus] = useState<DiscordStatus>("offline");
     const [presenceInfo, setPresenceInfo] = useState<PresenceInfo>({
         kind: "text",
-        text: "Currently not doing anything",
+        text: "Currently offline",
     });
     const [isMultiLine, setIsMultiLine] = useState(false);
     const presenceTextRef = useRef<HTMLSpanElement | null>(null);
