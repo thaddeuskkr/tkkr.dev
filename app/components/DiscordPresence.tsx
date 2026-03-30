@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const LANYARD_WS_URL = "wss://l.tkkr.dev/socket";
-const DISCORD_USER_ID = "275830234262142978";
 const RECONNECT_DELAY_MS = 3000;
 
 type DiscordStatus = "online" | "idle" | "dnd" | "offline";
@@ -28,6 +26,10 @@ type PresenceInfo =
     | { kind: "listening"; song: string; artist: string }
     | { kind: "listening-while-playing"; song: string; artist: string; game: string }
     | { kind: "text"; text: string };
+type DiscordPresenceProps = {
+    lanyardWsUrl: string;
+    discordUserId: string;
+};
 
 const statusDotClassMap: Record<DiscordStatus, string> = {
     online: "bg-emerald-500",
@@ -102,20 +104,20 @@ function toPresenceData(value: unknown): LanyardData | null {
     return value as LanyardData;
 }
 
-function extractPresenceData(payload: unknown): LanyardData | null {
+function extractPresenceData(payload: unknown, discordUserId: string): LanyardData | null {
     const direct = toPresenceData(payload);
     if (direct) {
         return direct;
     }
 
-    if (!isRecord(payload) || !(DISCORD_USER_ID in payload)) {
+    if (!isRecord(payload) || !(discordUserId in payload)) {
         return null;
     }
 
-    return toPresenceData(payload[DISCORD_USER_ID]);
+    return toPresenceData(payload[discordUserId]);
 }
 
-export default function DiscordPresence() {
+export default function DiscordPresence({ lanyardWsUrl, discordUserId }: DiscordPresenceProps) {
     const [discordStatus, setDiscordStatus] = useState<DiscordStatus>("offline");
     const [presenceInfo, setPresenceInfo] = useState<PresenceInfo>({
         kind: "text",
@@ -154,7 +156,7 @@ export default function DiscordPresence() {
         };
 
         const connect = () => {
-            socket = new WebSocket(LANYARD_WS_URL);
+            socket = new WebSocket(lanyardWsUrl);
 
             socket.onmessage = (event) => {
                 let message: LanyardSocketMessage;
@@ -170,7 +172,7 @@ export default function DiscordPresence() {
                         socket.send(
                             JSON.stringify({
                                 op: 2,
-                                d: { subscribe_to_id: DISCORD_USER_ID },
+                                d: { subscribe_to_id: discordUserId },
                             }),
                         );
                     }
@@ -193,7 +195,7 @@ export default function DiscordPresence() {
                     return;
                 }
 
-                const presence = extractPresenceData(message.d);
+                const presence = extractPresenceData(message.d, discordUserId);
                 if (presence) {
                     applyPresence(presence);
                 }
@@ -234,7 +236,7 @@ export default function DiscordPresence() {
                 socket = null;
             }
         };
-    }, []);
+    }, [lanyardWsUrl, discordUserId]);
 
     useEffect(() => {
         const textElement = presenceTextRef.current;
