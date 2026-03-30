@@ -14,10 +14,12 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-SG", {
     hour12: true,
 });
 
-export default function ClockFooter() {
-    const [now, setNow] = useState<Date>(() => new Date());
+export default function Clock() {
+    const [now, setNow] = useState<Date | null>(null);
 
     useEffect(() => {
+        setNow(new Date());
+
         const interval = window.setInterval(() => {
             setNow(new Date());
         }, 1000);
@@ -26,10 +28,8 @@ export default function ClockFooter() {
     }, []);
 
     return (
-        <footer className="mt-auto pt-10 text-xs text-neutral-600 transition-colors dark:text-neutral-400">
-            <div className="border-t border-neutral-200 pt-3 dark:border-neutral-800">
-                {dateTimeFormatter.format(now)}
-            </div>
-        </footer>
+        <div suppressHydrationWarning>
+            {now ? `${dateTimeFormatter.format(now)} (GMT+8)` : "SGT (GMT+8): --"}
+        </div>
     );
 }

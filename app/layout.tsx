@@ -2,7 +2,7 @@ import "@/globals.css";
 import { Instrument_Sans } from "next/font/google";
 import Navigation from "@/components/Navigation";
 import Summary from "@/components/Summary";
-import ClockFooter from "@/components/ClockFooter";
+import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <Navigation />
                     <Summary />
                     {children}
-                    <ClockFooter />
+                    <Footer />
                     <Toaster
                         toastOptions={{
                             descriptionClassName: "!text-neutral-700 dark:!text-neutral-400",
