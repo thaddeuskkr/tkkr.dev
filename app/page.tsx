@@ -72,10 +72,10 @@ export default function Home() {
                             <li key={exp.company} className="pl-3">
                                 <div>
                                     <span className="font-medium">{exp.company}</span>{" "}
-                                    <span className="text-neutral-700 transition-colors dark:text-neutral-300">
+                                    <span className="text-body-secondary transition-colors">
                                         ({exp.from} - {exp.to})
                                     </span>
-                                    <p className="text-neutral-600 transition-colors dark:text-neutral-400">
+                                    <p className="text-body-tertiary transition-colors">
                                         {exp.position} — {exp.type}
                                     </p>
                                 </div>
@@ -90,10 +90,10 @@ export default function Home() {
                             <li key={edu.institution} className="pl-3">
                                 <div>
                                     <span className="font-medium">{edu.institution}</span>{" "}
-                                    <span className="text-neutral-700 transition-colors dark:text-neutral-300">
+                                    <span className="text-body-secondary transition-colors">
                                         ({edu.from} - {edu.to})
                                     </span>
-                                    <p className="text-neutral-600 transition-colors dark:text-neutral-400">
+                                    <p className="text-body-tertiary transition-colors">
                                         {edu.course}
                                     </p>
                                 </div>
@@ -105,3 +105,4 @@ export default function Home() {
         </main>
     );
 }
+

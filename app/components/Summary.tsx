@@ -3,7 +3,7 @@ export default function Summary() {
         target: "_blank",
         rel: "noopener noreferrer",
         className:
-            "text-neutral-600 hover:text-neutral-800 transition-colors dark:text-neutral-300 dark:hover:text-neutral-100",
+            "text-link transition-colors hover:text-link-hover",
     };
     return (
         <div>
@@ -37,3 +37,4 @@ export default function Summary() {
         </div>
     );
 }
+

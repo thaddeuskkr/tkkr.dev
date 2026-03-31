@@ -44,17 +44,17 @@ export default function More() {
                             <li key={game.game} className="pl-3">
                                 <div>
                                     <span className="font-medium">{game.game}</span>
-                                    <p className="text-neutral-600 transition-colors dark:text-neutral-400">
+                                    <p className="text-body-tertiary transition-colors">
                                         {"url" in game ?
                                             <a
                                                 href={game.url}
-                                                className="text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                                                className="text-body-muted transition-colors hover:text-body-tertiary"
                                                 target="_blank"
                                                 rel="noopener noreferrer">
                                                 {game.username}
                                             </a>
                                         :   <CopyButton text={game.username}>
-                                                <span className="cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
+                                                <span className="cursor-pointer text-body-muted transition-colors hover:text-body-tertiary">
                                                     {game.username}
                                                 </span>
                                             </CopyButton>
@@ -69,3 +69,4 @@ export default function More() {
         </main>
     );
 }
+

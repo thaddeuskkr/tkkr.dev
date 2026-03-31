@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import * as motion from "motion/react-client";
 import { headers } from "next/headers";
 
-export default async function Shorten() {
+export default async function Admin() {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -17,12 +17,6 @@ export default async function Shorten() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15 }}>
                 <div className="flex flex-col gap-1">
-                    <span className="font-bold">link shortener</span>
-                    {session ?
-                        <ShortenForm />
-                    :   <p>this service is private, and requires an authorised user account.</p>}
-                </div>
-                <div className="flex flex-col gap-1">
                     <span className="font-bold">authentication</span>
                     {session?.user ?
                         <p>
@@ -31,6 +25,12 @@ export default async function Shorten() {
                     :   <p>you’re not currently signed in.</p>}
                     <AuthButton session={session} />
                 </div>
+                {session?.user && (
+                    <div className="flex flex-col gap-1">
+                        <span className="font-bold">link shortener</span>
+                        <ShortenForm />
+                    </div>
+                )}
             </motion.div>
         </main>
     );

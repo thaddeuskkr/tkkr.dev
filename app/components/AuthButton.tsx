@@ -13,7 +13,7 @@ export function AuthButton({
 }) {
     const [pending, setPending] = useState(false);
     const defaultClassName =
-        "max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200";
+        "max-w-fit cursor-pointer text-body-muted transition-colors hover:text-body-tertiary";
 
     const isSignedIn = Boolean(session?.user);
     const label =
@@ -52,3 +52,4 @@ export function AuthButton({
         </button>
     );
 }
+

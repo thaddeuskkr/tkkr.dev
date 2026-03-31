@@ -13,12 +13,12 @@ import type {
 const RECONNECT_DELAY_MS = 3000;
 
 const statusDotClassMap: Record<DiscordStatus, string> = {
-    online: "bg-emerald-500",
-    dnd: "bg-red-500",
-    idle: "bg-amber-400",
-    offline: "bg-neutral-500",
+    online: "bg-status-online",
+    dnd: "bg-status-dnd",
+    idle: "bg-status-idle",
+    offline: "bg-status-offline",
 };
-const highlightClassName = "font-semibold text-neutral-700 dark:text-neutral-200";
+const highlightClassName = "font-semibold text-highlight transition-colors duration-200";
 const texts = {
     unavailable: "Discord status unavailable",
     idle: "Currently not doing anything",
@@ -335,3 +335,4 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
         </div>
     );
 }
+

@@ -102,18 +102,18 @@ export default function Projects() {
                             <li key={project.name} className="pl-3">
                                 <div>
                                     <span className="font-medium">{project.name}</span>{" "}
-                                    <span className="text-neutral-700 transition-colors dark:text-neutral-300">
+                                    <span className="text-body-secondary transition-colors">
                                         ({project.from} - {project.to})
                                     </span>
-                                    <p className="text-neutral-600 transition-colors dark:text-neutral-400">
+                                    <p className="text-body-tertiary transition-colors">
                                         {project.description}
                                     </p>
-                                    <p className="text-neutral-500 transition-colors dark:text-neutral-500">
+                                    <p className="text-body-muted transition-colors">
                                         {project.links.map((link, linkIdx) => (
                                             <span key={link.name}>
                                                 <a
                                                     href={link.url}
-                                                    className="text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-300"
+                                                    className="text-body-muted transition-colors hover:text-body-secondary"
                                                     target="_blank"
                                                     rel="noopener noreferrer">
                                                     {link.name}
@@ -131,3 +131,4 @@ export default function Projects() {
         </main>
     );
 }
+

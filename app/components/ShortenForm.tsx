@@ -58,7 +58,7 @@ export default function ShortenForm() {
     }, [pending, state]);
 
     const inputClass =
-        "w-full text-neutral-700 placeholder-neutral-600 select-none focus:outline-none dark:text-neutral-300 dark:placeholder-neutral-400";
+        "w-full text-body-secondary placeholder:text-body-tertiary select-none focus:outline-none";
 
     const fields: Array<{
         name: string;
@@ -110,9 +110,10 @@ export default function ShortenForm() {
                 type="submit"
                 disabled={pending}
                 aria-busy={pending}
-                className="max-w-fit cursor-pointer text-neutral-600 transition-colors hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
+                className="max-w-fit cursor-pointer text-body-muted transition-colors hover:text-body-tertiary">
                 {pending ? "shortening..." : "shorten"}
             </button>
         </form>
     );
 }
+

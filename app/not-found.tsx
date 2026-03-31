@@ -17,7 +17,7 @@ export default function NotFound() {
                         href="mailto:tk@tkkr.dev"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="underline transition-colors hover:text-purple-800 dark:hover:text-purple-300">
+                        className="underline transition-colors hover:text-link-hover">
                         contact me
                     </a>
                     .
@@ -26,3 +26,4 @@ export default function NotFound() {
         </main>
     );
 }
+
