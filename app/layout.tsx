@@ -1,5 +1,5 @@
 import "@/globals.css";
-import { Instrument_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import Navigation from "@/components/Navigation";
 import Summary from "@/components/Summary";
 import Footer from "@/components/Footer";
@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import Script from "next/script";
 
-const font = Instrument_Sans({
+const font = Inter({
     subsets: ["latin"],
 });
 
