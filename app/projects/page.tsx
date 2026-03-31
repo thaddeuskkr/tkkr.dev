@@ -74,7 +74,7 @@ const projects: {
     {
         name: "tkkr.dev",
         description:
-            "my personal website, built with next.js and a bunch of love. you’re looking at it!",
+            "my personal website, built with next.js and a bunch of love. you’re looking at it! includes a link shortener, live discord presence updates, and more to come.",
         from: "december 2023",
         to: "present",
         links: [
