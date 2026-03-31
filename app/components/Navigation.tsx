@@ -5,8 +5,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 
-const UNLOCK_PRESSES = 4;
-const HINT_THRESHOLD = 1;
+const UNLOCK_PRESSES = 5;
+const HINT_THRESHOLD = 2;
 const unlockedLinks = [{ href: "/shorten", label: "shorten" }];
 const navRowClass = "flex items-center gap-5";
 
