@@ -41,16 +41,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 type="text/javascript"
             />
             <body className="relative m-10 min-h-[calc(100vh-5rem)]">
-                <div
-                    aria-hidden
-                    className="will-change-opacity pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l from-violet-600/26 via-violet-400/14 to-transparent opacity-100 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] dark:opacity-0"
-                />
-                <div
-                    aria-hidden
-                    className="will-change-opacity pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l from-violet-900/20 via-violet-950/14 to-transparent opacity-0 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] lg:from-violet-900/35 lg:via-violet-950/25 dark:opacity-100"
-                />
-                <div className="relative z-10 flex min-h-[calc(100vh-5rem)] max-w-xl flex-col">
-                    <ThemeProvider attribute="class" storageKey="theme" enableSystem={true}>
+                <ThemeProvider attribute="class" storageKey="theme" enableSystem={true}>
+                    <div
+                        aria-hidden
+                        className="will-change-opacity pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l from-violet-600/26 via-violet-400/14 to-transparent opacity-100 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] dark:opacity-0"
+                    />
+                    <div
+                        aria-hidden
+                        className="will-change-opacity pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l from-violet-900/20 via-violet-950/14 to-transparent opacity-0 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] lg:from-violet-900/35 lg:via-violet-950/25 dark:opacity-100"
+                    />
+                    <div className="relative z-10 flex min-h-[calc(100vh-5rem)] max-w-xl flex-col">
                         <Navigation />
                         <Summary />
                         {children}
@@ -64,8 +64,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         />
                         <Analytics />
                         <SpeedInsights />
-                    </ThemeProvider>
-                </div>
+                    </div>
+                </ThemeProvider>
             </body>
         </html>
     );
