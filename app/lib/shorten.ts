@@ -4,6 +4,7 @@ import { z } from "zod";
 import parse from "parse-duration";
 import { auth } from "@/auth";
 import { shortenUrl } from "@/lib/db";
+import { headers } from "next/headers";
 
 const schema = z.object({
     url: z.preprocess(
@@ -42,7 +43,9 @@ const schema = z.object({
 });
 
 export async function shorten(_: unknown, formData: FormData) {
-    const session = await auth();
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
     if (!session || !session.user) {
         return { success: false, issues: ["Unauthorized"], slugs: [] };
     }

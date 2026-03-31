@@ -1,24 +1,30 @@
-import NextAuth from "next-auth";
+import { betterAuth } from "better-auth";
+import { genericOAuth } from "better-auth/plugins";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-    providers: [
-        {
-            id: "tkkr",
-            name: "tkkr.dev",
-            type: "oidc",
-            issuer: process.env.AUTH_ISSUER,
-            clientId: process.env.AUTH_CLIENT_ID,
-            clientSecret: process.env.AUTH_CLIENT_SECRET,
-            authorization: { params: { scope: "openid email profile" } },
-            checks: ["pkce", "state"],
-            profile(profile) {
-                return {
-                    id: profile.sub,
-                    name: profile.name,
-                    email: profile.email,
-                    image: profile.picture,
-                };
-            },
+export const auth = betterAuth({
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 7 * 24 * 60 * 60,
+            strategy: "jwe",
+            refreshCache: true,
         },
+    },
+    account: {
+        storeStateStrategy: "cookie",
+        storeAccountCookie: true,
+    },
+    plugins: [
+        genericOAuth({
+            config: [
+                {
+                    providerId: "tkkr",
+                    clientId: process.env.AUTH_CLIENT_ID as string,
+                    clientSecret: process.env.AUTH_CLIENT_SECRET as string,
+                    discoveryUrl: process.env.AUTH_DISCOVERY_URL as string,
+                    pkce: true,
+                },
+            ],
+        }),
     ],
 });

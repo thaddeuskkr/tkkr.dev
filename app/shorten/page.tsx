@@ -1,10 +1,13 @@
-import { auth } from "@/auth";
 import { AuthButton } from "@/components/AuthButton";
 import ShortenForm from "@/components/ShortenForm";
+import { auth } from "@/auth";
 import * as motion from "motion/react-client";
+import { headers } from "next/headers";
 
 export default async function Shorten() {
-    const session = await auth();
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
 
     return (
         <main>

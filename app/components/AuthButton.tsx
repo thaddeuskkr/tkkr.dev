@@ -1,6 +1,7 @@
 "use client";
 
-import { signIn, signOut } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 export function AuthButton({
@@ -26,9 +27,14 @@ export function AuthButton({
         try {
             setPending(true);
             if (isSignedIn) {
-                await signOut();
+                await authClient.signOut();
+                redirect("/shorten");
             } else {
-                await signIn("tkkr");
+                await authClient.signIn.oauth2({
+                    providerId: "tkkr",
+                    scopes: ["openid", "profile", "email"],
+                    callbackURL: `${window.location.origin}/shorten`,
+                });
             }
         } finally {
             setPending(false);
