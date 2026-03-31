@@ -10,7 +10,7 @@ const projects: {
     {
         name: "anti-scam student champions",
         description:
-            "researched scam prevention strategies and raised anti-scam awareness using an educational video. secured 1st place out of 14 participating schools.",
+            "researched scam prevention strategies and raised anti-scam awareness using various methods. secured 1st place out of 14 participating schools.",
         from: "february 2020",
         to: "january 2021",
         links: [
@@ -23,7 +23,7 @@ const projects: {
     {
         name: "garbage-detect",
         description:
-            "a comprehensive litter detection, monitoring, and notification system built on aws services. uses ai/ml to identify litter and notifies personnel if it piles up.",
+            "a comprehensive litter detection, monitoring, and notification system built on aws. uses ai/ml to identify litter and notifies personnel if it piles up.",
         from: "june 2021",
         to: "february 2022",
         links: [
@@ -74,7 +74,7 @@ const projects: {
     {
         name: "tkkr.dev",
         description:
-            "my personal website, built with next.js and a bunch of love. you’re looking at it! includes a link shortener, live discord presence updates, and more to come.",
+            "my personal website, built with next.js and lots of love. you’re looking at it! includes a link shortener and live discord presence updates.",
         from: "december 2023",
         to: "present",
         links: [
