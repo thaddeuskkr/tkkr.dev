@@ -1,35 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import * as motion from "motion/react-client";
+import type {
+    DiscordPresenceProps,
+    DiscordStatus,
+    LanyardData,
+    LanyardSocketMessage,
+    PresenceInfo,
+} from "@/types";
 
 const RECONNECT_DELAY_MS = 3000;
-
-type DiscordStatus = "online" | "idle" | "dnd" | "offline";
-type DiscordActivity = {
-    type: number;
-    name: string;
-    details?: string;
-    state?: string;
-};
-type LanyardData = {
-    discord_status: DiscordStatus;
-    listening_to_spotify: boolean;
-    spotify: { song: string; artist: string } | null;
-    activities: DiscordActivity[];
-};
-type LanyardSocketMessage = {
-    op: number;
-    d?: unknown;
-};
-type PresenceInfo =
-    | { kind: "playing"; game: string }
-    | { kind: "listening"; song: string; artist: string }
-    | { kind: "listening-while-playing"; song: string; artist: string; game: string }
-    | { kind: "text"; text: string };
-type DiscordPresenceProps = {
-    lanyardWsUrl: string;
-    discordUserId: string;
-};
 
 const statusDotClassMap: Record<DiscordStatus, string> = {
     online: "bg-emerald-500",
@@ -38,22 +19,20 @@ const statusDotClassMap: Record<DiscordStatus, string> = {
     offline: "bg-neutral-500",
 };
 const highlightClassName = "font-semibold text-neutral-700 dark:text-neutral-200";
+const texts = {
+    unavailable: "Discord status unavailable",
+    idle: "Currently not doing anything",
+    offline: "Currently offline",
+    mobileOnline: "Currently online on mobile",
+} as const;
 
-function getPresenceInfo(data: LanyardData): PresenceInfo {
-    const activeGame = data.activities.find((activity) => activity.type === 0);
+function Highlight({ children }: { children: string }) {
+    return <span className={highlightClassName}>{children}</span>;
+}
 
+function getListeningInfo(data: LanyardData): { song: string; artist: string } | null {
     if (data.listening_to_spotify && data.spotify?.song && data.spotify?.artist) {
-        if (activeGame) {
-            return {
-                kind: "listening-while-playing",
-                song: data.spotify.song,
-                artist: data.spotify.artist,
-                game: activeGame.name,
-            };
-        }
-
         return {
-            kind: "listening",
             song: data.spotify.song,
             artist: data.spotify.artist,
         };
@@ -61,27 +40,40 @@ function getPresenceInfo(data: LanyardData): PresenceInfo {
 
     const activeListening = data.activities.find((activity) => activity.type === 2);
     if (activeListening?.details && activeListening.state) {
-        if (activeGame) {
-            return {
-                kind: "listening-while-playing",
-                song: activeListening.details,
-                artist: activeListening.state,
-                game: activeGame.name,
-            };
-        }
-
         return {
-            kind: "listening",
             song: activeListening.details,
             artist: activeListening.state,
         };
     }
 
-    if (activeGame) {
-        return { kind: "playing", game: activeGame.name };
+    return null;
+}
+
+function getPresenceInfo(data: LanyardData, status: DiscordStatus): PresenceInfo {
+    if (status === "offline") {
+        return { kind: "text", text: texts.offline };
     }
 
-    return { kind: "text", text: "Currently not doing anything" };
+    const activeGame = data.activities.find((activity) => activity.type === 0)?.name;
+    const listening = getListeningInfo(data);
+
+    if (listening && activeGame) {
+        return { kind: "listening-while-playing", ...listening, game: activeGame };
+    }
+
+    if (listening) {
+        return { kind: "listening", ...listening };
+    }
+
+    if (activeGame) {
+        return { kind: "playing", game: activeGame };
+    }
+
+    if (status === "online" && data.active_on_discord_mobile) {
+        return { kind: "text", text: texts.mobileOnline };
+    }
+
+    return { kind: "text", text: texts.idle };
 }
 
 function normalizeStatus(status: string): DiscordStatus {
@@ -117,12 +109,62 @@ function extractPresenceData(payload: unknown, discordUserId: string): LanyardDa
     return toPresenceData(payload[discordUserId]);
 }
 
+function parseSocketMessage(raw: string): LanyardSocketMessage | null {
+    try {
+        return JSON.parse(raw) as LanyardSocketMessage;
+    } catch {
+        return null;
+    }
+}
+
+function renderPresenceText(presenceInfo: PresenceInfo): ReactNode {
+    switch (presenceInfo.kind) {
+        case "playing":
+            return (
+                <>
+                    Currently playing <Highlight>{presenceInfo.game}</Highlight>
+                </>
+            );
+        case "listening-while-playing":
+            return (
+                <>
+                    Currently listening to <Highlight>{presenceInfo.song}</Highlight> by{" "}
+                    <Highlight>{presenceInfo.artist}</Highlight> while playing{" "}
+                    <Highlight>{presenceInfo.game}</Highlight>
+                </>
+            );
+        case "listening":
+            return (
+                <>
+                    Currently listening to <Highlight>{presenceInfo.song}</Highlight> by{" "}
+                    <Highlight>{presenceInfo.artist}</Highlight>
+                </>
+            );
+        case "text":
+            return presenceInfo.text;
+    }
+}
+
+function getPresenceAnimationKey(presenceInfo: PresenceInfo): string {
+    switch (presenceInfo.kind) {
+        case "playing":
+            return `playing:${presenceInfo.game}`;
+        case "listening-while-playing":
+            return `listening-while-playing:${presenceInfo.song}:${presenceInfo.artist}:${presenceInfo.game}`;
+        case "listening":
+            return `listening:${presenceInfo.song}:${presenceInfo.artist}`;
+        case "text":
+            return `text:${presenceInfo.text}`;
+    }
+}
+
 export default function DiscordPresence({ lanyardWsUrl, discordUserId }: DiscordPresenceProps) {
     const [discordStatus, setDiscordStatus] = useState<DiscordStatus>("offline");
     const [presenceInfo, setPresenceInfo] = useState<PresenceInfo>({
         kind: "text",
-        text: "Currently offline",
+        text: texts.offline,
     });
+    const presenceAnimationKey = getPresenceAnimationKey(presenceInfo);
     const [isMultiLine, setIsMultiLine] = useState(false);
     const presenceTextRef = useRef<HTMLSpanElement | null>(null);
 
@@ -133,8 +175,9 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
         let reconnectTimeoutId: number | null = null;
 
         const applyPresence = (data: LanyardData) => {
-            setDiscordStatus(normalizeStatus(data.discord_status));
-            setPresenceInfo(getPresenceInfo(data));
+            const status = normalizeStatus(data.discord_status);
+            setDiscordStatus(status);
+            setPresenceInfo(getPresenceInfo(data, status));
         };
 
         const clearHeartbeat = () => {
@@ -159,45 +202,51 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
             socket = new WebSocket(lanyardWsUrl);
 
             socket.onmessage = (event) => {
-                let message: LanyardSocketMessage;
-
-                try {
-                    message = JSON.parse(event.data as string) as LanyardSocketMessage;
-                } catch {
+                if (typeof event.data !== "string") {
                     return;
                 }
 
-                if (message.op === 1) {
-                    if (socket?.readyState === WebSocket.OPEN) {
-                        socket.send(
-                            JSON.stringify({
-                                op: 2,
-                                d: { subscribe_to_id: discordUserId },
-                            }),
-                        );
-                    }
+                const message = parseSocketMessage(event.data);
+                if (!message) {
+                    return;
+                }
 
-                    clearHeartbeat();
-                    const heartbeatIntervalMs =
-                        isRecord(message.d) && typeof message.d.heartbeat_interval === "number" ?
-                            message.d.heartbeat_interval
-                        :   30000;
-
-                    heartbeatIntervalId = window.setInterval(() => {
+                switch (message.op) {
+                    case 1: {
                         if (socket?.readyState === WebSocket.OPEN) {
-                            socket.send(JSON.stringify({ op: 3 }));
+                            socket.send(
+                                JSON.stringify({
+                                    op: 2,
+                                    d: { subscribe_to_id: discordUserId },
+                                }),
+                            );
                         }
-                    }, heartbeatIntervalMs);
-                    return;
-                }
 
-                if (message.op !== 0) {
-                    return;
-                }
+                        clearHeartbeat();
+                        const heartbeatIntervalMs =
+                            (
+                                isRecord(message.d) &&
+                                typeof message.d.heartbeat_interval === "number"
+                            ) ?
+                                message.d.heartbeat_interval
+                            :   30000;
 
-                const presence = extractPresenceData(message.d, discordUserId);
-                if (presence) {
-                    applyPresence(presence);
+                        heartbeatIntervalId = window.setInterval(() => {
+                            if (socket?.readyState === WebSocket.OPEN) {
+                                socket.send(JSON.stringify({ op: 3 }));
+                            }
+                        }, heartbeatIntervalMs);
+                        return;
+                    }
+                    case 0: {
+                        const presence = extractPresenceData(message.d, discordUserId);
+                        if (presence) {
+                            applyPresence(presence);
+                        }
+                        return;
+                    }
+                    default:
+                        return;
                 }
             };
 
@@ -207,7 +256,7 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
                 }
 
                 setDiscordStatus("offline");
-                setPresenceInfo({ kind: "text", text: "Discord status unavailable" });
+                setPresenceInfo({ kind: "text", text: texts.unavailable });
             };
 
             socket.onclose = () => {
@@ -270,31 +319,19 @@ export default function DiscordPresence({ lanyardWsUrl, discordUserId }: Discord
     return (
         <div className="mt-1 flex items-center gap-2">
             <span
-                className={`${isMultiLine ? "min-h-2 w-2 self-stretch rounded-full" : "h-2 w-2 rounded-full"} ${statusDotClassMap[discordStatus]}`}
+                className={`${isMultiLine ? "min-h-2 w-2 self-stretch rounded-full" : "h-2 w-2 rounded-full"} ${statusDotClassMap[discordStatus]} transition-colors duration-200`}
                 aria-hidden
             />
-            {presenceInfo.kind === "playing" ?
-                <span ref={presenceTextRef} className="leading-5">
-                    Currently playing{" "}
-                    <span className={highlightClassName}>{presenceInfo.game}</span>
-                </span>
-            : presenceInfo.kind === "listening-while-playing" ?
-                <span ref={presenceTextRef} className="leading-5">
-                    Currently listening to{" "}
-                    <span className={highlightClassName}>{presenceInfo.song}</span> by{" "}
-                    <span className={highlightClassName}>{presenceInfo.artist}</span> while playing{" "}
-                    <span className={highlightClassName}>{presenceInfo.game}</span>
-                </span>
-            : presenceInfo.kind === "listening" ?
-                <span ref={presenceTextRef} className="leading-5">
-                    Currently listening to{" "}
-                    <span className={highlightClassName}>{presenceInfo.song}</span> by{" "}
-                    <span className={highlightClassName}>{presenceInfo.artist}</span>
-                </span>
-            :   <span ref={presenceTextRef} className="leading-5">
-                    {presenceInfo.text}
-                </span>
-            }
+            <span ref={presenceTextRef} className="leading-5">
+                <motion.span
+                    key={presenceAnimationKey}
+                    className="inline-block"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}>
+                    {renderPresenceText(presenceInfo)}
+                </motion.span>
+            </span>
         </div>
     );
 }
