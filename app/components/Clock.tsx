@@ -15,9 +15,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-SG", {
 });
 
 export default function Clock() {
-    const [now, setNow] = useState<Date>(() => new Date());
+    const [now, setNow] = useState<Date | null>(null);
 
     useEffect(() => {
+        setNow(new Date());
+
         const interval = window.setInterval(() => {
             setNow(new Date());
         }, 1000);
@@ -25,5 +27,9 @@ export default function Clock() {
         return () => window.clearInterval(interval);
     }, []);
 
-    return <div suppressHydrationWarning>{`${dateTimeFormatter.format(now)} (GMT+8)`}</div>;
+    return (
+        <div suppressHydrationWarning>
+            {now ? `${dateTimeFormatter.format(now)} (GMT+8)` : "SGT (GMT+8): --"}
+        </div>
+    );
 }
