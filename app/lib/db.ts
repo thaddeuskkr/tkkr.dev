@@ -1,31 +1,34 @@
 import { MongoClient } from "mongodb";
 import { nanoid } from "nanoid";
 
-const uri = process.env.MONGODB_URI;
-if (!uri) {
-    throw new Error("Invalid database URI");
-}
 const options = {};
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+let clientPromise: Promise<MongoClient> | undefined;
 
-if (process.env.NODE_ENV === "development") {
-    if (!global._mongoClientPromise) {
-        client = new MongoClient(uri, options);
-        global._mongoClientPromise = client.connect();
+function getClientPromise() {
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+        throw new Error("Invalid database URI");
     }
-    clientPromise = global._mongoClientPromise;
-} else {
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
-}
 
-export default clientPromise;
+    if (process.env.NODE_ENV === "development") {
+        if (!global._mongoClientPromise) {
+            const client = new MongoClient(uri, options);
+            global._mongoClientPromise = client.connect();
+        }
+        return global._mongoClientPromise;
+    }
+
+    if (!clientPromise) {
+        const client = new MongoClient(uri, options);
+        clientPromise = client.connect();
+    }
+    return clientPromise;
+}
 
 export async function getUrlBySlug(slug: string, password: string) {
     try {
-        const client = await clientPromise;
+        const client = await getClientPromise();
         const db = client.db(process.env.MONGODB_DB || "tkkr");
         const collection = db.collection(process.env.MONGODB_COLLECTION || "urls");
 
@@ -58,7 +61,7 @@ export async function shortenUrl({
     password: string | null;
 }) {
     try {
-        const client = await clientPromise;
+        const client = await getClientPromise();
         const db = client.db(process.env.MONGODB_DB || "tkkr");
         const collection = db.collection(process.env.MONGODB_COLLECTION || "urls");
 
