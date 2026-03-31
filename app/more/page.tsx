@@ -26,7 +26,7 @@ const usernames: (
     {
         game: "riot games",
         username: "rumination#0609",
-    }
+    },
 ];
 
 export default function More() {
