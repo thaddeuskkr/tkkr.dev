@@ -1,9 +1,15 @@
 node_modules
 dist
+out
+coverage
 logs
+*.log
 .cache
+.tmp
+.eslintcache
 .vscode
 .DS_Store
+Thumbs.db
 .idea
 .next
 .env.*
