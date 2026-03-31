@@ -26,6 +26,21 @@ function getClientPromise() {
     return clientPromise;
 }
 
+export async function checkConnection() {
+    const res = {
+        connected: false,
+        error: null as string | null,
+    };
+    try {
+        const client = await getClientPromise();
+        await client.db("admin").command({ ping: 1 });
+        res.connected = true;
+    } catch (error) {
+        res.error = error instanceof Error ? error.message : String(error);
+    }
+    return res;
+}
+
 export async function getUrlBySlug(slug: string, password: string) {
     try {
         const client = await getClientPromise();
