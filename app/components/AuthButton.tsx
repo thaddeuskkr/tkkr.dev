@@ -28,12 +28,12 @@ export function AuthButton({
             setPending(true);
             if (isSignedIn) {
                 await authClient.signOut();
-                redirect("/shorten");
+                redirect(window.location.pathname);
             } else {
                 await authClient.signIn.oauth2({
                     providerId: "tkkr",
                     scopes: ["openid", "profile", "email"],
-                    callbackURL: `${window.location.origin}/shorten`,
+                    callbackURL: window.location.href,
                 });
             }
         } finally {
