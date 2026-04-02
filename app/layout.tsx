@@ -1,5 +1,6 @@
 import "@/globals.css";
 import { Inter } from "next/font/google";
+import ContentViewport from "@/components/ContentViewport";
 import Navigation from "@/components/Navigation";
 import Summary from "@/components/Summary";
 import Footer from "@/components/Footer";
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 async={true}
                 type="text/javascript"
             />
-            <body className="relative m-10 min-h-[calc(100vh-5rem)]">
+            <body className="relative box-border h-dvh overflow-hidden p-10">
                 <ThemeProvider attribute="class" storageKey="theme" enableSystem={true}>
                     <div
                         aria-hidden
@@ -48,10 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         aria-hidden
                         className="will-change-opacity from-glow-dark-from via-glow-dark-via lg:from-glow-dark-from-lg lg:via-glow-dark-via-lg pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l to-transparent opacity-0 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] dark:opacity-100"
                     />
-                    <div className="relative z-10 flex min-h-[calc(100vh-5rem)] max-w-xl flex-col">
+                    <div className="relative z-10 grid h-full max-w-xl grid-rows-[auto_auto_minmax(0,1fr)_auto]">
                         <Navigation />
                         <Summary />
-                        {children}
+                        <ContentViewport>{children}</ContentViewport>
                         <Footer />
                         <Toaster
                             toastOptions={{
@@ -66,4 +67,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </html>
     );
 }
-

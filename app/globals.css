@@ -3,6 +3,12 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
 :root {
     --app-page-bg: #fafafa;
     --app-text-body: #141414;
