@@ -8,6 +8,7 @@ export default function ThemeToggle() {
     const { theme, setTheme, resolvedTheme } = useTheme();
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
@@ -23,11 +24,10 @@ export default function ThemeToggle() {
             }}
             type="button"
             aria-label={`Switch to ${nextTheme} mode`}
-            className={`cursor-pointer text-link transition-all hover:text-link-hover ${
+            className={`text-link hover:text-link-hover cursor-pointer transition-all ${
                 mounted ? "opacity-100" : "opacity-0"
             }`}>
             {nextTheme}
         </button>
     );
 }
-
