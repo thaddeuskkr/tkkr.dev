@@ -95,3 +95,12 @@
     --color-glow-dark-from-lg: var(--app-glow-dark-from-lg);
     --color-glow-dark-via-lg: var(--app-glow-dark-via-lg);
 }
+
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
