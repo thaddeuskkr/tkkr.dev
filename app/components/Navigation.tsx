@@ -36,9 +36,7 @@ export default function Navigation() {
 
     const linkClass = (href: string) =>
         `transition-colors ${
-            pathname === href ?
-                "text-body-strong font-semibold"
-            :   "text-link hover:text-link-hover"
+            pathname === href ? "text-body-strong font-semibold" : "text-link hover:text-link-hover"
         }`;
 
     return (
@@ -50,12 +48,15 @@ export default function Navigation() {
                 <Link href="/projects" className={linkClass("/projects")}>
                     projects
                 </Link>
+                <Link href="/services" className={linkClass("/services")}>
+                    services
+                </Link>
                 <Link href="/more" className={linkClass("/more")} onClick={onMoreClick}>
                     <span className="inline-flex items-center">
                         more
                         {hintDots && (
                             <span
-                                className="pl-0.5 text-body-faint transition-colors"
+                                className="text-body-faint pl-0.5 transition-colors"
                                 aria-hidden="true">
                                 {hintDots}
                             </span>
@@ -67,4 +68,3 @@ export default function Navigation() {
         </nav>
     );
 }
-
