@@ -23,7 +23,7 @@ const services: {
     {
         name: "status page",
         description:
-            "monitors the uptime of all tkkr.dev services and provides real-time updates during incidents. experiencing issues with any tkkr.dev service? check here for updates! powered by better stack.",
+            "monitors the uptime of all tkkr.dev services and provides real-time updates during incidents. powered by better stack.",
         links: [
             {
                 name: "live",
