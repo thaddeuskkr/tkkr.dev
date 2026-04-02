@@ -6,7 +6,7 @@ export default function Footer() {
     const discordUserId = process.env.DISCORD_USER_ID || "275830234262142978";
 
     return (
-        <footer className="text-body-tertiary mt-auto pt-10 text-[0.825rem] transition-colors">
+        <footer className="text-body-tertiary mt-auto pt-6 text-[0.825rem] transition-colors">
             <div className="relative pt-3 leading-relaxed">
                 <span
                     aria-hidden
@@ -22,4 +22,3 @@ export default function Footer() {
         </footer>
     );
 }
-
