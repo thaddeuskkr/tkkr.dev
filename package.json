@@ -23,7 +23,7 @@
     },
     "homepage": "https://github.com/thaddeuskkr/tkkr.dev#readme",
     "dependencies": {
-        "better-auth": "^1.5.6",
+        "better-auth": "^1.6.0",
         "mongodb": "^7.1.1",
         "motion": "^12.38.0",
         "nanoid": "^5.1.7",
