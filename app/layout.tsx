@@ -33,12 +33,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     {`document.documentElement.classList.add('transition-colors');`}
                 </Script>
             </head>
-            <script
-                src="https://uptime.betterstack.com/widgets/announcement.js"
-                data-id="188428"
-                async={true}
-                type="text/javascript"
-            />
             <body className="relative box-border h-dvh overflow-hidden p-10">
                 <ThemeProvider attribute="class" storageKey="theme" enableSystem={true}>
                     <div
