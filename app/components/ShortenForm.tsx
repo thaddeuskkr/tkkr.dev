@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { shorten } from "@/lib/shorten";
 import { useActionState, useEffect } from "react";
 
-export default function ShortenForm() {
+export function ShortenForm() {
     const [state, formAction, pending] = useActionState(shorten, {
         success: false,
         issues: [] as string[],
@@ -82,7 +82,7 @@ export default function ShortenForm() {
         },
         {
             name: "expiry",
-            placeholder: "enter expiry (e.g. 5m, 10h, 1d, etc., optional)",
+            placeholder: "enter expiry (e.g., 5m, 10h, 1d, etc., optional)",
             type: "text",
             autoComplete: "off",
         },
@@ -110,10 +110,9 @@ export default function ShortenForm() {
                 type="submit"
                 disabled={pending}
                 aria-busy={pending}
-                className="max-w-fit cursor-pointer text-body-muted transition-colors hover:text-body-tertiary">
+                className="text-body-muted hover:text-body-tertiary disabled:text-body-faint max-w-fit cursor-pointer transition-colors disabled:cursor-not-allowed">
                 {pending ? "shortening..." : "shorten"}
             </button>
         </form>
     );
 }
-

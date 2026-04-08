@@ -1,9 +1,11 @@
 import "@/globals.css";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Inter } from "next/font/google";
 import ContentViewport from "@/components/ContentViewport";
 import Navigation from "@/components/Navigation";
 import Summary from "@/components/Summary";
 import Footer from "@/components/Footer";
+import { getAnnouncement } from "@/lib/db";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
@@ -22,7 +24,11 @@ export const metadata: Metadata = {
         "hi! i’m thaddeus, a 19 year-old self-taught hobbyist programmer studying in singapore.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const dynamic = "force-dynamic";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+    const announcement = await getAnnouncement();
+
     return (
         <html
             lang="en"
@@ -43,7 +49,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         aria-hidden
                         className="will-change-opacity from-glow-dark-from via-glow-dark-via lg:from-glow-dark-from-lg lg:via-glow-dark-via-lg pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l to-transparent opacity-0 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] dark:opacity-100"
                     />
-                    <div className="relative z-10 grid h-full max-w-xl grid-rows-[auto_auto_minmax(0,1fr)_auto]">
+                    <div className="relative z-10 grid h-full max-w-xl grid-rows-[auto_auto_auto_minmax(0,1fr)_auto]">
+                        <AnnouncementBanner announcement={announcement} />
                         <Navigation />
                         <Summary />
                         <ContentViewport>{children}</ContentViewport>

@@ -4,6 +4,17 @@ declare global {
     var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
+export type AnnouncementCategory = string;
+
+export interface Announcement {
+    _id: "site-announcement";
+    message: string;
+    category: AnnouncementCategory;
+    updatedBy: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface ShortUrl {
     _id: ObjectId;
     url: string;

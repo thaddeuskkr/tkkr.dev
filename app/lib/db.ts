@@ -1,5 +1,13 @@
 import { MongoClient } from "mongodb";
 import { nanoid } from "nanoid";
+import { unstable_cache } from "next/cache";
+import type { Announcement, AnnouncementCategory } from "@/types";
+
+export const ANNOUNCEMENT_CACHE_TAG = "announcement";
+
+type AnnouncementDocument = Omit<Announcement, "category"> & {
+    category?: AnnouncementCategory;
+};
 
 const defaultServerSelectionTimeoutMS = 5000;
 const configuredServerSelectionTimeoutMS = Number.parseInt(
@@ -34,6 +42,27 @@ function setCachedClientPromise(promise: Promise<MongoClient> | undefined) {
 
 function clearCachedClientPromise() {
     setCachedClientPromise(undefined);
+}
+
+function getDatabase(client: MongoClient) {
+    return client.db(process.env.MONGODB_DB || "tkkr");
+}
+
+function getUrlsCollection(client: MongoClient) {
+    return getDatabase(client).collection(process.env.MONGODB_COLLECTION || "urls");
+}
+
+function getAnnouncementsCollection(client: MongoClient) {
+    return getDatabase(client).collection<AnnouncementDocument>(
+        process.env.MONGODB_ANNOUNCEMENTS_COLLECTION || "announcements",
+    );
+}
+
+function toAnnouncement(document: AnnouncementDocument): Announcement {
+    return {
+        ...document,
+        category: document.category ?? "announcement",
+    };
 }
 
 function shouldResetConnection(error: unknown): boolean {
@@ -161,11 +190,121 @@ export async function checkConnection() {
     return res;
 }
 
+const getCachedAnnouncement = unstable_cache(
+    async (): Promise<Announcement | null> => {
+        try {
+            const announcement = await withClientRetry(async (client) =>
+                getAnnouncementsCollection(client).findOne({
+                    _id: "site-announcement",
+                }),
+            );
+
+            return announcement ? toAnnouncement(announcement) : null;
+        } catch (error) {
+            console.error("Database error:", error);
+            return null;
+        }
+    },
+    ["announcement", "site-announcement"],
+    { tags: [ANNOUNCEMENT_CACHE_TAG] },
+);
+
+export async function getAnnouncement() {
+    return getCachedAnnouncement();
+}
+
+export async function saveAnnouncement({
+    message,
+    category,
+    updatedBy,
+}: {
+    message: string;
+    category: AnnouncementCategory;
+    updatedBy: string;
+}) {
+    try {
+        const currentDate = new Date();
+
+        return await withClientRetry(async (client) => {
+            const collection = getAnnouncementsCollection(client);
+            const existingAnnouncement = await collection.findOne({
+                _id: "site-announcement",
+            });
+
+            if (existingAnnouncement) {
+                await collection.updateOne(
+                    { _id: "site-announcement" },
+                    {
+                        $set: {
+                            message,
+                            category,
+                            updatedBy,
+                            updatedAt: currentDate,
+                        },
+                    },
+                );
+
+                return {
+                    success: true as const,
+                    created: false,
+                    announcement: toAnnouncement({
+                        ...existingAnnouncement,
+                        message,
+                        category,
+                        updatedBy,
+                        updatedAt: currentDate,
+                    }),
+                };
+            }
+
+            const newAnnouncement: AnnouncementDocument = {
+                _id: "site-announcement",
+                message,
+                category,
+                updatedBy,
+                createdAt: currentDate,
+                updatedAt: currentDate,
+            };
+
+            await collection.insertOne(newAnnouncement);
+
+            return {
+                success: true as const,
+                created: true,
+                announcement: toAnnouncement(newAnnouncement),
+            };
+        });
+    } catch (error) {
+        console.error("Database error:", error);
+        return { success: false as const, error: "Database error" };
+    }
+}
+
+export async function deleteAnnouncement() {
+    try {
+        const deletedCount = await withClientRetry(async (client) => {
+            const collection = getAnnouncementsCollection(client);
+            const deleted = await collection.deleteOne({
+                _id: "site-announcement",
+            });
+            return deleted.deletedCount;
+        });
+
+        if (!deletedCount) {
+            return { success: false as const, error: "Announcement not found" };
+        }
+
+        return { success: true as const };
+    } catch (error) {
+        console.error("Database error:", error);
+        return { success: false as const, error: "Database error" };
+    }
+}
+
 export async function getUrlBySlug(slug: string, password: string) {
     try {
         const urlDoc = await withClientRetry(async (client) => {
-            const db = client.db(process.env.MONGODB_DB || "tkkr");
-            const collection = db.collection(process.env.MONGODB_COLLECTION || "urls");
+            const collection = getUrlsCollection(client);
 
             return collection.findOne({
                 slugs: slug,
@@ -213,8 +352,7 @@ export async function shortenUrl({
         };
 
         const inserted = await withClientRetry(async (client) => {
-            const db = client.db(process.env.MONGODB_DB || "tkkr");
-            const collection = db.collection(process.env.MONGODB_COLLECTION || "urls");
+            const collection = getUrlsCollection(client);
 
             if (await collection.findOne({ slugs: { $in: slugs } })) {
                 return false;

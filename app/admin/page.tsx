@@ -1,6 +1,8 @@
 import { AuthButton } from "@/components/AuthButton";
-import ShortenForm from "@/components/ShortenForm";
+import { AnnouncementForm } from "@/components/AnnouncementForm";
+import { ShortenForm } from "@/components/ShortenForm";
 import { auth } from "@/auth";
+import { getAnnouncement } from "@/lib/db";
 import * as motion from "motion/react-client";
 import { headers } from "next/headers";
 
@@ -8,6 +10,7 @@ export default async function Admin() {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
+    const announcement = session?.user ? await getAnnouncement() : null;
 
     return (
         <main>
@@ -26,9 +29,15 @@ export default async function Admin() {
                     <AuthButton session={session} />
                 </div>
                 {session?.user && (
-                    <div className="flex flex-col gap-1">
-                        <span className="font-bold">link shortener</span>
-                        <ShortenForm />
+                    <div className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-bold">link shortener</span>
+                            <ShortenForm />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="font-bold">site announcement</span>
+                            <AnnouncementForm initialAnnouncement={announcement} />
+                        </div>
                     </div>
                 )}
             </motion.div>
