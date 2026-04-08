@@ -28,6 +28,10 @@ export const dynamic = "force-dynamic";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     const announcement = await getAnnouncement();
+    const gridRowsClass =
+        announcement ?
+            "grid-rows-[auto_auto_auto_minmax(0,1fr)_auto]"
+        :   "grid-rows-[auto_auto_minmax(0,1fr)_auto]";
 
     return (
         <html
@@ -49,8 +53,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         aria-hidden
                         className="will-change-opacity from-glow-dark-from via-glow-dark-via lg:from-glow-dark-from-lg lg:via-glow-dark-via-lg pointer-events-none fixed inset-y-0 right-0 w-[34vw] bg-linear-to-l to-transparent opacity-0 transition-opacity duration-400 ease-in-out motion-reduce:transition-none sm:w-[36vw] lg:w-[42vw] dark:opacity-100"
                     />
-                    <div className="relative z-10 grid h-full max-w-xl grid-rows-[auto_auto_auto_minmax(0,1fr)_auto]">
-                        <AnnouncementBanner announcement={announcement} />
+                    <div className={`relative z-10 grid h-full max-w-xl ${gridRowsClass}`}>
+                        {announcement && <AnnouncementBanner announcement={announcement} />}
                         <Navigation />
                         <Summary />
                         <ContentViewport>{children}</ContentViewport>
