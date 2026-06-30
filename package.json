@@ -1,64 +1,58 @@
 {
-  "name": "tkkr.dev",
-  "version": "2",
-  "description": "the second iteration of my personal website!",
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "start": "next start",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thaddeuskkr/tkkr.dev.git"
-  },
-  "keywords": [
-    "website"
-  ],
-  "author": "Thaddeus Kuah <tk@tkkr.dev> (https://tkkr.dev)",
-  "license": "GPL-3.0-or-later",
-  "bugs": {
-    "url": "https://github.com/thaddeuskkr/tkkr.dev/issues"
-  },
-  "homepage": "https://github.com/thaddeuskkr/tkkr.dev#readme",
-  "dependencies": {
-    "@opennextjs/cloudflare": "^1.20.1",
-    "better-auth": "^1.6.11",
-    "mongodb": "^7.2.0",
-    "motion": "^12.38.0",
-    "nanoid": "^5.1.11",
-    "next": "16.2.6",
-    "next-themes": "^0.4.6",
-    "parse-duration": "^2.1.6",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "sonner": "^2.0.7",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@next/eslint-plugin-next": "16.2.6",
-    "@tailwindcss/postcss": "^4.3.0",
-    "@thaddeuskkr/prettier-config": "^1.1.5",
-    "@types/node": "^25.8.0",
-    "@types/react": "19.2.14",
-    "eslint": "9",
-    "eslint-config-next": "^16.2.6",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "postcss": "^8.5.14",
-    "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.8.0",
-    "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3",
-    "wrangler": "^4.105.0"
-  },
-  "trustedDependencies": [
-    "unrs-resolver"
-  ]
+    "name": "tkkr.dev",
+    "version": "2",
+    "description": "the second iteration of my personal website!",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint .",
+        "format": "prettier --write ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thaddeuskkr/tkkr.dev.git"
+    },
+    "keywords": [
+        "website"
+    ],
+    "author": "Thaddeus Kuah <tk@tkkr.dev> (https://tkkr.dev)",
+    "license": "GPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/thaddeuskkr/tkkr.dev/issues"
+    },
+    "homepage": "https://github.com/thaddeuskkr/tkkr.dev#readme",
+    "dependencies": {
+        "better-auth": "^1.6.11",
+        "mongodb": "^7.2.0",
+        "motion": "^12.38.0",
+        "nanoid": "^5.1.11",
+        "next": "16.2.6",
+        "next-themes": "^0.4.6",
+        "parse-duration": "^2.1.6",
+        "react": "19.2.6",
+        "react-dom": "19.2.6",
+        "sonner": "^2.0.7",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "@eslint/eslintrc": "^3.3.5",
+        "@next/eslint-plugin-next": "16.2.6",
+        "@tailwindcss/postcss": "^4.3.0",
+        "@thaddeuskkr/prettier-config": "^1.1.5",
+        "@types/node": "^25.8.0",
+        "@types/react": "19.2.14",
+        "eslint": "9",
+        "eslint-config-next": "^16.2.6",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "postcss": "^8.5.14",
+        "prettier": "^3.8.3",
+        "prettier-plugin-tailwindcss": "^0.8.0",
+        "tailwindcss": "^4.3.0",
+        "typescript": "^6.0.3"
+    },
+    "trustedDependencies": [
+        "unrs-resolver"
+    ]
 }
