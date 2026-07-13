@@ -54,12 +54,15 @@ export default function Home() {
                         i’m highly tech-savvy and passionate about technology, with extensive
                         hands-on experience in full-stack web development and systems
                         administration, currently pursuing a diploma in information technology.
+                        <br />
+                        oh, btw, did i mention? i really enjoy systems administration!
                     </p>
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">hobbies</span>
                     <ul className="list-inside list-['-_'] pl-3">
                         <li>gaming</li>
+                        <li>sysadmin</li>
                         <li>programming</li>
                         <li>photography</li>
                         <li>listening to music</li>
@@ -105,4 +108,3 @@ export default function Home() {
         </main>
     );
 }
-

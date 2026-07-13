@@ -70,6 +70,21 @@ const services: {
         ],
     },
     {
+        name: "netbird",
+        description:
+            "a self-hosted zero-trust network access solution. provides secure access to tkkr.dev services outside of the local area network. similar to tailscale, but with a more friendly user interface and better support for self-hosting.",
+        links: [
+            {
+                name: "dashboard",
+                url: "https://tkkr.net",
+            },
+            {
+                name: "source",
+                url: "https://github.com/netbirdio/netbird",
+            },
+        ],
+    },
+    {
         name: "komodo",
         description:
             "a dashboard to manage containers running tkkr.dev services. provides an easy-to-use interface to monitor resources, view logs, and more.",
@@ -124,6 +139,18 @@ export default function Services() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15 }}>
+                <div className="flex flex-col gap-1">
+                    <span className="font-bold">background</span>
+                    <p className="pl-3">
+                        i manage three ubuntu servers — two hosted on the cloud, and one at home.
+                        most mission-critical services like this website are hosted on the cloud
+                        servers and proxied behind cloudflare, while less critical services like
+                        file sharing, media streaming, and game servers are hosted on the home
+                        server. all of these services (except the status page) are containerised,
+                        self-hosted and managed by me, and i have full control over the entire
+                        stack.
+                    </p>
+                </div>
                 <div className="flex flex-col gap-1">
                     <span className="font-bold">services</span>
                     <ul className="flex flex-col gap-1">
