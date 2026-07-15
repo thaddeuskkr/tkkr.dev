@@ -23,6 +23,13 @@ const experience: { company: string; position: string; from: string; to: string;
             to: "march 2026",
             type: "part-time",
         },
+        {
+            company: "suzhou tf-amd",
+            position: "intern",
+            from: "june 2026",
+            to: "present",
+            type: "full-time (overseas)"
+        }
     ].reverse();
 
 const education: { institution: string; course: string; from: string; to: string }[] = [
