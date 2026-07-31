@@ -2,11 +2,11 @@ import { Link as RouterLink } from '@tanstack/react-router';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { cn } from '@/lib/utils';
-import { Briefcase, Home, Info, Link as LinkIcon } from 'lucide-react';
+import { Briefcase, Home, UserRound, Link as LinkIcon } from 'lucide-react';
 
 const navigationLinks = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/about', label: 'About', icon: Info },
+    { to: '/about', label: 'About', icon: UserRound },
 ] as const;
 
 const navigationItemClassName =

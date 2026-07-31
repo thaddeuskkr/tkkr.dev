@@ -3,13 +3,20 @@ import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/theme-provider';
 
 export function ModeToggle() {
-    const { setTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
+
+    const changeTheme = (value: unknown) => {
+        if (value === 'light' || value === 'dark' || value === 'system') {
+            setTheme(value);
+        }
+    };
 
     return (
         <DropdownMenu>
@@ -37,9 +44,17 @@ export function ModeToggle() {
                 }
             />
             <DropdownMenuContent align="end" className="mt-1 border border-border/70 bg-popover/90 shadow-lg">
-                <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+                <DropdownMenuRadioGroup value={theme} onValueChange={changeTheme}>
+                    <DropdownMenuRadioItem value="light" closeOnClick>
+                        Light
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dark" closeOnClick>
+                        Dark
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="system" closeOnClick>
+                        System
+                    </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
             </DropdownMenuContent>
         </DropdownMenu>
     );
