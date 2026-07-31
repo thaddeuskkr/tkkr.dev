@@ -1,4 +1,4 @@
-import { Link as RouterLink } from '@tanstack/react-router';
+import { Link as RouterLink, useSearch } from '@tanstack/react-router';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { cn } from '@/lib/utils';
@@ -10,16 +10,18 @@ const navigationLinks = [
 ] as const;
 
 const navigationItemClassName =
-    'rounded-lg bg-transparent px-2 text-muted-foreground hover:bg-background/30 hover:text-foreground motion-safe:hover:-translate-y-px min-[430px]:px-2.5 dark:hover:bg-white/5';
+    'rounded-lg px-2 text-muted-foreground hover:bg-background/30 hover:text-foreground motion-safe:hover:-translate-y-px min-[430px]:px-2.5 dark:hover:bg-white/5';
 
 const activeNavigationItemClassName =
-    'border-primary/12 bg-primary/[0.07] text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] backdrop-blur-md hover:border-primary/16 hover:bg-primary/11 dark:bg-primary/9 dark:hover:bg-primary/13';
+    'bg-primary/[0.11] text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.7),0_8px_20px_-16px_rgb(77_45_130/0.4)] ring-1 ring-primary/25 ring-inset backdrop-blur-md hover:bg-primary/[0.15] hover:ring-primary/35 aria-expanded:bg-primary/[0.11] dark:bg-primary/10 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.1)] dark:ring-primary/20 dark:hover:bg-primary/14 dark:aria-expanded:bg-primary/10';
 
 export function Navigation() {
+    const { links } = useSearch({ from: '__root__' });
+
     return (
         <nav
             aria-label="Primary navigation"
-            className="fixed inset-x-0 top-0 z-50 px-3 motion-safe:animate-nav-enter sm:px-4"
+            className="fixed inset-x-0 top-0 z-50 pr-3 pl-[calc(0.75rem+var(--page-scrollbar-compensation))] motion-safe:animate-nav-enter sm:pr-4 sm:pl-[calc(1rem+var(--page-scrollbar-compensation))]"
         >
             <div className="mx-auto mt-4 grid h-14 w-full max-w-4xl grid-cols-[1fr_auto] items-center rounded-xl border border-border/70 bg-background/75 px-2 shadow-[0_12px_40px_-26px_var(--foreground)] backdrop-blur-lg backdrop-saturate-150 transition-[border-color,background-color,box-shadow] duration-500 hover:border-primary/20 supports-backdrop-filter:bg-background/65 sm:mt-5 sm:grid-cols-3 sm:px-2.5">
                 <div className="flex gap-0.5">
@@ -45,13 +47,43 @@ export function Navigation() {
                 <div aria-hidden="true" className="hidden sm:block" />
 
                 <div className="flex justify-end gap-1">
-                    <Button variant="outline" size="lg" className="hidden rounded-lg sm:inline-flex md:px-3">
+                    <RouterLink
+                        to="."
+                        search={(previous) => ({ ...previous, links: true })}
+                        mask={{ to: '/links', search: {}, unmaskOnReload: true }}
+                        resetScroll={false}
+                        onPointerDownCapture={captureServiceHubScrollPosition}
+                        onClickCapture={captureServiceHubScrollPositionIfNeeded}
+                        onKeyDownCapture={(event) => {
+                            if (event.key === 'Enter') captureServiceHubScrollPosition();
+                        }}
+                        aria-label="Open links and services"
+                        aria-haspopup="dialog"
+                        aria-expanded={links === true}
+                        className={cn(
+                            buttonVariants({ variant: 'outline', size: 'lg' }),
+                            'rounded-lg px-2 md:px-3',
+                            links && activeNavigationItemClassName
+                        )}
+                    >
                         <LinkIcon className="transition-transform duration-300 group-hover/button:-rotate-12 md:mr-0.5" />
                         <span className="hidden md:inline">Quick Links</span>
-                    </Button>
+                    </RouterLink>
                     <ModeToggle />
                 </div>
             </div>
         </nav>
     );
+}
+
+function captureServiceHubScrollPosition() {
+    const { dataset } = document.documentElement;
+    dataset.serviceHubScrollX = String(window.scrollX);
+    dataset.serviceHubScrollY = String(window.scrollY);
+}
+
+function captureServiceHubScrollPositionIfNeeded() {
+    if (document.documentElement.dataset.serviceHubScrollY === undefined) {
+        captureServiceHubScrollPosition();
+    }
 }

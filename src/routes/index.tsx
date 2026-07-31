@@ -7,8 +7,8 @@ function App() {
     return (
         <main className="relative min-h-svh overflow-hidden bg-background transition-colors duration-500 motion-reduce:transition-none">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-                <div className="absolute -top-32 -right-40 size-120 rounded-full bg-primary/9 blur-3xl motion-safe:animate-ambient-drift dark:bg-primary/6" />
-                <div className="absolute -bottom-48 -left-48 size-112 rounded-full bg-primary/6 blur-3xl motion-safe:animate-ambient-drift-reverse dark:bg-primary/4" />
+                <div className="absolute -top-32 -right-40 size-120 rounded-full bg-primary/15 blur-3xl motion-safe:animate-ambient-drift dark:bg-primary/6" />
+                <div className="absolute -bottom-48 -left-48 size-112 rounded-full bg-primary/13 blur-3xl motion-safe:animate-ambient-drift-reverse dark:bg-primary/4" />
             </div>
 
             <section
@@ -16,7 +16,7 @@ function App() {
                 className="relative z-10 mx-auto grid min-h-svh w-full max-w-6xl items-center gap-10 px-6 pt-28 pb-12 sm:gap-12 sm:px-10 sm:pt-32 sm:pb-16 lg:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.82fr)] lg:gap-20 lg:px-12"
             >
                 <div>
-                    <p className="mb-4 text-xs font-semibold tracking-[0.24em] text-primary uppercase motion-safe:animate-hero-eyebrow sm:text-sm">
+                    <p className="mb-4 text-xs font-semibold text-primary motion-safe:animate-hero-eyebrow sm:text-sm">
                         Hello, I&apos;m
                     </p>
                     <h1

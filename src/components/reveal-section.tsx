@@ -3,12 +3,28 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import { cn } from '@/lib/utils';
 
-export function RevealSection({ className, ...props }: ComponentPropsWithoutRef<'section'>) {
+type RevealSectionProps = ComponentPropsWithoutRef<'section'> & {
+    revealClassName?: string;
+    rootMargin?: string;
+    threshold?: number;
+};
+
+export function RevealSection({
+    className,
+    revealClassName = 'about-reveal',
+    rootMargin = '0px 0px -10% 0px',
+    threshold = 0.12,
+    ...props
+}: RevealSectionProps) {
     const sectionRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         const section = sectionRef.current;
         if (!section) return;
+
+        const bounds = section.getBoundingClientRect();
+        section.dataset.revealEntry =
+            bounds.top < window.innerHeight * 0.92 && bounds.bottom > 0 ? 'initial' : 'scroll';
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion || !('IntersectionObserver' in window)) {
@@ -24,16 +40,16 @@ export function RevealSection({ className, ...props }: ComponentPropsWithoutRef<
                 observer.unobserve(section);
             },
             {
-                rootMargin: '0px 0px -10% 0px',
-                threshold: 0.12,
+                rootMargin,
+                threshold,
             }
         );
 
         observer.observe(section);
         return () => observer.disconnect();
-    }, []);
+    }, [rootMargin, threshold]);
 
     return (
-        <section {...props} ref={sectionRef} data-reveal-state="pending" className={cn('about-reveal', className)} />
+        <section {...props} ref={sectionRef} data-reveal-state="pending" className={cn(revealClassName, className)} />
     );
 }
