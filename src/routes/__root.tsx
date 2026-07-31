@@ -19,6 +19,10 @@ export const Route = createRootRoute({
             {
                 title: 'Thaddeus Kuah',
             },
+            {
+                name: 'description',
+                content: 'My personal website.',
+            },
         ],
         links: [
             {
@@ -44,7 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </head>
             <body>
                 <ThemeProvider defaultTheme="system" storageKey="theme">
-                    <Navigation currentPage="home" />
+                    <Navigation />
                     {children}
                 </ThemeProvider>
                 <TanStackDevtools
