@@ -27,8 +27,8 @@ function App() {
                         <span className="inline-block text-primary motion-safe:animate-hero-name-accent">Kuah</span>
                     </h1>
                     <p className="mt-7 max-w-xl text-base/7 text-pretty text-muted-foreground motion-safe:animate-hero-copy sm:text-lg/8">
-                        I&apos;m a student who builds things with care for thoughtful details, dependable systems, and
-                        keeping things simple.
+                        I&apos;m a self-taught hobbyist programmer and student who builds things with care for
+                        thoughtful details and dependable systems.
                     </p>
                 </div>
 

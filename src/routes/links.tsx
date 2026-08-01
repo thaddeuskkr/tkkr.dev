@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { ServiceHub } from '@/components/service-hub';
+import { Links } from '@/components/links';
 
 export const Route = createFileRoute('/links')({
     head: () => ({
@@ -26,7 +26,7 @@ function LinksPage() {
             <article className="relative z-10 mx-auto w-full max-w-6xl px-6 pt-32 pb-20 sm:px-10 sm:pt-40 sm:pb-28 lg:px-12">
                 <h1 className="sr-only">Quick links</h1>
 
-                <ServiceHub variant="page" />
+                <Links variant="page" />
             </article>
         </main>
     );

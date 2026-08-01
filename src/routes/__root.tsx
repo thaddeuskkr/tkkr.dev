@@ -8,9 +8,9 @@ import { Navigation } from '@/components/navigation';
 import { PageScrollbar } from '@/components/page-scrollbar';
 import appCss from '@/styles.css?url';
 
-const LazyServiceHubDialog = lazy(() =>
-    import('@/components/service-hub-dialog').then(({ ServiceHubDialog }) => ({
-        default: ServiceHubDialog,
+const LazyLinksDialog = lazy(() =>
+    import('@/components/links-dialog').then(({ LinksDialog }) => ({
+        default: LinksDialog,
     }))
 );
 
@@ -66,7 +66,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     <Navigation />
                     {children}
                     <PageScrollbar />
-                    <ServiceHubDialogSlot />
+                    <LinksDialogSlot />
                 </ThemeProvider>
                 <TanStackDevtools
                     config={{
@@ -85,7 +85,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     );
 }
 
-function ServiceHubDialogSlot() {
+function LinksDialogSlot() {
     const { links } = useSearch({ from: '__root__' });
     const [hasOpened, setHasOpened] = useState(links === true);
 
@@ -97,7 +97,7 @@ function ServiceHubDialogSlot() {
 
     return (
         <Suspense fallback={null}>
-            <LazyServiceHubDialog />
+            <LazyLinksDialog />
         </Suspense>
     );
 }

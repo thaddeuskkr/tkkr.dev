@@ -5,7 +5,7 @@ const selfHostedIconBase = 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg';
 
 // Brand assets are provided by selfh.st/icons under CC BY 4.0.
 
-export type ServiceLinkIcon =
+export type QuickLinkIcon =
     | {
           kind: 'brand';
           src: string;
@@ -15,31 +15,31 @@ export type ServiceLinkIcon =
           icon: LucideIcon;
       };
 
-export type ServiceLink = {
+export type QuickLink = {
     name: string;
     description: string;
     destination: string;
     href: string;
-    icon: ServiceLinkIcon;
+    icon: QuickLinkIcon;
     access?: 'Restricted';
     keywords?: readonly string[];
 };
 
-export type ServiceLinkGroup = {
+export type QuickLinkGroup = {
     id: string;
     title: string;
     description: string;
-    links: readonly ServiceLink[];
+    links: readonly QuickLink[];
 };
 
-function brandIcon(reference: string): ServiceLinkIcon {
+function brandIcon(reference: string): QuickLinkIcon {
     return {
         kind: 'brand',
         src: `${selfHostedIconBase}/${reference}.svg`,
     };
 }
 
-export const serviceLinkGroups: readonly ServiceLinkGroup[] = [
+export const quickLinkGroups: readonly QuickLinkGroup[] = [
     {
         id: 'social',
         title: 'Socials',

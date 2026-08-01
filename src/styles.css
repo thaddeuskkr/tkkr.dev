@@ -424,8 +424,8 @@ html[data-page-scrollbar-dragging] * {
     }
 }
 
-/* Links and services motion */
-.service-hub-dialog {
+/* Quick links motion */
+.links-dialog {
     --links-dialog-radius: 0;
     --links-dialog-rest: translate3d(0, 0, 0) scale(1);
     --links-dialog-enter: translate3d(0, 1.25rem, 0) scale(0.985);
@@ -435,7 +435,7 @@ html[data-page-scrollbar-dragging] * {
 }
 
 @media (min-width: 40rem) {
-    .service-hub-dialog {
+    .links-dialog {
         --links-dialog-radius: calc(var(--radius) * 1.8);
         --links-dialog-rest: translate3d(-50%, -50%, 0) scale(1);
         --links-dialog-enter: translate3d(-50%, calc(-50% + 1.4rem), 0) scale(0.975);
@@ -443,36 +443,36 @@ html[data-page-scrollbar-dragging] * {
     }
 }
 
-.service-hub-dialog[data-open] {
+.links-dialog[data-open] {
     animation: links-dialog-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.service-hub-dialog[data-closed] {
+.links-dialog[data-closed] {
     animation: links-dialog-out 240ms cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-.service-hub-dialog__overlay[data-open] {
+.links-dialog__overlay[data-open] {
     animation: links-overlay-in 360ms ease-out both;
 }
 
-.service-hub-dialog__overlay[data-closed] {
+.links-dialog__overlay[data-closed] {
     animation: links-overlay-out 220ms ease-in both;
 }
 
-.service-hub-dialog__body {
+.links-dialog__body {
     scrollbar-width: thin;
     scrollbar-color: color-mix(in oklab, var(--muted-foreground) 30%, transparent) transparent;
 }
 
-.service-hub-dialog__body::-webkit-scrollbar {
+.links-dialog__body::-webkit-scrollbar {
     width: 0.625rem;
 }
 
-.service-hub-dialog__body::-webkit-scrollbar-track {
+.links-dialog__body::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.service-hub-dialog__body::-webkit-scrollbar-thumb {
+.links-dialog__body::-webkit-scrollbar-thumb {
     min-height: 3rem;
     border: 0.2rem solid transparent;
     border-radius: 999px;
@@ -480,27 +480,27 @@ html[data-page-scrollbar-dragging] * {
     background-clip: padding-box;
 }
 
-.service-hub-dialog[data-open] .service-hub-dialog__close {
+.links-dialog[data-open] .links-dialog__close {
     animation: links-close-in 600ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
 }
 
-.service-hub-dialog[data-open] .service-hub-dialog__search {
+.links-dialog[data-open] .links-dialog__search {
     animation: links-search-in 720ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
 }
 
-.service-hub[data-hub-variant='page'] .links-group-reveal[data-reveal-entry='initial'] {
-    --hub-reveal-base: 560ms;
+.links[data-links-variant='page'] .links-group-reveal[data-reveal-entry='initial'] {
+    --links-reveal-base: 560ms;
 }
 
-.service-hub[data-hub-variant='dialog'] .links-group-reveal[data-reveal-entry='initial'] {
-    --hub-reveal-base: 330ms;
+.links[data-links-variant='dialog'] .links-group-reveal[data-reveal-entry='initial'] {
+    --links-reveal-base: 330ms;
 }
 
-.service-hub .links-group-reveal[data-reveal-entry='scroll'] {
-    --hub-reveal-base: 40ms;
+.links .links-group-reveal[data-reveal-entry='scroll'] {
+    --links-reveal-base: 40ms;
 }
 
-.links-group-reveal [data-hub-list]::before {
+.links-group-reveal [data-links-list]::before {
     position: absolute;
     top: 0;
     right: 0;
@@ -512,22 +512,22 @@ html[data-page-scrollbar-dragging] * {
     transform-origin: left;
 }
 
-.links-group-reveal[data-reveal-state='visible'] [data-hub-heading] {
+.links-group-reveal[data-reveal-state='visible'] [data-links-heading] {
     animation: links-group-heading-in 680ms cubic-bezier(0.16, 1, 0.3, 1)
-        calc(var(--hub-reveal-base, 40ms) + var(--hub-group-delay, 0ms)) both;
+        calc(var(--links-reveal-base, 40ms) + var(--links-group-delay, 0ms)) both;
 }
 
-.links-group-reveal[data-reveal-state='visible'] [data-hub-list]::before {
+.links-group-reveal[data-reveal-state='visible'] [data-links-list]::before {
     animation: links-line-in 820ms cubic-bezier(0.16, 1, 0.3, 1)
-        calc(var(--hub-reveal-base, 40ms) + var(--hub-group-delay, 0ms) + 90ms) both;
+        calc(var(--links-reveal-base, 40ms) + var(--links-group-delay, 0ms) + 90ms) both;
 }
 
-.links-group-reveal[data-reveal-state='visible'] [data-hub-row] {
+.links-group-reveal[data-reveal-state='visible'] [data-links-row] {
     animation: links-row-in 620ms cubic-bezier(0.16, 1, 0.3, 1)
-        calc(var(--hub-reveal-base, 40ms) + var(--hub-group-delay, 0ms) + var(--hub-row-delay, 0ms) + 130ms) both;
+        calc(var(--links-reveal-base, 40ms) + var(--links-group-delay, 0ms) + var(--links-row-delay, 0ms) + 130ms) both;
 }
 
-[data-hub-empty] {
+[data-links-empty] {
     animation: links-empty-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -650,8 +650,8 @@ html[data-page-scrollbar-dragging] * {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .service-hub-dialog[data-open],
-    .service-hub-dialog[data-closed] {
+    .links-dialog[data-open],
+    .links-dialog[data-closed] {
         opacity: 1;
         transform: var(--links-dialog-rest);
         filter: none;
@@ -659,13 +659,13 @@ html[data-page-scrollbar-dragging] * {
         animation: none;
     }
 
-    .service-hub-dialog__overlay[data-open],
-    .service-hub-dialog__overlay[data-closed],
-    .service-hub-dialog[data-open] .service-hub-dialog__close,
-    .service-hub-dialog[data-open] .service-hub-dialog__search,
-    .links-group-reveal[data-reveal-state='visible'] [data-hub-heading],
-    .links-group-reveal[data-reveal-state='visible'] [data-hub-row],
-    [data-hub-empty] {
+    .links-dialog__overlay[data-open],
+    .links-dialog__overlay[data-closed],
+    .links-dialog[data-open] .links-dialog__close,
+    .links-dialog[data-open] .links-dialog__search,
+    .links-group-reveal[data-reveal-state='visible'] [data-links-heading],
+    .links-group-reveal[data-reveal-state='visible'] [data-links-row],
+    [data-links-empty] {
         opacity: 1;
         transform: none;
         filter: none;
@@ -673,7 +673,7 @@ html[data-page-scrollbar-dragging] * {
         animation: none;
     }
 
-    .links-group-reveal [data-hub-list]::before {
+    .links-group-reveal [data-links-list]::before {
         transform: scaleX(1);
         animation: none;
     }

@@ -1,7 +1,10 @@
 packages: []
 
+autoInstallPeers: false
+
 allowBuilds:
-    esbuild: true
-    lightningcss: true
-    unrs-resolver: true
-    msw: false
+  esbuild: true
+  lightningcss: true
+  unrs-resolver: true
+  msw: false
+  workerd: true

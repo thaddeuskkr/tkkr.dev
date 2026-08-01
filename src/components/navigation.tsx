@@ -52,10 +52,10 @@ export function Navigation() {
                         search={(previous) => ({ ...previous, links: true })}
                         mask={{ to: '/links', search: {}, unmaskOnReload: true }}
                         resetScroll={false}
-                        onPointerDownCapture={captureServiceHubScrollPosition}
-                        onClickCapture={captureServiceHubScrollPositionIfNeeded}
+                        onPointerDownCapture={captureLinksScrollPosition}
+                        onClickCapture={captureLinksScrollPositionIfNeeded}
                         onKeyDownCapture={(event) => {
-                            if (event.key === 'Enter') captureServiceHubScrollPosition();
+                            if (event.key === 'Enter') captureLinksScrollPosition();
                         }}
                         aria-label="Open links and services"
                         aria-haspopup="dialog"
@@ -76,14 +76,14 @@ export function Navigation() {
     );
 }
 
-function captureServiceHubScrollPosition() {
+function captureLinksScrollPosition() {
     const { dataset } = document.documentElement;
-    dataset.serviceHubScrollX = String(window.scrollX);
-    dataset.serviceHubScrollY = String(window.scrollY);
+    dataset.linksScrollX = String(window.scrollX);
+    dataset.linksScrollY = String(window.scrollY);
 }
 
-function captureServiceHubScrollPositionIfNeeded() {
-    if (document.documentElement.dataset.serviceHubScrollY === undefined) {
-        captureServiceHubScrollPosition();
+function captureLinksScrollPositionIfNeeded() {
+    if (document.documentElement.dataset.linksScrollY === undefined) {
+        captureLinksScrollPosition();
     }
 }
