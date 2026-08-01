@@ -4,14 +4,14 @@ import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/lib/utils';
 
 type RevealSectionProps = ComponentPropsWithoutRef<'section'> & {
-    revealClassName?: string;
+    revealClassName: string;
     rootMargin?: string;
     threshold?: number;
 };
 
 export function RevealSection({
     className,
-    revealClassName = 'about-reveal',
+    revealClassName,
     rootMargin = '0px 0px -10% 0px',
     threshold = 0.12,
     ...props

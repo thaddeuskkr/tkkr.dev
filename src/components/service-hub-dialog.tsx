@@ -1,8 +1,8 @@
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useRouter, useSearch } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 
-import { ServiceHub } from '@/components/service-hub';
+import { ServiceHub, ServiceHubSearch } from '@/components/service-hub';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -16,7 +16,12 @@ import {
 export function ServiceHubDialog() {
     const router = useRouter();
     const { links } = useSearch({ from: '__root__' });
+    const [query, setQuery] = useState('');
     useDocumentScrollLock(links === true);
+
+    useEffect(() => {
+        if (links) setQuery('');
+    }, [links]);
 
     return (
         <Dialog
@@ -31,23 +36,23 @@ export function ServiceHubDialog() {
                 overlayClassName="service-hub-dialog__overlay"
                 className="service-hub-dialog top-0 left-0 grid h-dvh max-h-dvh w-screen max-w-none translate-x-0 translate-y-0 grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden rounded-none border-0 bg-popover/95 p-0 text-foreground ring-0 backdrop-blur-xl sm:top-1/2 sm:left-1/2 sm:h-[min(88dvh,56rem)] sm:max-h-[calc(100dvh-2.5rem)] sm:w-[min(calc(100vw-2.5rem),72rem)] sm:max-w-6xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border sm:border-[rgb(124_84_220/0.28)] sm:shadow-[0_32px_90px_-28px_rgb(48_34_74/0.26),inset_0_1px_0_rgb(255_255_255/0.65)] dark:sm:border-[rgb(174_130_255/0.34)] dark:sm:shadow-[0_36px_100px_-26px_rgb(0_0_0/0.72),inset_0_1px_0_rgb(255_255_255/0.08)]"
             >
-                <DialogHeader className="service-hub-dialog__header grid grid-cols-[minmax(0,1fr)_auto] items-start gap-6 px-5 py-5 sm:px-8 sm:py-7">
-                    <div>
-                        <DialogTitle className="service-hub-dialog__title text-2xl font-semibold tracking-tight sm:text-3xl">
-                            Links &amp; services
-                        </DialogTitle>
-                        <DialogDescription className="service-hub-dialog__description mt-2 max-w-3xl text-sm/6 sm:text-base/7 lg:whitespace-nowrap">
-                            The places I&apos;m active and the public entry points into the systems I maintain.
-                        </DialogDescription>
-                    </div>
+                <DialogHeader className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-5 sm:gap-4 sm:px-8 sm:pt-8 sm:pb-5 lg:px-10">
+                    <DialogTitle className="sr-only">Quick links</DialogTitle>
+                    <DialogDescription className="sr-only">Search profiles and public services.</DialogDescription>
+
+                    <ServiceHubSearch
+                        value={query}
+                        onValueChange={setQuery}
+                        className="service-hub-dialog__search opacity-0"
+                    />
 
                     <DialogClose
                         render={
                             <Button
                                 variant="outline"
                                 size="icon-lg"
-                                className="service-hub-dialog__close size-10 rounded-xl bg-background/45"
-                                aria-label="Close links and services"
+                                className="service-hub-dialog__close size-12 rounded-xl bg-background/45"
+                                aria-label="Close quick links"
                             />
                         }
                     >
@@ -55,8 +60,8 @@ export function ServiceHubDialog() {
                     </DialogClose>
                 </DialogHeader>
 
-                <div className="service-hub-dialog__body min-h-0 overflow-y-auto overscroll-contain px-5 py-7 sm:px-8 sm:py-9 lg:px-10">
-                    <ServiceHub variant="dialog" />
+                <div className="service-hub-dialog__body min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-7 sm:px-8 sm:pt-2 sm:pb-9 lg:px-10">
+                    <ServiceHub variant="dialog" query={query} />
                 </div>
             </DialogContent>
         </Dialog>
@@ -72,10 +77,7 @@ function useDocumentScrollLock(locked: boolean) {
         const scrollPosition = consumeServiceHubScrollPosition();
         const scrollX = scrollPosition?.x ?? window.scrollX;
         const scrollY = scrollPosition?.y ?? window.scrollY;
-        const rootStyles = {
-            overflow: root.style.overflow,
-            scrollbarGutter: root.style.scrollbarGutter,
-        };
+        const rootOverflow = root.style.overflow;
         const bodyStyles = {
             position: body.style.position,
             top: body.style.top,
@@ -85,10 +87,7 @@ function useDocumentScrollLock(locked: boolean) {
             width: body.style.width,
         };
 
-        Object.assign(root.style, {
-            overflow: 'hidden',
-            scrollbarGutter: 'stable',
-        });
+        root.style.overflow = 'hidden';
         Object.assign(body.style, {
             position: 'fixed',
             top: `${-scrollY}px`,
@@ -99,7 +98,7 @@ function useDocumentScrollLock(locked: boolean) {
         });
 
         return () => {
-            Object.assign(root.style, rootStyles);
+            root.style.overflow = rootOverflow;
             Object.assign(body.style, bodyStyles);
             window.scrollTo(scrollX, scrollY);
         };

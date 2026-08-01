@@ -21,9 +21,9 @@ export function Navigation() {
     return (
         <nav
             aria-label="Primary navigation"
-            className="fixed inset-x-0 top-0 z-50 pr-3 pl-[calc(0.75rem+var(--page-scrollbar-compensation))] motion-safe:animate-nav-enter sm:pr-4 sm:pl-[calc(1rem+var(--page-scrollbar-compensation))]"
+            className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 motion-safe:animate-nav-enter sm:px-4"
         >
-            <div className="mx-auto mt-4 grid h-14 w-full max-w-4xl grid-cols-[1fr_auto] items-center rounded-xl border border-border/70 bg-background/75 px-2 shadow-[0_12px_40px_-26px_var(--foreground)] backdrop-blur-lg backdrop-saturate-150 transition-[border-color,background-color,box-shadow] duration-500 hover:border-primary/20 supports-backdrop-filter:bg-background/65 sm:mt-5 sm:grid-cols-3 sm:px-2.5">
+            <div className="pointer-events-auto mx-auto mt-4 grid h-14 w-full max-w-4xl grid-cols-[1fr_auto] items-center rounded-xl border border-border/70 bg-background/75 px-2 shadow-[0_12px_40px_-26px_var(--foreground)] backdrop-blur-lg backdrop-saturate-150 transition-[border-color,background-color,box-shadow] duration-500 hover:border-primary/20 supports-backdrop-filter:bg-background/65 sm:mt-5 sm:grid-cols-3 sm:px-2.5">
                 <div className="flex gap-0.5">
                     {navigationLinks.map(({ to, label, icon: Icon }) => (
                         <RouterLink

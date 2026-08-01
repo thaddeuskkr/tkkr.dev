@@ -137,13 +137,13 @@ function AboutPage() {
                 />
 
                 <AboutSection title="Hobbies" description="The things I keep coming back to.">
-                    <ol data-reveal-list>
+                    <ol className="relative border-t border-transparent" data-reveal-list>
                         {interests.map(({ title, description }, index) => (
                             <li
                                 key={title}
                                 data-reveal-item
                                 style={{ '--about-delay': `${index * 90}ms` } as CSSProperties}
-                                className="group border-b py-5"
+                                className="group border-b border-b-transparent py-5"
                             >
                                 <div className="transition-transform duration-300 motion-safe:group-hover:translate-x-1">
                                     <h3 className="font-semibold tracking-tight">{title}</h3>
@@ -178,13 +178,13 @@ function TimelineSection({
 }) {
     return (
         <AboutSection title={title} description={description}>
-            <ol data-reveal-list>
+            <ol className="relative border-t border-transparent" data-reveal-list>
                 {items.map((item, index) => (
                     <li
                         key={`${item.organisation}-${item.role}`}
                         data-reveal-item
                         style={{ '--about-delay': `${index * 100}ms` } as CSSProperties}
-                        className="group grid gap-2 border-b py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8"
+                        className="group grid gap-2 border-b border-b-transparent py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8"
                     >
                         <div className="transition-transform duration-300 motion-safe:group-hover:translate-x-1">
                             <h3 className="font-semibold tracking-tight">{item.organisation}</h3>
@@ -210,9 +210,9 @@ function AboutSection({ title, description, children }: { title: string; descrip
         <RevealSection
             aria-labelledby={headingId}
             revealClassName="about-page-reveal"
-            className="about-page-section grid gap-10 pt-10 sm:gap-14 sm:pt-14 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-12 md:py-16"
+            className="about-page-section relative grid gap-10 pt-10 sm:gap-14 sm:pt-14 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-12 md:py-16"
         >
-            <div data-reveal-heading className="border-l-2 pl-4 md:border-l-0 md:pl-0">
+            <div data-reveal-heading className="border-l-2 border-l-transparent pl-4 md:border-l-0 md:pl-0">
                 <h2 id={headingId} className="text-xl font-semibold tracking-tight md:text-lg">
                     {title}
                 </h2>

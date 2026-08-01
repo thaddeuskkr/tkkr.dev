@@ -5,6 +5,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools';
 
 import { ThemeProvider } from '@/components/theme-provider';
 import { Navigation } from '@/components/navigation';
+import { PageScrollbar } from '@/components/page-scrollbar';
 import appCss from '@/styles.css?url';
 
 const LazyServiceHubDialog = lazy(() =>
@@ -64,6 +65,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <ThemeProvider defaultTheme="system" storageKey="theme">
                     <Navigation />
                     {children}
+                    <PageScrollbar />
                     <ServiceHubDialogSlot />
                 </ThemeProvider>
                 <TanStackDevtools

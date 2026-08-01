@@ -27,7 +27,6 @@ export type ServiceLink = {
 
 export type ServiceLinkGroup = {
     id: string;
-    eyebrow: string;
     title: string;
     description: string;
     links: readonly ServiceLink[];
@@ -43,7 +42,6 @@ function brandIcon(reference: string): ServiceLinkIcon {
 export const serviceLinkGroups: readonly ServiceLinkGroup[] = [
     {
         id: 'social',
-        eyebrow: '01',
         title: 'Socials',
         description: 'Profiles, music, and ways to get in touch.',
         links: [
@@ -83,7 +81,6 @@ export const serviceLinkGroups: readonly ServiceLinkGroup[] = [
     },
     {
         id: 'services',
-        eyebrow: '02',
         title: 'Services',
         description: 'Quick access to the systems I host.',
         links: [
