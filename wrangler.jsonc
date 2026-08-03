@@ -1,10 +1,20 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "tkkr-dev",
-    // Set this to today's date
     "compatibility_date": "2026-08-01",
     "compatibility_flags": ["nodejs_compat"],
     "main": "@tanstack/react-start/server-entry",
+    "secrets": {
+        "required": ["SHORT_LINK_PEPPER"],
+    },
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "tkkr-dev-links",
+            "database_id": "e7c245fb-83d5-4155-8edc-b4a1e4efb533",
+            "migrations_dir": "migrations",
+        },
+    ],
     "observability": {
         "enabled": true,
     },
