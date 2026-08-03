@@ -54,27 +54,27 @@ const interests: readonly Interest[] = [
     {
         title: 'Gaming',
         description:
-            'I play many online multiplayer and gacha games among others, including Overwatch, League of Legends, Minecraft, Roblox, Honkai: Star Rail, and more.',
+            'I play a variety of online multiplayer and gacha games, including Overwatch, League of Legends, Minecraft, Roblox, and Honkai: Star Rail.',
     },
     {
         title: 'Systems administration',
         description:
-            'I manage and maintain two servers, one cloud-based and one local. These two servers host most of my infrastructure and self-hosted services.',
+            'I manage and maintain two servers, one cloud-based and one local, which host most of my infrastructure and self-hosted services.',
     },
     {
         title: 'Programming',
         description:
-            'I enjoy building web applications and exploring new technologies, and am well-versed in many programming languages, including TypeScript, Python, and HTML/CSS.',
+            'I enjoy building web applications, exploring new technologies, and working with several programming languages, including TypeScript and Python, as well as HTML and CSS.',
     },
     {
         title: 'Photography',
         description:
-            'I enjoy capturing landscapes and moments using my Nikon Z50ii, especially when traveling. I have a pretty good understanding of photography fundamentals and techniques.',
+            'I enjoy capturing landscapes and memorable moments with my Nikon Z50II, especially while traveling. I also have a solid understanding of photography fundamentals and techniques.',
     },
     {
         title: 'Listening to music',
         description:
-            'I regularly listen to music, though I usually stick to a selection of genres without exploring much. These include pop, k-pop, j-pop and some indie music.',
+            'I regularly listen to music, though I tend to stick to a select few genres. These include pop, K-pop, J-pop, and some indie music.',
     },
 ];
 
