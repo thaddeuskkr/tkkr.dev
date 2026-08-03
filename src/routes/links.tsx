@@ -17,7 +17,7 @@ export const Route = createFileRoute('/links')({
 
 function LinksPage() {
     return (
-        <main className="relative min-h-svh overflow-clip bg-background transition-colors duration-500 motion-reduce:transition-none">
+        <main className="relative min-h-svh overflow-clip">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute -top-52 -right-56 size-136 rounded-full bg-primary/15 blur-3xl motion-safe:animate-ambient-drift dark:bg-primary/6" />
                 <div className="absolute top-160 -left-72 size-128 rounded-full bg-primary/13 blur-3xl motion-safe:animate-ambient-drift-reverse dark:bg-primary/4" />

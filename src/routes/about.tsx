@@ -93,7 +93,7 @@ export const Route = createFileRoute('/about')({
 
 function AboutPage() {
     return (
-        <main className="relative min-h-svh overflow-hidden bg-background text-foreground transition-colors duration-500 motion-reduce:transition-none">
+        <main className="relative min-h-svh overflow-hidden text-foreground">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute -top-40 -right-32 size-128 rounded-full bg-primary/15 blur-3xl motion-safe:animate-ambient-drift dark:bg-primary/6" />
                 <div className="absolute top-184 -left-56 size-136 rounded-full bg-primary/13 blur-3xl motion-safe:animate-ambient-drift-reverse dark:bg-primary/4" />

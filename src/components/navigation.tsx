@@ -13,7 +13,7 @@ const navigationItemClassName =
     'rounded-lg px-2 text-muted-foreground hover:bg-background/30 hover:text-foreground motion-safe:hover:-translate-y-px min-[430px]:px-2.5 dark:hover:bg-white/5';
 
 const activeNavigationItemClassName =
-    'bg-primary/[0.11] text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.7),0_8px_20px_-16px_rgb(77_45_130/0.4)] ring-1 ring-primary/25 ring-inset backdrop-blur-md hover:bg-primary/[0.15] hover:ring-primary/35 aria-expanded:bg-primary/[0.11] dark:bg-primary/10 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.1)] dark:ring-primary/20 dark:hover:bg-primary/14 dark:aria-expanded:bg-primary/10';
+    'bg-primary/[0.11] text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.7),0_8px_20px_-16px_rgb(77_45_130/0.4)] ring-1 ring-primary/25 ring-inset backdrop-blur-md duration-500 hover:bg-primary/[0.15] hover:ring-primary/35 aria-expanded:bg-primary/[0.11] dark:bg-primary/10 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.1)] dark:ring-primary/20 dark:hover:bg-primary/14 dark:aria-expanded:bg-primary/10';
 
 export function Navigation() {
     const { links } = useSearch({ from: '__root__' });

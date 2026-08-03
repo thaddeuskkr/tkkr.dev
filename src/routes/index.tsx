@@ -5,7 +5,7 @@ export const Route = createFileRoute('/')({ component: App });
 
 function App() {
     return (
-        <main className="relative min-h-svh overflow-hidden bg-background transition-colors duration-500 motion-reduce:transition-none">
+        <main className="relative min-h-svh overflow-hidden">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute -top-32 -right-40 size-120 rounded-full bg-primary/15 blur-3xl motion-safe:animate-ambient-drift dark:bg-primary/6" />
                 <div className="absolute -bottom-48 -left-48 size-112 rounded-full bg-primary/13 blur-3xl motion-safe:animate-ambient-drift-reverse dark:bg-primary/4" />

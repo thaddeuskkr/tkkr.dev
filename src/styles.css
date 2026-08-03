@@ -125,21 +125,28 @@
         @apply border-border outline-ring/50;
     }
     body {
-        @apply min-h-svh bg-background text-foreground antialiased;
+        @apply min-h-svh text-foreground antialiased;
     }
     button:not(:disabled),
     [role='button']:not(:disabled) {
         cursor: pointer;
     }
     html {
-        @apply font-sans;
+        @apply bg-background font-sans;
         scrollbar-width: none;
+        transition: background-color 300ms ease;
     }
     html::-webkit-scrollbar {
         display: none;
     }
     ::selection {
         @apply bg-primary/20 text-foreground;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        transition: none;
     }
 }
 
