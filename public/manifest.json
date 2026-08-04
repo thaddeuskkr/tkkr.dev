@@ -1,6 +1,7 @@
 {
     "short_name": "tkkr.dev",
     "name": "Thaddeus Kuah",
+    "description": "thaddeus kuah’s personal website",
     "icons": [
         {
             "src": "favicon.ico",

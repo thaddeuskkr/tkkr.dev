@@ -38,7 +38,7 @@ export const Route = createRootRoute({
             },
             {
                 name: 'description',
-                content: 'My personal website.',
+                content: 'hi! i’m thaddeus, a 20 year-old self-taught hobbyist programmer studying in singapore.',
             },
         ],
         links: [
@@ -80,7 +80,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function RouteChrome({ children }: { children: React.ReactNode }) {
-    const standaloneQuickLink = useRouterState({
+    const standaloneShortUrl = useRouterState({
         select: ({ matches }) =>
             matches.some(({ loaderData, routeId }) => {
                 if (routeId !== '/$slug' || typeof loaderData !== 'object') return false;
@@ -90,10 +90,10 @@ function RouteChrome({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            {!standaloneQuickLink ? <Navigation /> : null}
+            {!standaloneShortUrl ? <Navigation /> : null}
             {children}
-            {!standaloneQuickLink ? <PageScrollbar /> : null}
-            {!standaloneQuickLink ? <LinksDialogSlot /> : null}
+            {!standaloneShortUrl ? <PageScrollbar /> : null}
+            {!standaloneShortUrl ? <LinksDialogSlot /> : null}
         </>
     );
 }

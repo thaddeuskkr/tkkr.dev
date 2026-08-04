@@ -2,13 +2,13 @@ import { ArrowRight, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { QuickLinkProtection } from '@/lib/quick-link-store';
+import type { ShortUrlProtection } from '@/lib/short-url-store';
 
 type UnlockPageState =
     { kind: 'idle' } | { kind: 'rejected'; attemptsRemaining?: number } | { kind: 'locked'; retryAfterSeconds: number };
 
-type QuickLinkUnlockPageProps = {
-    protection: QuickLinkProtection;
+type ShortUrlUnlockPageProps = {
+    protection: ShortUrlProtection;
     scriptNonce?: string;
     slug: string;
     state: UnlockPageState;
@@ -23,7 +23,7 @@ function fill(start,value){var digits=value.replace(/[^0-9]/g,'').slice(0,slots.
 slots.forEach(function(slot,index){slot.addEventListener('focus',function(){slot.select();});slot.addEventListener('input',function(){var digits=slot.value.replace(/[^0-9]/g,'');slot.value=digits.slice(-1);if(digits.length>1){fill(index,digits);return;}if(slot.value&&index<slots.length-1){slots[index+1].focus();slots[index+1].select();}});slot.addEventListener('paste',function(event){var value=event.clipboardData&&event.clipboardData.getData('text');if(value){event.preventDefault();fill(index,value);}});slot.addEventListener('keydown',function(event){if(event.key==='Backspace'&&!slot.value&&index>0){event.preventDefault();slots[index-1].value='';slots[index-1].focus();}else if(event.key==='ArrowLeft'&&index>0){event.preventDefault();slots[index-1].focus();}else if(event.key==='ArrowRight'&&index<slots.length-1){event.preventDefault();slots[index+1].focus();}});});
 })();`;
 
-export function QuickLinkUnlockPage({ protection, scriptNonce, slug, state }: QuickLinkUnlockPageProps) {
+export function ShortUrlUnlockPage({ protection, scriptNonce, slug, state }: ShortUrlUnlockPageProps) {
     const locked = state.kind === 'locked';
     const descriptionId = state.kind === 'idle' ? 'unlock-description' : 'unlock-feedback';
     const copy = protectionCopy(protection);
@@ -51,7 +51,7 @@ export function QuickLinkUnlockPage({ protection, scriptNonce, slug, state }: Qu
                     id="unlock-heading"
                     className="max-w-sm text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-balance sm:text-4xl"
                 >
-                    This link is protected.
+                    This short URL is protected.
                 </h1>
                 <p
                     id="unlock-description"
@@ -156,7 +156,7 @@ function UnlockFeedback({
     protection,
 }: {
     state: Exclude<UnlockPageState, { kind: 'idle' }>;
-    protection: QuickLinkProtection;
+    protection: ShortUrlProtection;
 }) {
     if (state.kind === 'locked') {
         return (
@@ -176,7 +176,7 @@ function UnlockFeedback({
     );
 }
 
-function protectionCopy(protection: QuickLinkProtection): { description: string; label: string } {
+function protectionCopy(protection: ShortUrlProtection): { description: string; label: string } {
     switch (protection.kind) {
         case 'pin':
             return {

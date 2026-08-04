@@ -1,78 +1,78 @@
-const quickLinkSlugPattern = /^[a-z0-9_-]{1,64}$/;
+const shortUrlSlugPattern = /^[a-z0-9_-]{1,64}$/;
 const accessKeyPattern = /^[A-Za-z0-9_-]{22}$/;
 const legacyVerifierPattern = /^hmac-sha256:v1:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
 const passwordVerifierPattern = /^hmac-sha256:v2:password:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
 const pinVerifierPattern = /^hmac-sha256:v2:pin:([4-8]):([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
 
-const reservedQuickLinkSlugs = new Set(['about', 'admin', 'api', 'links', 'projects']);
+const reservedShortUrlSlugs = new Set(['about', 'admin', 'api', 'links', 'projects']);
 
 const textEncoder = new TextEncoder();
 
-type QuickLinkRow = {
+type ShortUrlRow = {
     id: string;
     destination_url: string;
     expires_at: number | null;
     unlock_verifier: string | null;
 };
 
-export type PublicQuickLink = {
+export type PublicShortUrl = {
     destinationUrl: string;
     expiresAt: number | null;
 };
 
-export type ProtectedQuickLink = PublicQuickLink & {
+export type ProtectedShortUrl = PublicShortUrl & {
     id: string;
-    protection: QuickLinkProtection;
+    protection: ShortUrlProtection;
     unlockVerifier: string;
 };
 
-export type QuickLinkProtection = { kind: 'key' } | { kind: 'password' } | { kind: 'pin'; length: number };
+export type ShortUrlProtection = { kind: 'key' } | { kind: 'password' } | { kind: 'pin'; length: number };
 
-export type QuickLinkLookupResult =
-    | { kind: 'active'; link: PublicQuickLink }
-    | { kind: 'protected'; link: ProtectedQuickLink }
+export type ShortUrlLookupResult =
+    | { kind: 'active'; shortUrl: PublicShortUrl }
+    | { kind: 'protected'; shortUrl: ProtectedShortUrl }
     | { kind: 'expired' }
     | { kind: 'missing' }
     | { kind: 'unavailable'; reason: 'database' | 'invalid-record'; error?: string };
 
-export type QuickLinkAccessCredentials = {
+export type ShortUrlAccessCredentials = {
     accessKey: string;
     verifier: string;
 };
 
-export function normalizeQuickLinkSlug(value: string): string | null {
+export function normalizeShortUrlSlug(value: string): string | null {
     const slug = value.toLowerCase();
 
-    if (!quickLinkSlugPattern.test(slug) || reservedQuickLinkSlugs.has(slug)) {
+    if (!shortUrlSlugPattern.test(slug) || reservedShortUrlSlugs.has(slug)) {
         return null;
     }
 
     return slug;
 }
 
-export async function lookupQuickLink(
+export async function lookupShortUrl(
     database: D1Database,
     slug: string,
     now = Date.now()
-): Promise<QuickLinkLookupResult> {
-    let row: QuickLinkRow | null;
+): Promise<ShortUrlLookupResult> {
+    let row: ShortUrlRow | null;
 
     try {
         row = await database
             .prepare(
                 `SELECT
-                    quick_links.id,
-                    quick_links.destination_url,
-                    quick_links.expires_at,
-                    quick_links.unlock_verifier
-                FROM quick_link_slugs
-                INNER JOIN quick_links
-                    ON quick_links.id = quick_link_slugs.quick_link_id
-                WHERE quick_link_slugs.slug = ?1
+                    short_urls.id,
+                    short_urls.destination_url,
+                    short_urls.expires_at,
+                    short_urls.unlock_verifier
+                FROM short_url_slugs
+                INNER JOIN short_urls
+                    ON short_urls.id = short_url_slugs.short_url_id
+                WHERE short_url_slugs.slug = ?1
                 LIMIT 1`
             )
             .bind(slug)
-            .first<QuickLinkRow>();
+            .first<ShortUrlRow>();
     } catch (error) {
         return {
             kind: 'unavailable',
@@ -106,7 +106,7 @@ export async function lookupQuickLink(
     if (unlockVerifier) {
         return {
             kind: 'protected',
-            link: {
+            shortUrl: {
                 id: row.id,
                 destinationUrl,
                 expiresAt,
@@ -118,11 +118,11 @@ export async function lookupQuickLink(
 
     return {
         kind: 'active',
-        link: { destinationUrl, expiresAt },
+        shortUrl: { destinationUrl, expiresAt },
     };
 }
 
-export async function generateQuickLinkAccessCredentials(pepper: string): Promise<QuickLinkAccessCredentials> {
+export async function generateShortUrlAccessCredentials(pepper: string): Promise<ShortUrlAccessCredentials> {
     const accessKeyBytes = crypto.getRandomValues(new Uint8Array(16));
     const saltBytes = crypto.getRandomValues(new Uint8Array(16));
     const accessKey = encodeBase64Url(accessKeyBytes);
@@ -135,7 +135,7 @@ export async function generateQuickLinkAccessCredentials(pepper: string): Promis
     };
 }
 
-export async function verifyQuickLinkSecret(secret: string, verifier: string, pepper: string): Promise<boolean> {
+export async function verifyShortUrlSecret(secret: string, verifier: string, pepper: string): Promise<boolean> {
     const parsedVerifier = parseVerifier(verifier);
     if (!parsedVerifier || !isValidSubmittedSecret(secret, parsedVerifier.protection)) {
         return false;
@@ -156,7 +156,7 @@ export async function verifyQuickLinkSecret(secret: string, verifier: string, pe
 }
 
 type ParsedVerifier = {
-    protection: QuickLinkProtection;
+    protection: ShortUrlProtection;
     salt: string;
     encodedSignature: string;
 };
@@ -193,7 +193,7 @@ function parseVerifier(verifier: string): ParsedVerifier | null {
     return null;
 }
 
-function isValidSubmittedSecret(value: string, protection: QuickLinkProtection): boolean {
+function isValidSubmittedSecret(value: string, protection: ShortUrlProtection): boolean {
     switch (protection.kind) {
         case 'key':
             return accessKeyPattern.test(value);
@@ -204,7 +204,7 @@ function isValidSubmittedSecret(value: string, protection: QuickLinkProtection):
     }
 }
 
-function signingPayload(value: string, protection: QuickLinkProtection, salt: string): string {
+function signingPayload(value: string, protection: ShortUrlProtection, salt: string): string {
     return protection.kind === 'key' ? `${salt}.${value}` : `${protection.kind}.${salt}.${value}`;
 }
 
@@ -231,7 +231,7 @@ async function signAccessKey(accessKey: string, salt: string, pepper: string): P
 function importHmacKey(pepper: string, usages: KeyUsage[]): Promise<CryptoKey> {
     const pepperBytes = textEncoder.encode(pepper);
     if (pepperBytes.byteLength < 32) {
-        throw new Error('SHORT_LINK_PEPPER must contain at least 32 bytes');
+        throw new Error('SHORT_URL_PEPPER must contain at least 32 bytes');
     }
 
     return crypto.subtle.importKey('raw', pepperBytes, { name: 'HMAC', hash: 'SHA-256' }, false, usages);

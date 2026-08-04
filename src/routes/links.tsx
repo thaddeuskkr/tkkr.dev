@@ -8,7 +8,7 @@ export const Route = createFileRoute('/links')({
             { title: 'Quick links — Thaddeus Kuah' },
             {
                 name: 'description',
-                content: 'Social profiles and public services maintained by Thaddeus Kuah.',
+                content: 'Social profiles and self-hosted services — Thaddeus Kuah',
             },
         ],
     }),

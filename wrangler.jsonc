@@ -5,13 +5,13 @@
     "compatibility_flags": ["nodejs_compat"],
     "main": "@tanstack/react-start/server-entry",
     "secrets": {
-        "required": ["SHORT_LINK_PEPPER"],
+        "required": ["SHORT_URL_PEPPER"],
     },
     "d1_databases": [
         {
-            "binding": "DB",
-            "database_name": "tkkr-dev-links",
-            "database_id": "e7c245fb-83d5-4155-8edc-b4a1e4efb533",
+            "binding": "SHORT_URL_DB",
+            "database_name": "tkkr-dev-urls",
+            "database_id": "17e8f4a7-6259-4922-a5c7-af7ad7ef9db0",
             "migrations_dir": "migrations",
         },
     ],

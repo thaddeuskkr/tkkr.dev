@@ -7,43 +7,39 @@ type UnlockAttemptRow = {
     locked_until: number | null;
 };
 
-export type QuickLinkRateLimitResult =
+export type ShortUrlRateLimitResult =
     | { kind: 'allowed'; attemptsRemaining: number; tracked: boolean }
     | { kind: 'locked'; retryAfterSeconds: number }
     | { kind: 'unavailable'; error: string };
 
-export async function fingerprintQuickLinkClient(
-    quickLinkId: string,
-    clientIp: string,
-    pepper: string
-): Promise<string> {
+export async function fingerprintShortUrlClient(shortUrlId: string, clientIp: string, pepper: string): Promise<string> {
     const key = await importFingerprintKey(pepper);
     const signature = await crypto.subtle.sign(
         'HMAC',
         key,
-        textEncoder.encode(`quick-link-rate-limit:v1:${quickLinkId}:${clientIp}`)
+        textEncoder.encode(`short-url-rate-limit:v1:${shortUrlId}:${clientIp}`)
     );
 
     return encodeBase64Url(new Uint8Array(signature));
 }
 
-export async function checkQuickLinkRateLimit(
+export async function checkShortUrlRateLimit(
     database: D1Database,
-    quickLinkId: string,
+    shortUrlId: string,
     clientFingerprint: string,
     now = Date.now()
-): Promise<QuickLinkRateLimitResult> {
+): Promise<ShortUrlRateLimitResult> {
     let row: UnlockAttemptRow | null;
 
     try {
         row = await database
             .prepare(
                 `SELECT failed_attempts, locked_until
-                FROM quick_link_unlock_attempts
-                WHERE quick_link_id = ?1 AND client_fingerprint = ?2
+                FROM short_url_unlock_attempts
+                WHERE short_url_id = ?1 AND client_fingerprint = ?2
                 LIMIT 1`
             )
-            .bind(quickLinkId, clientFingerprint)
+            .bind(shortUrlId, clientFingerprint)
             .first<UnlockAttemptRow>();
     } catch (error) {
         return unavailable(error);
@@ -66,12 +62,12 @@ export async function checkQuickLinkRateLimit(
     return { kind: 'allowed', attemptsRemaining, tracked: true };
 }
 
-export async function recordQuickLinkUnlockFailure(
+export async function recordShortUrlUnlockFailure(
     database: D1Database,
-    quickLinkId: string,
+    shortUrlId: string,
     clientFingerprint: string,
     now = Date.now()
-): Promise<QuickLinkRateLimitResult> {
+): Promise<ShortUrlRateLimitResult> {
     const lockedUntil = now + lockDurationMilliseconds;
     let row: unknown;
 
@@ -79,40 +75,40 @@ export async function recordQuickLinkUnlockFailure(
         const [, readResult] = await database.batch<UnlockAttemptRow>([
             database
                 .prepare(
-                    `INSERT INTO quick_link_unlock_attempts (
-                        quick_link_id,
+                    `INSERT INTO short_url_unlock_attempts (
+                        short_url_id,
                         client_fingerprint,
                         failed_attempts,
                         locked_until,
                         updated_at
                     ) VALUES (?1, ?2, 1, NULL, ?3)
-                    ON CONFLICT (quick_link_id, client_fingerprint) DO UPDATE SET
+                    ON CONFLICT (short_url_id, client_fingerprint) DO UPDATE SET
                         failed_attempts = CASE
-                            WHEN quick_link_unlock_attempts.locked_until IS NOT NULL
-                                AND quick_link_unlock_attempts.locked_until <= ?3 THEN 1
-                            WHEN quick_link_unlock_attempts.failed_attempts >= ?4 THEN ?4
-                            ELSE quick_link_unlock_attempts.failed_attempts + 1
+                            WHEN short_url_unlock_attempts.locked_until IS NOT NULL
+                                AND short_url_unlock_attempts.locked_until <= ?3 THEN 1
+                            WHEN short_url_unlock_attempts.failed_attempts >= ?4 THEN ?4
+                            ELSE short_url_unlock_attempts.failed_attempts + 1
                         END,
                         locked_until = CASE
-                            WHEN quick_link_unlock_attempts.locked_until IS NOT NULL
-                                AND quick_link_unlock_attempts.locked_until > ?3
-                                THEN quick_link_unlock_attempts.locked_until
-                            WHEN quick_link_unlock_attempts.locked_until IS NOT NULL
-                                AND quick_link_unlock_attempts.locked_until <= ?3 THEN NULL
-                            WHEN quick_link_unlock_attempts.failed_attempts >= ?4 - 1 THEN ?5
+                            WHEN short_url_unlock_attempts.locked_until IS NOT NULL
+                                AND short_url_unlock_attempts.locked_until > ?3
+                                THEN short_url_unlock_attempts.locked_until
+                            WHEN short_url_unlock_attempts.locked_until IS NOT NULL
+                                AND short_url_unlock_attempts.locked_until <= ?3 THEN NULL
+                            WHEN short_url_unlock_attempts.failed_attempts >= ?4 - 1 THEN ?5
                             ELSE NULL
                         END,
                         updated_at = ?3`
                 )
-                .bind(quickLinkId, clientFingerprint, now, maximumFailedAttempts, lockedUntil),
+                .bind(shortUrlId, clientFingerprint, now, maximumFailedAttempts, lockedUntil),
             database
                 .prepare(
                     `SELECT failed_attempts, locked_until
-                    FROM quick_link_unlock_attempts
-                    WHERE quick_link_id = ?1 AND client_fingerprint = ?2
+                    FROM short_url_unlock_attempts
+                    WHERE short_url_id = ?1 AND client_fingerprint = ?2
                     LIMIT 1`
                 )
-                .bind(quickLinkId, clientFingerprint),
+                .bind(shortUrlId, clientFingerprint),
         ]);
 
         row = readResult.results[0];
@@ -135,17 +131,17 @@ export async function recordQuickLinkUnlockFailure(
     };
 }
 
-export async function clearQuickLinkUnlockFailures(
+export async function clearShortUrlUnlockFailures(
     database: D1Database,
-    quickLinkId: string,
+    shortUrlId: string,
     clientFingerprint: string
 ): Promise<void> {
     await database
         .prepare(
-            `DELETE FROM quick_link_unlock_attempts
-            WHERE quick_link_id = ?1 AND client_fingerprint = ?2`
+            `DELETE FROM short_url_unlock_attempts
+            WHERE short_url_id = ?1 AND client_fingerprint = ?2`
         )
-        .bind(quickLinkId, clientFingerprint)
+        .bind(shortUrlId, clientFingerprint)
         .run();
 }
 
@@ -166,14 +162,14 @@ function isValidRow(row: unknown): row is UnlockAttemptRow {
     );
 }
 
-function locked(lockedUntil: number, now: number): QuickLinkRateLimitResult {
+function locked(lockedUntil: number, now: number): ShortUrlRateLimitResult {
     return {
         kind: 'locked',
         retryAfterSeconds: Math.max(1, Math.ceil((lockedUntil - now) / 1000)),
     };
 }
 
-function unavailable(error: unknown): QuickLinkRateLimitResult {
+function unavailable(error: unknown): ShortUrlRateLimitResult {
     return {
         kind: 'unavailable',
         error: error instanceof Error ? error.message : String(error),
@@ -183,7 +179,7 @@ function unavailable(error: unknown): QuickLinkRateLimitResult {
 function importFingerprintKey(pepper: string): Promise<CryptoKey> {
     const pepperBytes = textEncoder.encode(pepper);
     if (pepperBytes.byteLength < 32) {
-        throw new Error('SHORT_LINK_PEPPER must contain at least 32 bytes');
+        throw new Error('SHORT_URL_PEPPER must contain at least 32 bytes');
     }
 
     return crypto.subtle.importKey('raw', pepperBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);

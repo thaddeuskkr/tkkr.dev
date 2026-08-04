@@ -84,7 +84,7 @@ export const Route = createFileRoute('/about')({
             { title: 'About — Thaddeus Kuah' },
             {
                 name: 'description',
-                content: 'Experience, education, and interests of Thaddeus Kuah.',
+                content: 'Experience, education, and interests — Thaddeus Kuah',
             },
         ],
     }),

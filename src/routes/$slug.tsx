@@ -3,27 +3,27 @@ import { createFileRoute, notFound, redirect, rootRouteId } from '@tanstack/reac
 import { createMiddleware, createServerFn } from '@tanstack/react-start';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { QuickLinkUnlockPage } from '@/components/quick-link-unlock-page';
+import { ShortUrlUnlockPage } from '@/components/short-url-unlock-page';
 import { StatusPage } from '@/components/not-found-page';
 import {
-    checkQuickLinkRateLimit,
-    clearQuickLinkUnlockFailures,
-    fingerprintQuickLinkClient,
-    recordQuickLinkUnlockFailure,
-} from '@/lib/quick-link-rate-limit';
-import { lookupQuickLink, normalizeQuickLinkSlug, verifyQuickLinkSecret } from '@/lib/quick-link-store';
+    checkShortUrlRateLimit,
+    clearShortUrlUnlockFailures,
+    fingerprintShortUrlClient,
+    recordShortUrlUnlockFailure,
+} from '@/lib/short-url-rate-limit';
+import { lookupShortUrl, normalizeShortUrlSlug, verifyShortUrlSecret } from '@/lib/short-url-store';
 import type {
-    ProtectedQuickLink,
-    PublicQuickLink,
-    QuickLinkLookupResult,
-    QuickLinkProtection,
-} from '@/lib/quick-link-store';
+    ProtectedShortUrl,
+    PublicShortUrl,
+    ShortUrlLookupResult,
+    ShortUrlProtection,
+} from '@/lib/short-url-store';
 import {
-    quickLinkExpiredStatusPage,
-    quickLinkMethodNotAllowedStatusPage,
-    quickLinkRequestTooLargeStatusPage,
-    quickLinkUnavailableStatusPage,
-    quickLinkUnsupportedRequestStatusPage,
+    shortUrlExpiredStatusPage,
+    shortUrlMethodNotAllowedStatusPage,
+    shortUrlRequestTooLargeStatusPage,
+    shortUrlUnavailableStatusPage,
+    shortUrlUnsupportedRequestStatusPage,
 } from '@/lib/status-pages';
 import type { StatusPageDefinition } from '@/lib/status-pages';
 import appCss from '@/styles.css?url';
@@ -35,8 +35,8 @@ const maxSubmittedSecretLength = 256;
 type UnlockPageState =
     { kind: 'idle' } | { kind: 'rejected'; attemptsRemaining?: number } | { kind: 'locked'; retryAfterSeconds: number };
 
-type QuickLinkRouteData =
-    | { kind: 'protected'; protection: QuickLinkProtection; slug: string }
+type ShortUrlRouteData =
+    | { kind: 'protected'; protection: ShortUrlProtection; slug: string }
     | { kind: 'expired' }
     | { kind: 'unavailable'; slug: string };
 
@@ -48,32 +48,32 @@ const noStoreHeaders = {
 
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='light'||t==='dark'?t:(d?'dark':'light');document.documentElement.classList.add(r);document.documentElement.style.colorScheme=r}catch(e){}})();`;
 
-const lookupQuickLinkForRoute = createServerFn({ method: 'GET' })
+const lookupShortUrlForRoute = createServerFn({ method: 'GET' })
     .validator((rawSlug: unknown) => {
-        if (typeof rawSlug !== 'string') throw new Error('Link slug must be a string');
+        if (typeof rawSlug !== 'string') throw new Error('Short URL slug must be a string');
         return rawSlug;
     })
     .handler(async ({ data: rawSlug }) => {
         const { getRequest } = await import('@tanstack/react-start/server');
         const request = getRequest();
-        const slug = normalizeQuickLinkSlug(rawSlug);
+        const slug = normalizeShortUrlSlug(rawSlug);
         if (!slug) return { kind: 'missing' } as const;
 
-        const cachedLink = await readCachedQuickLink(request, slug);
-        if (cachedLink) {
+        const cachedShortUrl = await readCachedShortUrl(request, slug);
+        if (cachedShortUrl) {
             logCache(slug, 'hit');
-            return { kind: 'active', destinationUrl: cachedLink.destinationUrl } as const;
+            return { kind: 'active', destinationUrl: cachedShortUrl.destinationUrl } as const;
         }
 
         logCache(slug, 'miss');
-        const result = await lookupQuickLink(env.DB, slug);
+        const result = await lookupShortUrl(env.SHORT_URL_DB, slug);
 
         switch (result.kind) {
             case 'active':
-                cacheQuickLink(request, slug, result.link);
-                return { kind: 'active', destinationUrl: result.link.destinationUrl } as const;
+                cacheShortUrl(request, slug, result.shortUrl);
+                return { kind: 'active', destinationUrl: result.shortUrl.destinationUrl } as const;
             case 'protected':
-                return { kind: 'protected', protection: result.link.protection, slug } as const;
+                return { kind: 'protected', protection: result.shortUrl.protection, slug } as const;
             case 'expired':
                 return { kind: 'expired' } as const;
             case 'missing':
@@ -84,19 +84,19 @@ const lookupQuickLinkForRoute = createServerFn({ method: 'GET' })
         }
     });
 
-const quickLinkGetMiddleware = createMiddleware().server(async ({ handlerType, next, pathname, request }) => {
+const shortUrlGetMiddleware = createMiddleware().server(async ({ handlerType, next, pathname, request }) => {
     if (handlerType !== 'router' || request.method !== 'GET') {
         return next();
     }
 
-    const response = await handleQuickLinkGet(request, pathname.slice(1));
+    const response = await handleShortUrlGet(request, pathname.slice(1));
     return response ?? next();
 });
 
 export const Route = createFileRoute('/$slug')({
     headers: () => noStoreHeaders,
     loader: async ({ params }) => {
-        const result = await lookupQuickLinkForRoute({ data: params.slug });
+        const result = await lookupShortUrlForRoute({ data: params.slug });
 
         switch (result.kind) {
             case 'active':
@@ -108,66 +108,66 @@ export const Route = createFileRoute('/$slug')({
             case 'missing':
                 throw notFound({ routeId: rootRouteId });
             case 'expired':
-                return result satisfies QuickLinkRouteData;
+                return result satisfies ShortUrlRouteData;
             case 'unavailable':
-                return result satisfies QuickLinkRouteData;
+                return result satisfies ShortUrlRouteData;
             case 'protected':
-                return result satisfies QuickLinkRouteData;
+                return result satisfies ShortUrlRouteData;
         }
     },
     head: ({ loaderData }) => ({
-        meta: loaderData ? [{ title: quickLinkRouteTitle(loaderData) }] : undefined,
+        meta: loaderData ? [{ title: shortUrlRouteTitle(loaderData) }] : undefined,
     }),
-    component: QuickLinkRoute,
+    component: ShortUrlRoute,
     server: {
-        middleware: [quickLinkGetMiddleware],
+        middleware: [shortUrlGetMiddleware],
         handlers: {
-            POST: ({ request, params }) => handleQuickLinkPost(request, params.slug),
+            POST: ({ request, params }) => handleShortUrlPost(request, params.slug),
         },
     },
 });
 
-function QuickLinkRoute() {
+function ShortUrlRoute() {
     const data = Route.useLoaderData();
 
     if (data.kind === 'protected') {
-        return <QuickLinkUnlockPage protection={data.protection} slug={data.slug} state={{ kind: 'idle' }} />;
+        return <ShortUrlUnlockPage protection={data.protection} slug={data.slug} state={{ kind: 'idle' }} />;
     }
 
     if (data.kind === 'expired') {
-        return <StatusPage page={quickLinkExpiredStatusPage} />;
+        return <StatusPage page={shortUrlExpiredStatusPage} />;
     }
 
-    return <StatusPage page={quickLinkUnavailableStatusPage(data.slug)} />;
+    return <StatusPage page={shortUrlUnavailableStatusPage(data.slug)} />;
 }
 
-function quickLinkRouteTitle(data: QuickLinkRouteData): string {
+function shortUrlRouteTitle(data: ShortUrlRouteData): string {
     switch (data.kind) {
         case 'protected':
             return `Unlock ${data.slug} — tkkr.dev`;
         case 'expired':
-            return quickLinkExpiredStatusPage.title;
+            return shortUrlExpiredStatusPage.title;
         case 'unavailable':
-            return quickLinkUnavailableStatusPage(data.slug).title;
+            return shortUrlUnavailableStatusPage(data.slug).title;
     }
 }
 
-async function handleQuickLinkGet(request: Request, rawSlug: string): Promise<Response | undefined> {
-    const slug = normalizeQuickLinkSlug(rawSlug);
+async function handleShortUrlGet(request: Request, rawSlug: string): Promise<Response | undefined> {
+    const slug = normalizeShortUrlSlug(rawSlug);
     if (!slug) return undefined;
 
-    const cachedLink = await readCachedQuickLink(request, slug);
-    if (cachedLink) {
+    const cachedShortUrl = await readCachedShortUrl(request, slug);
+    if (cachedShortUrl) {
         logCache(slug, 'hit');
-        return redirectTo(cachedLink.destinationUrl, 307);
+        return redirectTo(cachedShortUrl.destinationUrl, 307);
     }
 
     logCache(slug, 'miss');
-    const result = await lookupQuickLink(env.DB, slug);
+    const result = await lookupShortUrl(env.SHORT_URL_DB, slug);
 
     if (result.kind === 'active') {
-        cacheQuickLink(request, slug, result.link);
-        return redirectTo(result.link.destinationUrl, 307);
+        cacheShortUrl(request, slug, result.shortUrl);
+        return redirectTo(result.shortUrl.destinationUrl, 307);
     }
 
     if (result.kind === 'missing') {
@@ -177,16 +177,16 @@ async function handleQuickLinkGet(request: Request, rawSlug: string): Promise<Re
     return responseForLookupResult(result, slug, request);
 }
 
-async function handleQuickLinkPost(request: Request, rawSlug: string): Promise<Response> {
-    const slug = normalizeQuickLinkSlug(rawSlug);
+async function handleShortUrlPost(request: Request, rawSlug: string): Promise<Response> {
+    const slug = normalizeShortUrlSlug(rawSlug);
     if (!slug) {
         return redirectPostToGet(request);
     }
 
-    const result = await lookupQuickLink(env.DB, slug);
+    const result = await lookupShortUrl(env.SHORT_URL_DB, slug);
     if (result.kind !== 'protected') {
         if (result.kind === 'active') {
-            return statusPage(quickLinkMethodNotAllowedStatusPage(slug), { Allow: 'GET, HEAD' });
+            return statusPage(shortUrlMethodNotAllowedStatusPage(slug), { Allow: 'GET, HEAD' });
         }
 
         return responseForLookupResult(result, slug, request);
@@ -194,13 +194,13 @@ async function handleQuickLinkPost(request: Request, rawSlug: string): Promise<R
 
     const submittedSecret = await readUnlockSecret(request);
     if (submittedSecret.kind === 'unsupported') {
-        return statusPage(quickLinkUnsupportedRequestStatusPage(slug));
+        return statusPage(shortUrlUnsupportedRequestStatusPage(slug));
     }
     if (submittedSecret.kind === 'too-large') {
-        return statusPage(quickLinkRequestTooLargeStatusPage(slug));
+        return statusPage(shortUrlRequestTooLargeStatusPage(slug));
     }
 
-    const pepper = env.SHORT_LINK_PEPPER;
+    const pepper = env.SHORT_URL_PEPPER;
     if (!pepper) {
         logFailure(slug, 'missing-pepper');
         return unavailablePage(slug);
@@ -208,10 +208,10 @@ async function handleQuickLinkPost(request: Request, rawSlug: string): Promise<R
 
     let clientFingerprint: string | null = null;
     let hasTrackedFailures = false;
-    if (result.link.protection.kind === 'password' || result.link.protection.kind === 'pin') {
+    if (result.shortUrl.protection.kind === 'password' || result.shortUrl.protection.kind === 'pin') {
         try {
-            clientFingerprint = await fingerprintQuickLinkClient(
-                result.link.id,
+            clientFingerprint = await fingerprintShortUrlClient(
+                result.shortUrl.id,
                 request.headers.get('CF-Connecting-IP') ?? 'unavailable',
                 pepper
             );
@@ -220,20 +220,20 @@ async function handleQuickLinkPost(request: Request, rawSlug: string): Promise<R
             return unavailablePage(slug);
         }
 
-        const rateLimit = await checkQuickLinkRateLimit(env.DB, result.link.id, clientFingerprint);
+        const rateLimit = await checkShortUrlRateLimit(env.SHORT_URL_DB, result.shortUrl.id, clientFingerprint);
         if (rateLimit.kind === 'unavailable') {
             logFailure(slug, 'rate-limit-check', rateLimit.error);
             return unavailablePage(slug);
         }
         if (rateLimit.kind === 'locked') {
-            return unlockPage(slug, result.link, rateLimit);
+            return unlockPage(slug, result.shortUrl, rateLimit);
         }
         hasTrackedFailures = rateLimit.tracked;
     }
 
     let valid = false;
     try {
-        valid = await verifyQuickLinkSecret(submittedSecret.secret, result.link.unlockVerifier, pepper);
+        valid = await verifyShortUrlSecret(submittedSecret.secret, result.shortUrl.unlockVerifier, pepper);
     } catch (error) {
         logFailure(slug, 'verification', error);
         return unavailablePage(slug);
@@ -241,48 +241,52 @@ async function handleQuickLinkPost(request: Request, rawSlug: string): Promise<R
 
     if (!valid) {
         if (clientFingerprint) {
-            const rateLimit = await recordQuickLinkUnlockFailure(env.DB, result.link.id, clientFingerprint);
+            const rateLimit = await recordShortUrlUnlockFailure(
+                env.SHORT_URL_DB,
+                result.shortUrl.id,
+                clientFingerprint
+            );
             if (rateLimit.kind === 'unavailable') {
                 logFailure(slug, 'rate-limit-write', rateLimit.error);
                 return unavailablePage(slug);
             }
             if (rateLimit.kind === 'locked') {
-                return unlockPage(slug, result.link, rateLimit);
+                return unlockPage(slug, result.shortUrl, rateLimit);
             }
 
-            return unlockPage(slug, result.link, {
+            return unlockPage(slug, result.shortUrl, {
                 kind: 'rejected',
                 attemptsRemaining: rateLimit.attemptsRemaining,
             });
         }
 
-        return unlockPage(slug, result.link, { kind: 'rejected' });
+        return unlockPage(slug, result.shortUrl, { kind: 'rejected' });
     }
 
     if (clientFingerprint && hasTrackedFailures) {
         try {
-            await clearQuickLinkUnlockFailures(env.DB, result.link.id, clientFingerprint);
+            await clearShortUrlUnlockFailures(env.SHORT_URL_DB, result.shortUrl.id, clientFingerprint);
         } catch (error) {
             logFailure(slug, 'rate-limit-clear', error);
         }
     }
 
-    return redirectTo(result.link.destinationUrl, 303);
+    return redirectTo(result.shortUrl.destinationUrl, 303);
 }
 
-function responseForLookupResult(result: QuickLinkLookupResult, slug: string, request: Request): Response {
+function responseForLookupResult(result: ShortUrlLookupResult, slug: string, request: Request): Response {
     switch (result.kind) {
         case 'protected':
-            return unlockPage(slug, result.link, { kind: 'idle' });
+            return unlockPage(slug, result.shortUrl, { kind: 'idle' });
         case 'expired':
-            return statusPage(quickLinkExpiredStatusPage);
+            return statusPage(shortUrlExpiredStatusPage);
         case 'missing':
             return redirectPostToGet(request);
         case 'unavailable':
             logFailure(slug, result.reason, result.error);
             return unavailablePage(slug);
         case 'active':
-            return redirectTo(result.link.destinationUrl, 307);
+            return redirectTo(result.shortUrl.destinationUrl, 307);
     }
 }
 
@@ -306,12 +310,12 @@ function redirectTo(destinationUrl: string, status: 303 | 307): Response {
     });
 }
 
-function unlockPage(slug: string, link: ProtectedQuickLink, state: UnlockPageState): Response {
+function unlockPage(slug: string, shortUrl: ProtectedShortUrl, state: UnlockPageState): Response {
     const nonce = createCspNonce();
     const status = state.kind === 'locked' ? 429 : state.kind === 'rejected' ? 401 : 200;
-    const destinationOrigin = new URL(link.destinationUrl).origin;
+    const destinationOrigin = new URL(shortUrl.destinationUrl).origin;
     const body = renderToStaticMarkup(
-        <QuickLinkUnlockPage protection={link.protection} scriptNonce={nonce} slug={slug} state={state} />
+        <ShortUrlUnlockPage protection={shortUrl.protection} scriptNonce={nonce} slug={slug} state={state} />
     );
     const headers = new Headers({
         ...noStoreHeaders,
@@ -376,7 +380,7 @@ function statusPage(page: StatusPageDefinition, additionalHeaders: HeadersInit =
 }
 
 function unavailablePage(slug: string): Response {
-    return statusPage(quickLinkUnavailableStatusPage(slug), { 'Retry-After': '60' });
+    return statusPage(shortUrlUnavailableStatusPage(slug), { 'Retry-After': '60' });
 }
 
 async function readUnlockSecret(
@@ -459,13 +463,13 @@ async function readBoundedBody(request: Request, maxBytes: number): Promise<stri
     return new TextDecoder().decode(body);
 }
 
-async function readCachedQuickLink(request: Request, slug: string): Promise<PublicQuickLink | null> {
+async function readCachedShortUrl(request: Request, slug: string): Promise<PublicShortUrl | null> {
     try {
         const response = await defaultCache().match(cacheRequest(request, slug));
         if (!response) return null;
 
         const value: unknown = await response.json();
-        if (!isCachedQuickLink(value) || (value.expiresAt !== null && value.expiresAt <= Date.now())) {
+        if (!isCachedShortUrl(value) || (value.expiresAt !== null && value.expiresAt <= Date.now())) {
             return null;
         }
 
@@ -476,11 +480,11 @@ async function readCachedQuickLink(request: Request, slug: string): Promise<Publ
     }
 }
 
-function cacheQuickLink(request: Request, slug: string, link: PublicQuickLink): void {
-    const ttl = cacheTtl(link.expiresAt);
+function cacheShortUrl(request: Request, slug: string, shortUrl: PublicShortUrl): void {
+    const ttl = cacheTtl(shortUrl.expiresAt);
     if (ttl <= 0) return;
 
-    const response = Response.json(link, {
+    const response = Response.json(shortUrl, {
         headers: { 'Cache-Control': `public, max-age=${ttl}` },
     });
 
@@ -504,13 +508,13 @@ function cacheTtl(expiresAt: number | null): number {
 
 function cacheRequest(request: Request, slug: string): Request {
     const url = new URL(request.url);
-    url.pathname = `/__quick-links-cache/${encodeURIComponent(slug)}`;
+    url.pathname = `/__short-url-cache/${encodeURIComponent(slug)}`;
     url.search = '';
     url.hash = '';
     return new Request(url, { method: 'GET' });
 }
 
-function isCachedQuickLink(value: unknown): value is PublicQuickLink {
+function isCachedShortUrl(value: unknown): value is PublicShortUrl {
     if (!value || typeof value !== 'object') return false;
 
     const candidate = value as Record<string, unknown>;
@@ -540,13 +544,13 @@ function escapeHtml(value: string): string {
 }
 
 function logCache(slug: string, outcome: 'hit' | 'miss'): void {
-    console.log(JSON.stringify({ event: 'quick_link_cache', outcome, slug }));
+    console.log(JSON.stringify({ event: 'short_url_cache', outcome, slug }));
 }
 
 function logFailure(slug: string, reason: string, error?: unknown): void {
     console.error(
         JSON.stringify({
-            event: 'quick_link_failure',
+            event: 'short_url_failure',
             slug,
             reason,
             error: error instanceof Error ? error.message : error ? String(error) : undefined,

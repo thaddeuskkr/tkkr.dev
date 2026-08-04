@@ -1,0 +1,1049 @@
+import { spawn } from 'node:child_process';
+import { createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { emitKeypressEvents } from 'node:readline';
+import { createInterface } from 'node:readline/promises';
+import { fileURLToPath } from 'node:url';
+import { parseArgs, styleText } from 'node:util';
+
+const databaseName = 'tkkr-dev-urls';
+const publicOrigins = {
+    local: 'http://localhost:3000',
+    remote: 'https://tkkr.dev',
+} as const;
+const shortUrlSlugPattern = /^[a-z0-9_-]{1,64}$/;
+const reservedShortUrlSlugs = new Set(['about', 'admin', 'api', 'links', 'projects']);
+const projectDirectory = dirname(dirname(fileURLToPath(import.meta.url)));
+const issueUrl = 'https://github.com/thaddeuskkr/tkkr.dev/issues/new';
+
+type CliCommand = 'add' | 'list' | 'remove';
+type DatabaseTarget = keyof typeof publicOrigins;
+type ProtectionKind = 'key' | 'password' | 'pin';
+type ShortUrlStatus = 'active' | 'expired';
+type CliErrorCode = 'E_CONFIG' | 'E_D1' | 'E_INPUT' | 'E_INTERNAL' | 'E_INTERRUPTED' | 'E_NOT_FOUND' | 'E_USAGE';
+
+type CliOptions = {
+    aliases: string[];
+    command: CliCommand | null;
+    databaseTarget: DatabaseTarget | null;
+    expires: string | undefined;
+    help: boolean;
+    json: boolean;
+    owner: string | undefined;
+    positionals: string[];
+    protection: ProtectionKind | null;
+    yes: boolean;
+};
+
+type ProtectionCredentials = {
+    accessKey?: string;
+    verifier: string;
+};
+
+type ShortUrlInsert = {
+    id: string;
+    destinationUrl: string;
+    verifier: string | null;
+    expiresAt: number | null;
+    ownerId: string;
+    now: number;
+    slugs: string[];
+};
+
+type ShortUrlQueryRow = {
+    id: string;
+    destinationUrl: string;
+    unlockVerifier: string | null;
+    expiresAt: number | null;
+    ownerId: string;
+    createdAt: number;
+    updatedAt: number;
+    slug: string;
+};
+
+type ShortUrlRecord = Omit<ShortUrlQueryRow, 'slug' | 'unlockVerifier'> & {
+    protection: ProtectionKind | 'protected' | 'public';
+    slugs: string[];
+    status: ShortUrlStatus;
+};
+
+type D1ExecuteResult = {
+    success: boolean;
+    results?: unknown[] | null;
+};
+
+class CliError extends Error {
+    readonly code: CliErrorCode;
+    readonly hint: string | undefined;
+    readonly exitCode: 1 | 2 | 130 | 143;
+
+    constructor(
+        code: CliErrorCode,
+        message: string,
+        hint: string | undefined,
+        exitCode: 1 | 2 | 130 | 143,
+        cause?: unknown
+    ) {
+        super(message, cause === undefined ? undefined : { cause });
+        this.name = 'CliError';
+        this.code = code;
+        this.hint = hint;
+        this.exitCode = exitCode;
+    }
+}
+
+function usageError(message: string, command?: CliCommand): CliError {
+    const helpCommand = command ? `pnpm urls ${command} --help` : 'pnpm urls --help';
+    return new CliError('E_USAGE', message, `Run "${helpCommand}" for usage.`, 2);
+}
+
+function inputError(message: string, hint?: string): CliError {
+    return new CliError('E_INPUT', message, hint, 2);
+}
+
+function configError(message: string, hint: string): CliError {
+    return new CliError('E_CONFIG', message, hint, 2);
+}
+
+function d1Error(message: string, cause?: unknown): CliError {
+    return new CliError(
+        'E_D1',
+        message,
+        'Review the Wrangler output above. If its login has expired, run "pnpm exec wrangler login" and retry.',
+        1,
+        cause
+    );
+}
+
+function interruptedError(signal: 'SIGINT' | 'SIGTERM' = 'SIGINT'): CliError {
+    return new CliError(
+        'E_INTERRUPTED',
+        signal === 'SIGINT' ? 'Interrupted by Ctrl+C.' : 'Terminated by SIGTERM.',
+        undefined,
+        signal === 'SIGINT' ? 130 : 143
+    );
+}
+
+function styled(
+    format: Parameters<typeof styleText>[0],
+    text: string,
+    stream: NodeJS.WritableStream = process.stdout
+): string {
+    return styleText(format, text, { stream });
+}
+
+const commonOptions = `  -l, --local            Use the local test D1 database
+  -r, --remote           Use remote D1 (the default)
+  -h, --help             Show contextual help
+  --debug                Show diagnostic details on errors`;
+
+const globalHelp = `Manage Short URLs directly in D1.
+
+Usage:
+  pnpm urls add <slug> <destination> [options]
+  pnpm urls list [options]
+  pnpm urls remove <slug...> [options]
+
+Commands:
+  add                    Create a Short URL
+  list                   List Short URLs
+  remove                 Remove a Short URL and all of its aliases
+
+Common options:
+${commonOptions}
+
+Examples:
+  pnpm urls add docs https://developers.cloudflare.com
+  pnpm urls list
+  pnpm urls remove docs old-docs
+
+Run "pnpm urls <command> --help" for command-specific options.
+
+Environment:
+  SHORT_URL_DEBUG=1      Show diagnostic details on errors
+  NO_COLOR=1             Disable terminal colours
+
+Exit codes:
+  0    Success or user-declined removal
+  1    D1 or operational failure
+  2    Invalid command, input, or configuration
+  130  Interrupted with Ctrl+C
+  143  Terminated with SIGTERM
+`;
+
+const commandHelp: Record<CliCommand, string> = {
+    add: `Create a Short URL.
+
+Usage:
+  pnpm urls add <slug> <destination> [options]
+
+Options:
+  -a, --alias <slug>     Add another alias (repeatable)
+  --owner <tkid>         Owner tkid (defaults to SHORT_URL_OWNER_ID)
+  -e, --expires <date>   Expiry as an ISO 8601 date
+  -k, --protected        Generate a 128-bit access key
+  --password             Prompt for a password (8-128 characters)
+  --pin                  Prompt for a numeric PIN (4-8 digits)
+${commonOptions}
+
+Examples:
+  pnpm urls add docs https://developers.cloudflare.com
+  pnpm urls add docs https://developers.cloudflare.com -a cf -e 2030-01-01T00:00:00Z
+  pnpm urls add private https://example.com --password -l
+
+Expired aliases are reclaimed automatically when a new Short URL reuses them.
+`,
+    list: `List Short URLs.
+
+Usage:
+  pnpm urls list [options]
+
+Options:
+  --json                 Print machine-readable JSON
+${commonOptions}
+
+Examples:
+  pnpm urls list
+  pnpm urls list --json -l
+`,
+    remove: `Remove Short URLs and all of their aliases.
+
+Usage:
+  pnpm urls remove <slug...> [options]
+
+Options:
+  -y, --yes              Skip the removal confirmation
+${commonOptions}
+
+Examples:
+  pnpm urls remove docs old-docs
+  pnpm urls remove docs old-docs -l -y
+`,
+};
+
+async function main(arguments_: string[]): Promise<void> {
+    if (arguments_.length === 0) {
+        process.stdout.write(globalHelp);
+        return;
+    }
+
+    let options: CliOptions;
+    try {
+        options = parseArguments(arguments_);
+    } catch (error) {
+        if (error instanceof CliError) throw error;
+        throw usageError(
+            error instanceof Error ? error.message : 'The command line could not be parsed.',
+            arguments_.find(isCommand)
+        );
+    }
+
+    if (options.help) {
+        process.stdout.write(options.command === null ? globalHelp : commandHelp[options.command]);
+        return;
+    }
+
+    const command = options.command;
+    if (command === null) {
+        const suppliedCommand = options.positionals[0];
+        throw usageError(suppliedCommand ? `Unknown command "${suppliedCommand}".` : 'Choose add, list, or remove.');
+    }
+
+    switch (command) {
+        case 'add':
+            await addShortUrl(options);
+            return;
+        case 'list':
+            await listShortUrls(options);
+            return;
+        case 'remove':
+            await removeShortUrl(options);
+            return;
+    }
+}
+
+async function addShortUrl(options: CliOptions): Promise<void> {
+    validateAddOptions(options);
+
+    const slug = normalizeSlug(options.positionals[0], 'slug');
+    const destinationUrl = normalizeDestinationUrl(options.positionals[1]);
+    const aliases = options.aliases.map((alias) => normalizeSlug(alias, 'alias'));
+    const slugs = [...new Set([slug, ...aliases])];
+    const ownerId = normalizeOwnerId(options.owner ?? process.env.SHORT_URL_OWNER_ID);
+    const expiresAt = normalizeExpiry(options.expires);
+    const credentials = await createProtectionCredentials(options.protection, process.env.SHORT_URL_PEPPER);
+    const databaseTarget = options.databaseTarget ?? 'remote';
+    const id = randomUUID();
+    const now = Date.now();
+    const sql = createInsertSql({
+        id,
+        destinationUrl,
+        verifier: credentials?.verifier ?? null,
+        expiresAt,
+        ownerId,
+        now,
+        slugs,
+    });
+
+    await executeInsertSqlFile(sql, databaseTarget, id);
+
+    process.stdout.write(
+        `${styled('green', `Created ${slugs.length === 1 ? 'a Short URL' : 'Short URLs'}`)} in ${databaseLabel(databaseTarget)}:\n`
+    );
+    for (const shortUrlSlug of slugs) {
+        process.stdout.write(`  ${styled('cyan', `${publicOrigins[databaseTarget]}/${shortUrlSlug}`)}\n`);
+    }
+
+    if (expiresAt !== null) {
+        process.stdout.write(`Expires: ${new Date(expiresAt).toISOString()}\n`);
+    }
+
+    if (credentials?.accessKey) {
+        process.stdout.write(`\nAccess key (shown once): ${credentials.accessKey}\n`);
+    }
+}
+
+async function listShortUrls(options: CliOptions): Promise<void> {
+    validateListOptions(options);
+
+    const databaseTarget = options.databaseTarget ?? 'remote';
+    const shortUrls = await fetchShortUrls(databaseTarget);
+
+    if (options.json) {
+        process.stdout.write(
+            `${JSON.stringify(
+                shortUrls.map((shortUrl) => shortUrlJson(shortUrl, databaseTarget)),
+                null,
+                2
+            )}\n`
+        );
+        return;
+    }
+
+    if (shortUrls.length === 0) {
+        process.stdout.write(`No Short URLs found in ${databaseLabel(databaseTarget)}.\n`);
+        return;
+    }
+
+    process.stdout.write(
+        `${styled('bold', databaseLabel(databaseTarget))} — ${shortUrls.length} Short URL${shortUrls.length === 1 ? '' : 's'}\n`
+    );
+    for (const shortUrl of shortUrls) {
+        process.stdout.write(
+            `\n${shortUrl.slugs.map((slug) => styled('cyan', `${publicOrigins[databaseTarget]}/${slug}`)).join('\n')}\n`
+        );
+        process.stdout.write(`  → ${shortUrl.destinationUrl}\n`);
+        process.stdout.write(
+            `  ${styled(shortUrl.status === 'active' ? 'green' : 'yellow', shortUrl.status)} · ${shortUrl.protection} · ${shortUrl.expiresAt === null ? 'never expires' : `expires ${new Date(shortUrl.expiresAt).toISOString()}`}\n`
+        );
+        process.stdout.write(`  owner ${shortUrl.ownerId} · created ${new Date(shortUrl.createdAt).toISOString()}\n`);
+    }
+}
+
+async function removeShortUrl(options: CliOptions): Promise<void> {
+    validateRemoveOptions(options);
+
+    const requestedSlugs = [
+        ...new Set(options.positionals.map((slug, index) => normalizeSlug(slug, `slug ${index + 1}`))),
+    ];
+    const databaseTarget = options.databaseTarget ?? 'remote';
+    const shortUrls = await fetchShortUrls(databaseTarget, requestedSlugs);
+    const resolvedSlugs = new Set(shortUrls.flatMap((shortUrl) => shortUrl.slugs));
+    const missingSlugs = requestedSlugs.filter((slug) => !resolvedSlugs.has(slug));
+
+    if (missingSlugs.length > 0) {
+        throw new CliError(
+            'E_NOT_FOUND',
+            `No Short URL exists for ${missingSlugs.map((slug) => `/${slug}`).join(', ')} in ${databaseLabel(databaseTarget)}. Nothing was deleted.`,
+            `Run "pnpm urls list${databaseTarget === 'local' ? ' --local' : ''}" to review the available Short URLs.`,
+            1
+        );
+    }
+
+    if (!options.yes && !(await confirmRemoval(shortUrls, databaseTarget))) {
+        process.stdout.write('Removal cancelled.\n');
+        return;
+    }
+
+    const shortUrlIds = shortUrls.map((shortUrl) => shortUrl.id);
+    const results = await executeD1Command(
+        `PRAGMA foreign_keys = ON;
+DELETE FROM short_urls
+WHERE id IN (${shortUrlIds.map(quoteSql).join(', ')})
+RETURNING id;`,
+        databaseTarget,
+        'D1 removal failed. Short URLs could not be removed.'
+    );
+    const removedIds = new Set(
+        results
+            .flatMap((result) => result.results ?? [])
+            .flatMap((row) =>
+                row && typeof row === 'object' && 'id' in row && typeof row.id === 'string' ? [row.id] : []
+            )
+    );
+    if (shortUrlIds.some((id) => !removedIds.has(id))) {
+        throw d1Error('One or more Short URLs changed while they were being removed. List the Short URLs and retry.');
+    }
+
+    const aliases = shortUrls.flatMap((shortUrl) => shortUrl.slugs);
+    process.stdout.write(
+        `${styled('green', `Removed ${shortUrls.length} Short URL${shortUrls.length === 1 ? '' : 's'}`)} and ${aliases.length} alias${aliases.length === 1 ? '' : 'es'} (${aliases.map((alias) => `/${alias}`).join(', ')}) from ${databaseLabel(databaseTarget)}.\n`
+    );
+    if (shortUrls.some((shortUrl) => shortUrl.status === 'active' && shortUrl.protection === 'public')) {
+        process.stdout.write(
+            `${styled('yellow', 'Note:')} Previously cached public redirects may remain available for up to five minutes.\n`
+        );
+    }
+}
+
+function parseArguments(arguments_: string[]): CliOptions {
+    const { positionals, values } = parseArgs({
+        args: arguments_,
+        allowPositionals: true,
+        options: {
+            alias: { type: 'string', multiple: true, short: 'a' },
+            debug: { type: 'boolean' },
+            expires: { type: 'string', short: 'e' },
+            help: { type: 'boolean', short: 'h' },
+            json: { type: 'boolean' },
+            local: { type: 'boolean', short: 'l' },
+            owner: { type: 'string' },
+            password: { type: 'boolean' },
+            pin: { type: 'boolean' },
+            protected: { type: 'boolean', short: 'k' },
+            remote: { type: 'boolean', short: 'r' },
+            yes: { type: 'boolean', short: 'y' },
+        },
+        strict: true,
+    });
+    const targets = [values.local && 'local', values.remote && 'remote'].filter(Boolean) as DatabaseTarget[];
+    const protections = [values.protected && 'key', values.password && 'password', values.pin && 'pin'].filter(
+        Boolean
+    ) as ProtectionKind[];
+
+    if (targets.length > 1) {
+        throw usageError('Choose only one of --local or --remote.');
+    }
+    if (protections.length > 1) {
+        throw usageError('Choose only one of --protected, --password, or --pin.', 'add');
+    }
+
+    const [possibleCommand, ...commandPositionals] = positionals;
+    const command = possibleCommand && isCommand(possibleCommand) ? possibleCommand : null;
+
+    return {
+        aliases: values.alias ?? [],
+        command,
+        databaseTarget: targets[0] ?? null,
+        expires: values.expires,
+        help: values.help ?? false,
+        json: values.json ?? false,
+        owner: values.owner,
+        positionals: command === null ? positionals : commandPositionals,
+        protection: protections[0] ?? null,
+        yes: values.yes ?? false,
+    };
+}
+
+function isCommand(value: string): value is CliCommand {
+    return value === 'add' || value === 'list' || value === 'remove';
+}
+
+function validateAddOptions(options: CliOptions): void {
+    if (options.positionals.length !== 2) {
+        throw usageError('Add expects exactly one slug and one destination URL.', 'add');
+    }
+    if (options.json || options.yes) {
+        throw usageError('Add does not support --json or --yes.', 'add');
+    }
+}
+
+function validateListOptions(options: CliOptions): void {
+    if (options.positionals.length !== 0) {
+        throw usageError('List does not accept positional arguments.', 'list');
+    }
+    rejectAddOptions(options, 'List');
+    if (options.yes) {
+        throw usageError('List does not support --yes.', 'list');
+    }
+}
+
+function validateRemoveOptions(options: CliOptions): void {
+    if (options.positionals.length === 0) {
+        throw usageError('Remove expects at least one slug.', 'remove');
+    }
+    rejectAddOptions(options, 'Remove');
+    if (options.json) {
+        throw usageError('Remove does not support --json.', 'remove');
+    }
+}
+
+function rejectAddOptions(options: CliOptions, command: 'List' | 'Remove'): void {
+    if (
+        options.aliases.length > 0 ||
+        options.owner !== undefined ||
+        options.expires !== undefined ||
+        options.protection
+    ) {
+        throw usageError(`${command} does not support add-only options.`, command === 'List' ? 'list' : 'remove');
+    }
+}
+
+function normalizeSlug(value: string | undefined, label: string): string {
+    const slug = value?.toLowerCase();
+
+    if (!slug || !shortUrlSlugPattern.test(slug)) {
+        throw inputError(
+            `${label} must use 1-64 characters from a-z, 0-9, _ or -.`,
+            'Choose a short lowercase name such as "docs" or "release_notes".'
+        );
+    }
+
+    if (reservedShortUrlSlugs.has(slug)) {
+        throw inputError(`${label} "${slug}" is reserved by the website.`, 'Choose a different slug.');
+    }
+
+    return slug;
+}
+
+function normalizeDestinationUrl(value: string | undefined): string {
+    if (!value) {
+        throw inputError('Destination URL is required.', 'Provide a complete HTTP or HTTPS URL.');
+    }
+
+    let url: URL;
+
+    try {
+        url = new URL(value);
+    } catch {
+        throw inputError('Destination must be a valid URL.', 'For example: https://example.com/path');
+    }
+
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        throw inputError('Destination must use HTTP or HTTPS.', 'For example: https://example.com/path');
+    }
+
+    if (url.href.length > 2048) {
+        throw inputError('Destination must be no longer than 2048 characters.', 'Use a shorter destination URL.');
+    }
+
+    return url.href;
+}
+
+function normalizeOwnerId(value: string | undefined): string {
+    const ownerId = value?.trim();
+
+    if (!ownerId) {
+        throw configError('No owner tkid is configured.', 'Pass --owner <tkid> or add SHORT_URL_OWNER_ID to .env.');
+    }
+
+    if (ownerId.length > 255 || ownerId.includes('\0')) {
+        throw inputError('Owner tkid must be between 1 and 255 characters.', 'Check --owner or SHORT_URL_OWNER_ID.');
+    }
+
+    return ownerId;
+}
+
+function normalizeExpiry(value: string | undefined): number | null {
+    if (value === undefined) {
+        return null;
+    }
+
+    const expiresAt = Date.parse(value);
+    if (!Number.isSafeInteger(expiresAt)) {
+        throw inputError('Expiry must be a valid ISO 8601 date.', 'For example: 2030-01-01T00:00:00Z');
+    }
+
+    if (expiresAt <= Date.now()) {
+        throw inputError('Expiry must be in the future.', 'Choose a later date or omit --expires.');
+    }
+
+    return expiresAt;
+}
+
+async function createProtectionCredentials(
+    protection: CliOptions['protection'],
+    pepper: string | undefined
+): Promise<ProtectionCredentials | null> {
+    if (protection === null) {
+        return null;
+    }
+
+    if (!pepper || Buffer.byteLength(pepper) < 32) {
+        throw configError(
+            'SHORT_URL_PEPPER must contain at least 32 bytes for protected Short URLs.',
+            'Add a sufficiently long SHORT_URL_PEPPER to .env, then retry.'
+        );
+    }
+
+    if (protection === 'key') {
+        return createAccessCredentials(pepper);
+    }
+
+    const label = protection === 'pin' ? 'PIN' : 'Password';
+    const secret = await promptAndConfirmSecret(label);
+
+    if (protection === 'pin' && !/^[0-9]{4,8}$/.test(secret)) {
+        throw inputError('PIN must contain 4-8 digits.', 'Retry and enter digits only.');
+    }
+    if (protection === 'password' && (secret.length < 8 || secret.length > 128)) {
+        throw inputError('Password must contain 8-128 characters.', 'Retry with a password in that range.');
+    }
+
+    const salt = randomBytes(16).toString('base64url');
+    const signature = createHmac('sha256', pepper).update(`${protection}.${salt}.${secret}`).digest('base64url');
+    const lengthSegment = protection === 'pin' ? `:${secret.length}` : '';
+
+    return {
+        verifier: `hmac-sha256:v2:${protection}${lengthSegment}:${salt}:${signature}`,
+    };
+}
+
+function createAccessCredentials(pepper: string): ProtectionCredentials {
+    const accessKey = randomBytes(16).toString('base64url');
+    const salt = randomBytes(16).toString('base64url');
+    const signature = createHmac('sha256', pepper).update(`${salt}.${accessKey}`).digest('base64url');
+
+    return {
+        accessKey,
+        verifier: `hmac-sha256:v1:${salt}:${signature}`,
+    };
+}
+
+async function promptAndConfirmSecret(label: string): Promise<string> {
+    const secret = await readSecret(`${label}: `);
+    const confirmation = await readSecret(`Confirm ${label.toLowerCase()}: `);
+
+    if (secret !== confirmation) {
+        throw inputError(`${label} entries do not match.`, `Run the add command again and re-enter the ${label}.`);
+    }
+
+    return secret;
+}
+
+function readSecret(prompt: string): Promise<string> {
+    const input = process.stdin;
+    const output = process.stdout;
+
+    if (!input.isTTY || !output.isTTY || typeof input.setRawMode !== 'function') {
+        throw configError(
+            'Password and PIN entry requires an interactive terminal.',
+            'Run the add command directly in a terminal so the secret can be entered securely.'
+        );
+    }
+
+    return new Promise((resolve, reject) => {
+        let value = '';
+        const previouslyRaw = input.isRaw;
+
+        const cleanup = () => {
+            input.off('keypress', onKeypress);
+            process.off('SIGTERM', onTermination);
+            input.setRawMode(previouslyRaw);
+            input.pause();
+        };
+
+        const onTermination = () => {
+            output.write('\n');
+            cleanup();
+            reject(interruptedError('SIGTERM'));
+        };
+
+        const onKeypress = (character: string, key: { ctrl?: boolean; meta?: boolean; name?: string }) => {
+            if (key.ctrl && key.name === 'c') {
+                output.write('\n');
+                cleanup();
+                reject(interruptedError());
+                return;
+            }
+
+            if (key.name === 'return' || key.name === 'enter') {
+                output.write('\n');
+                cleanup();
+                resolve(value);
+                return;
+            }
+
+            if (key.name === 'backspace') {
+                if (value.length > 0) {
+                    value = value.slice(0, -1);
+                    output.write('\b \b');
+                }
+                return;
+            }
+
+            if (!character || key.ctrl || key.meta || key.name === 'escape') {
+                return;
+            }
+
+            value += character;
+            output.write('•'.repeat([...character].length));
+        };
+
+        emitKeypressEvents(input);
+        input.setRawMode(true);
+        input.resume();
+        input.on('keypress', onKeypress);
+        process.once('SIGTERM', onTermination);
+        output.write(prompt);
+    });
+}
+
+async function confirmRemoval(shortUrls: ShortUrlRecord[], databaseTarget: DatabaseTarget): Promise<boolean> {
+    if (!process.stdin.isTTY || !process.stdout.isTTY) {
+        throw configError(
+            'Removal confirmation requires an interactive terminal.',
+            'Pass --yes to confirm the removal non-interactively.'
+        );
+    }
+
+    process.stdout.write(
+        `Remove ${shortUrls.length} Short URL${shortUrls.length === 1 ? '' : 's'} from ${databaseLabel(databaseTarget)}?\n`
+    );
+    for (const shortUrl of shortUrls) {
+        process.stdout.write(`  ${shortUrl.slugs.map((slug) => `/${slug}`).join(', ')} → ${shortUrl.destinationUrl}\n`);
+    }
+
+    const prompt = createInterface({ input: process.stdin, output: process.stdout });
+    const abortController = new AbortController();
+    let interruption: 'SIGINT' | 'SIGTERM' = 'SIGINT';
+    const interrupt = (signal: 'SIGINT' | 'SIGTERM') => {
+        interruption = signal;
+        abortController.abort();
+    };
+    const interruptWithSigint = () => interrupt('SIGINT');
+    const interruptWithSigterm = () => interrupt('SIGTERM');
+    process.once('SIGINT', interruptWithSigint);
+    process.once('SIGTERM', interruptWithSigterm);
+
+    try {
+        const answer = await prompt.question('Continue? [y/N] ', { signal: abortController.signal });
+        return answer.trim().toLowerCase() === 'y' || answer.trim().toLowerCase() === 'yes';
+    } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+            process.stdout.write('\n');
+            throw interruptedError(interruption);
+        }
+        throw error;
+    } finally {
+        process.off('SIGINT', interruptWithSigint);
+        process.off('SIGTERM', interruptWithSigterm);
+        prompt.close();
+    }
+}
+
+function createInsertSql({ id, destinationUrl, verifier, expiresAt, ownerId, now, slugs }: ShortUrlInsert): string {
+    const slugValues = slugs.map((slug) => `(${quoteSql(slug)}, ${quoteSql(id)})`).join(',\n    ');
+
+    return `PRAGMA foreign_keys = ON;
+
+INSERT INTO short_urls (
+    id,
+    destination_url,
+    unlock_verifier,
+    expires_at,
+    owner_id,
+    created_at,
+    updated_at
+) VALUES (
+    ${quoteSql(id)},
+    ${quoteSql(destinationUrl)},
+    ${verifier === null ? 'NULL' : quoteSql(verifier)},
+    ${expiresAt === null ? 'NULL' : expiresAt},
+    ${quoteSql(ownerId)},
+    ${now},
+    ${now}
+);
+
+INSERT INTO short_url_slugs (slug, short_url_id) VALUES
+    ${slugValues};
+
+DELETE FROM short_urls
+WHERE expires_at IS NOT NULL
+  AND expires_at <= ${now}
+  AND NOT EXISTS (
+      SELECT 1
+      FROM short_url_slugs
+      WHERE short_url_slugs.short_url_id = short_urls.id
+  );
+`;
+}
+
+async function fetchShortUrls(databaseTarget: DatabaseTarget, slugs?: readonly string[]): Promise<ShortUrlRecord[]> {
+    const where = slugs
+        ? `WHERE q.id IN (
+    SELECT DISTINCT short_url_id
+    FROM short_url_slugs
+    WHERE slug IN (${slugs.map(quoteSql).join(', ')})
+)`
+        : '';
+    const results = await executeD1Command(
+        `SELECT
+    q.id AS id,
+    q.destination_url AS destinationUrl,
+    q.unlock_verifier AS unlockVerifier,
+    q.expires_at AS expiresAt,
+    q.owner_id AS ownerId,
+    q.created_at AS createdAt,
+    q.updated_at AS updatedAt,
+    s.slug AS slug
+FROM short_urls AS q
+INNER JOIN short_url_slugs AS s ON s.short_url_id = q.id
+${where}
+ORDER BY q.created_at DESC, s.slug ASC;`,
+        databaseTarget,
+        'D1 lookup failed. Short URLs could not be read.'
+    );
+    const rows = results.flatMap((result) => result.results ?? []) as ShortUrlQueryRow[];
+    const shortUrls = new Map<string, ShortUrlRecord>();
+    const now = Date.now();
+
+    for (const row of rows) {
+        const existing = shortUrls.get(row.id);
+        if (existing) {
+            existing.slugs.push(row.slug);
+            continue;
+        }
+
+        shortUrls.set(row.id, {
+            id: row.id,
+            destinationUrl: row.destinationUrl,
+            expiresAt: row.expiresAt,
+            ownerId: row.ownerId,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+            protection: protectionKind(row.unlockVerifier),
+            slugs: [row.slug],
+            status: row.expiresAt !== null && row.expiresAt <= now ? 'expired' : 'active',
+        });
+    }
+
+    return [...shortUrls.values()];
+}
+
+function protectionKind(verifier: string | null): ShortUrlRecord['protection'] {
+    if (verifier === null) return 'public';
+    if (verifier.startsWith('hmac-sha256:v1:')) return 'key';
+    if (verifier.startsWith('hmac-sha256:v2:password:')) return 'password';
+    if (verifier.startsWith('hmac-sha256:v2:pin:')) return 'pin';
+    return 'protected';
+}
+
+function shortUrlJson(shortUrl: ShortUrlRecord, databaseTarget: DatabaseTarget) {
+    return {
+        id: shortUrl.id,
+        slugs: shortUrl.slugs,
+        urls: shortUrl.slugs.map((slug) => `${publicOrigins[databaseTarget]}/${slug}`),
+        destinationUrl: shortUrl.destinationUrl,
+        status: shortUrl.status,
+        protection: shortUrl.protection,
+        expiresAt: shortUrl.expiresAt === null ? null : new Date(shortUrl.expiresAt).toISOString(),
+        ownerId: shortUrl.ownerId,
+        createdAt: new Date(shortUrl.createdAt).toISOString(),
+        updatedAt: new Date(shortUrl.updatedAt).toISOString(),
+    };
+}
+
+function quoteSql(value: string): string {
+    return `'${value.replaceAll("'", "''")}'`;
+}
+
+async function executeInsertSqlFile(sql: string, databaseTarget: DatabaseTarget, shortUrlId: string): Promise<void> {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'tkkr-short-url-'));
+    const sqlFile = join(temporaryDirectory, 'insert.sql');
+
+    try {
+        await writeFile(sqlFile, sql, { encoding: 'utf8', mode: 0o600 });
+        try {
+            const output = await runWrangler(
+                [
+                    'd1',
+                    'execute',
+                    databaseName,
+                    `--file=${sqlFile}`,
+                    databaseTarget === 'local' ? '--local' : '--remote',
+                    '--yes',
+                    '--json',
+                ],
+                'D1 write failed. No Short URL was created.'
+            );
+            parseD1Results(output);
+        } catch (error) {
+            await cleanupFailedInsert(shortUrlId, databaseTarget, error);
+            throw error;
+        }
+    } finally {
+        await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+}
+
+async function cleanupFailedInsert(
+    shortUrlId: string,
+    databaseTarget: DatabaseTarget,
+    originalError: unknown
+): Promise<void> {
+    const cleanupSql = `DELETE FROM short_urls
+WHERE id = ${quoteSql(shortUrlId)}
+  AND NOT EXISTS (
+      SELECT 1
+      FROM short_url_slugs
+      WHERE short_url_slugs.short_url_id = short_urls.id
+  );`;
+
+    try {
+        await executeD1Command(
+            cleanupSql,
+            databaseTarget,
+            'D1 cleanup failed. The incomplete Short URL may still exist.'
+        );
+    } catch (cleanupError) {
+        throw d1Error(
+            'D1 write failed and its incomplete Short URL could not be cleaned up.',
+            new AggregateError([originalError, cleanupError])
+        );
+    }
+}
+
+async function executeD1Command(
+    sql: string,
+    databaseTarget: DatabaseTarget,
+    failureMessage: string
+): Promise<D1ExecuteResult[]> {
+    const output = await runWrangler(
+        [
+            'd1',
+            'execute',
+            databaseName,
+            `--command=${sql}`,
+            databaseTarget === 'local' ? '--local' : '--remote',
+            '--yes',
+            '--json',
+        ],
+        failureMessage
+    );
+
+    return parseD1Results(output);
+}
+
+function parseD1Results(output: string): D1ExecuteResult[] {
+    let value: unknown;
+    try {
+        value = JSON.parse(output);
+    } catch (error) {
+        throw d1Error('Wrangler returned an unreadable D1 response.', error);
+    }
+
+    const results = Array.isArray(value) ? value : [value];
+    if (
+        results.length === 0 ||
+        results.some(
+            (result) =>
+                !result ||
+                typeof result !== 'object' ||
+                !('success' in result) ||
+                (result as D1ExecuteResult).success !== true
+        )
+    ) {
+        throw d1Error('D1 did not report a successful operation.');
+    }
+
+    return results as D1ExecuteResult[];
+}
+
+function runWrangler(arguments_: string[], failureMessage: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const child = spawn('pnpm', ['exec', 'wrangler', ...arguments_], {
+            cwd: projectDirectory,
+            stdio: ['inherit', 'pipe', 'inherit'],
+        });
+        let output = '';
+        let interrupted = false;
+        const cleanupSignalHandlers = () => {
+            process.off('SIGINT', interruptWithSigint);
+            process.off('SIGTERM', interruptWithSigterm);
+        };
+        const interrupt = (signal: 'SIGINT' | 'SIGTERM') => {
+            if (interrupted) return;
+            interrupted = true;
+            cleanupSignalHandlers();
+            child.kill(signal);
+            reject(interruptedError(signal));
+        };
+        const interruptWithSigint = () => interrupt('SIGINT');
+        const interruptWithSigterm = () => interrupt('SIGTERM');
+
+        process.once('SIGINT', interruptWithSigint);
+        process.once('SIGTERM', interruptWithSigterm);
+
+        child.stdout.setEncoding('utf8');
+        child.stdout.on('data', (chunk: string) => {
+            output += chunk;
+        });
+
+        child.once('error', (error) => {
+            cleanupSignalHandlers();
+            reject(d1Error(`${failureMessage} Wrangler could not be started.`, error));
+        });
+        child.once('exit', (code, signal) => {
+            cleanupSignalHandlers();
+            if (interrupted) return;
+
+            if (code === 0) {
+                resolve(output);
+                return;
+            }
+
+            const reason = signal ? `signal ${signal}` : `exit code ${code ?? 'unknown'}`;
+            reject(d1Error(`${failureMessage} Wrangler exited with ${reason}.`));
+        });
+    });
+}
+
+function databaseLabel(databaseTarget: DatabaseTarget): string {
+    return databaseTarget === 'local' ? 'local test D1' : 'remote D1';
+}
+
+function debugRequested(arguments_: readonly string[]): boolean {
+    const environmentValue = process.env.SHORT_URL_DEBUG?.trim().toLowerCase();
+    return arguments_.includes('--debug') || ['1', 'true', 'yes', 'on'].includes(environmentValue ?? '');
+}
+
+function describeError(error: unknown): string {
+    if (error instanceof Error) {
+        const details = error.stack ?? `${error.name}: ${error.message}`;
+        return error.cause === undefined ? details : `${details}\nCaused by: ${describeError(error.cause)}`;
+    }
+    return String(error);
+}
+
+function reportError(error: unknown, debug: boolean): void {
+    const cliError =
+        error instanceof CliError
+            ? error
+            : new CliError(
+                  'E_INTERNAL',
+                  'An unexpected CLI error occurred.',
+                  `Retry with --debug. If the problem persists, report it at ${issueUrl}`,
+                  1,
+                  error
+              );
+
+    process.stderr.write(
+        `\n${styled(['bold', 'red'], `Error [${cliError.code}]`, process.stderr)}: ${cliError.message}\n`
+    );
+    if (cliError.hint) {
+        process.stderr.write(`${styled('yellow', 'Hint', process.stderr)}: ${cliError.hint}\n`);
+    }
+    if (debug) {
+        process.stderr.write(`\n${styled('dim', 'Debug details', process.stderr)}\n${describeError(cliError)}\n`);
+    }
+
+    process.exitCode = cliError.exitCode;
+}
+
+const commandLineArguments = process.argv.slice(2);
+main(commandLineArguments).catch((error: unknown) => {
+    reportError(error, debugRequested(commandLineArguments));
+});

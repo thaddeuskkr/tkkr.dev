@@ -26,12 +26,12 @@ export const notFoundStatusPage = {
     },
 } satisfies StatusPageDefinition;
 
-export const quickLinkExpiredStatusPage = {
+export const shortUrlExpiredStatusPage = {
     status: 410,
-    title: 'Link expired — tkkr.dev',
-    label: 'Link expired',
-    heading: 'This link has run its course.',
-    description: 'This link has reached its expiry time and can no longer take you to its destination.',
+    title: 'Short URL expired — tkkr.dev',
+    label: 'Short URL expired',
+    heading: 'This short URL has run its course.',
+    description: 'This short URL has reached its expiry time and can no longer take you to its destination.',
     action: {
         href: '/',
         icon: 'home',
@@ -39,13 +39,13 @@ export const quickLinkExpiredStatusPage = {
     },
 } satisfies StatusPageDefinition;
 
-export function quickLinkUnavailableStatusPage(slug: string): StatusPageDefinition {
+export function shortUrlUnavailableStatusPage(slug: string): StatusPageDefinition {
     return {
         status: 503,
-        title: 'Links unavailable — tkkr.dev',
+        title: 'Short URLs unavailable — tkkr.dev',
         label: 'Service unavailable',
-        heading: 'Links are out of reach.',
-        description: 'Links are temporarily unavailable. Please wait a few minutes and try this address again.',
+        heading: 'Short URLs are out of reach.',
+        description: 'Short URLs are temporarily unavailable. Please wait a few minutes and try this address again.',
         action: {
             href: `/${slug}`,
             icon: 'retry',
@@ -54,28 +54,28 @@ export function quickLinkUnavailableStatusPage(slug: string): StatusPageDefiniti
     };
 }
 
-export function quickLinkMethodNotAllowedStatusPage(slug: string): StatusPageDefinition {
+export function shortUrlMethodNotAllowedStatusPage(slug: string): StatusPageDefinition {
     return {
         status: 405,
         title: 'Method not allowed — tkkr.dev',
         label: 'Method not allowed',
-        heading: 'This link is already open.',
-        description: 'This link does not require an access key. Open it normally to continue.',
+        heading: 'This short URL is already open.',
+        description: 'This short URL does not require an access key. Open it normally to continue.',
         action: {
             href: `/${slug}`,
             icon: 'open',
-            label: 'Open link',
+            label: 'Open short URL',
         },
     };
 }
 
-export function quickLinkUnsupportedRequestStatusPage(slug: string): StatusPageDefinition {
+export function shortUrlUnsupportedRequestStatusPage(slug: string): StatusPageDefinition {
     return {
         status: 415,
         title: 'Unsupported request — tkkr.dev',
         label: 'Unsupported request',
-        heading: 'That request cannot unlock this link.',
-        description: 'Use the protected-link form to submit your password, PIN, or access key.',
+        heading: 'That request cannot unlock this short URL.',
+        description: 'Use the protected short URL form to submit your password, PIN, or access key.',
         action: {
             href: `/${slug}`,
             icon: 'retry',
@@ -84,7 +84,7 @@ export function quickLinkUnsupportedRequestStatusPage(slug: string): StatusPageD
     };
 }
 
-export function quickLinkRequestTooLargeStatusPage(slug: string): StatusPageDefinition {
+export function shortUrlRequestTooLargeStatusPage(slug: string): StatusPageDefinition {
     return {
         status: 413,
         title: 'Request too large — tkkr.dev',
