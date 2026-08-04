@@ -1,8 +1,8 @@
 import { Link as RouterLink, useSearch } from '@tanstack/react-router';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { cn } from '@/lib/utils';
-import { Briefcase, Home, UserRound, Link as LinkIcon } from 'lucide-react';
+import { Home, UserRound, Link as LinkIcon } from 'lucide-react';
 
 const navigationLinks = [
     { to: '/', label: 'Home', icon: Home },
@@ -38,10 +38,12 @@ export function Navigation() {
                             <span className="hidden min-[430px]:inline">{label}</span>
                         </RouterLink>
                     ))}
+                    {/* Restore the Projects item when the projects page is ready.
                     <Button aria-label="Projects" variant="ghost" size="lg" className={navigationItemClassName}>
                         <Briefcase className="transition-transform duration-300 group-hover/button:scale-110 min-[430px]:mr-0.5" />
                         <span className="hidden min-[430px]:inline">Projects</span>
                     </Button>
+                    */}
                 </div>
 
                 <div aria-hidden="true" className="hidden sm:block" />
