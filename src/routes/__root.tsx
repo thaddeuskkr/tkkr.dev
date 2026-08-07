@@ -20,11 +20,21 @@ type RootSearch = {
     links?: boolean;
 };
 
+type NotFoundAwareMatch = {
+    status: string;
+    globalNotFound?: boolean;
+    _notFound?: boolean;
+};
+
+function isNotFoundMatch(match: NotFoundAwareMatch) {
+    return match.status === 'notFound' || match.globalNotFound === true || match._notFound === true;
+}
+
 export const Route = createRootRoute({
     validateSearch: (search: Record<string, unknown>): RootSearch => ({
         links: search.links === true || search.links === 'true' ? true : undefined,
     }),
-    head: ({ match }) => ({
+    head: ({ matches }) => ({
         meta: [
             {
                 charSet: 'utf-8',
@@ -34,7 +44,7 @@ export const Route = createRootRoute({
                 content: 'width=device-width, initial-scale=1',
             },
             {
-                title: match.globalNotFound ? notFoundStatusPage.title : 'Thaddeus Kuah',
+                title: matches.some(isNotFoundMatch) ? notFoundStatusPage.title : 'Thaddeus Kuah',
             },
             {
                 name: 'description',
@@ -51,6 +61,27 @@ export const Route = createRootRoute({
                 rel: 'icon',
                 href: '/favicon.ico',
                 type: 'image/x-icon',
+            },
+            {
+                rel: 'icon',
+                sizes: '16x16',
+                href: '/favicon-16x16.png',
+                type: 'image/png',
+            },
+            {
+                rel: 'icon',
+                sizes: '32x32',
+                href: '/favicon-32x32.png',
+                type: 'image/png',
+            },
+            {
+                rel: 'apple-touch-icon',
+                href: '/apple-touch-icon.png',
+                sizes: '180x180',
+            },
+            {
+                rel: 'manifest',
+                href: '/site.webmanifest',
             },
             {
                 rel: 'stylesheet',
