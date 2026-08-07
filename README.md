@@ -1,21 +1,50 @@
-# TanStack Start + shadcn/ui
+# tkkr.dev
 
-This is a template for a new TanStack Start project with React, TypeScript, and shadcn/ui.
+Thaddeus Kuah's personal website and short URL service. The site is built with TanStack Start, React, Tailwind CSS, and Base UI, then deployed to Cloudflare Workers with D1 storage.
 
-## Adding components
+## Local development
 
-To add components to your app, run the following command:
+Install dependencies and create a local environment file:
 
 ```bash
-npx shadcn@latest add button
+pnpm install
+cp .env.example .env
 ```
 
-This will place the ui components in the `components` directory.
+Create the local D1 database schema, then start the development server:
 
-## Using components
+```bash
+pnpm db:migrate:local
+pnpm dev
+```
 
-To use the components in your app, import them as follows:
+The site runs at [http://localhost:3000](http://localhost:3000).
 
-```tsx
-import { Button } from '@/components/ui/button';
+## Short URLs
+
+The Short URL command-line tool manages local or remote D1 records:
+
+```bash
+pnpm urls --help
+pnpm urls:local list
+```
+
+Protected URLs require a `SHORT_URL_PEPPER` containing at least 32 bytes. Remote writes use the Cloudflare account and D1 database configured through Wrangler.
+
+## Quality checks
+
+Run the full formatter, TypeScript, ESLint, and production-build check before deploying:
+
+```bash
+pnpm validate
+```
+
+Individual commands are also available as `pnpm check`, `pnpm typecheck`, `pnpm lint`, and `pnpm build`.
+
+## Deployment
+
+After configuring Wrangler and the required Worker secrets:
+
+```bash
+pnpm deploy
 ```

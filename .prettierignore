@@ -1,5 +1,9 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+node_modules
+dist
+.tanstack
+.wrangler
 routeTree.gen.ts
 worker-configuration.d.ts

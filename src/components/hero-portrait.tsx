@@ -96,11 +96,14 @@ export function HeroPortrait() {
                     />
                     <figure className="relative z-10 aspect-5/6 transform-[translateZ(18px)] overflow-hidden rounded-[1.7rem] border border-border/80 bg-muted shadow-[0_24px_70px_-38px_color-mix(in_oklch,var(--primary)_70%,transparent)] sm:aspect-5/7">
                         <img
-                            src="/robin.jpeg"
-                            alt="Robin - Honkai Star Rail"
+                            src="/robin.webp"
+                            alt="Robin from Honkai: Star Rail"
+                            width={908}
+                            height={1280}
                             decoding="async"
                             fetchPriority="high"
-                            className="size-full object-cover object-[50%_38%] will-change-transform motion-safe:transition-transform motion-safe:duration-1000 motion-safe:ease-out motion-safe:group-hover/portrait:scale-[1.035]"
+                            draggable={false}
+                            className="pointer-events-none size-full object-cover object-[50%_38%] will-change-transform select-none motion-safe:transition-transform motion-safe:duration-1000 motion-safe:ease-out motion-safe:group-hover/portrait:scale-[1.035]"
                         />
                         <div
                             aria-hidden="true"

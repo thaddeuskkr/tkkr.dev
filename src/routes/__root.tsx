@@ -38,10 +38,20 @@ export const Route = createRootRoute({
             },
             {
                 name: 'description',
-                content: 'hi! i’m thaddeus, a 20 year-old self-taught hobbyist programmer studying in singapore.',
+                content:
+                    'The personal website of Thaddeus Kuah, an information technology student and self-taught hobbyist programmer in Singapore.',
+            },
+            {
+                name: 'color-scheme',
+                content: 'light dark',
             },
         ],
         links: [
+            {
+                rel: 'icon',
+                href: '/favicon.ico',
+                type: 'image/x-icon',
+            },
             {
                 rel: 'stylesheet',
                 href: appCss,
