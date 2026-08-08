@@ -6,7 +6,9 @@ import { dirname, join } from 'node:path';
 import { emitKeypressEvents } from 'node:readline';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
-import { parseArgs, styleText } from 'node:util';
+import { parseArgs, stripVTControlCharacters, styleText } from 'node:util';
+
+import { validateShortUrlDestination } from '../src/lib/short-url-destination.ts';
 
 const databaseName = 'tkkr-dev-urls';
 const publicOrigins = {
@@ -22,10 +24,21 @@ type CliCommand = 'add' | 'list' | 'remove';
 type DatabaseTarget = keyof typeof publicOrigins;
 type ProtectionKind = 'key' | 'password' | 'pin';
 type ShortUrlStatus = 'active' | 'expired';
-type CliErrorCode = 'E_CONFIG' | 'E_D1' | 'E_INPUT' | 'E_INTERNAL' | 'E_INTERRUPTED' | 'E_NOT_FOUND' | 'E_USAGE';
+type CliErrorCode =
+    | 'E_AUTH'
+    | 'E_BUSY'
+    | 'E_CONFIG'
+    | 'E_CONFLICT'
+    | 'E_D1'
+    | 'E_INPUT'
+    | 'E_INTERNAL'
+    | 'E_INTERRUPTED'
+    | 'E_NETWORK'
+    | 'E_NOT_FOUND'
+    | 'E_SCHEMA'
+    | 'E_USAGE';
 
 type CliOptions = {
-    aliases: string[];
     command: CliCommand | null;
     databaseTarget: DatabaseTarget | null;
     expires: string | undefined;
@@ -70,9 +83,18 @@ type ShortUrlRecord = Omit<ShortUrlQueryRow, 'slug' | 'unlockVerifier'> & {
 };
 
 type D1ExecuteResult = {
+    error?: unknown;
     success: boolean;
     results?: unknown[] | null;
 };
+
+type D1OperationContext = {
+    databaseTarget: DatabaseTarget;
+    failureMessage: string;
+    slugs?: readonly string[];
+};
+
+type JsonParseAttempt = { ok: true; value: unknown } | { error: unknown; ok: false };
 
 class CliError extends Error {
     readonly code: CliErrorCode;
@@ -111,7 +133,39 @@ function d1Error(message: string, cause?: unknown): CliError {
     return new CliError(
         'E_D1',
         message,
-        'Review the Wrangler output above. If its login has expired, run "pnpm exec wrangler login" and retry.',
+        'Retry with --debug for diagnostic details. If Wrangler login has expired, run "pnpm exec wrangler login".',
+        1,
+        cause
+    );
+}
+
+function shortUrlConflictError(slugs: readonly string[], databaseTarget: DatabaseTarget, cause?: unknown): CliError {
+    const paths = slugs.map((slug) => `/${slug}`).join(', ');
+    const message =
+        slugs.length === 1
+            ? `The slug ${paths} already belongs to an active Short URL in ${databaseLabel(databaseTarget)}.`
+            : `These slugs already belong to active Short URLs in ${databaseLabel(databaseTarget)}: ${paths}.`;
+
+    return new CliError(
+        'E_CONFLICT',
+        message,
+        `Choose different slugs, or remove the existing Short URL${slugs.length === 1 ? '' : 's'} first.`,
+        1,
+        cause
+    );
+}
+
+function possibleShortUrlConflictError(
+    slugs: readonly string[],
+    databaseTarget: DatabaseTarget,
+    cause?: unknown
+): CliError {
+    if (slugs.length === 1) return shortUrlConflictError(slugs, databaseTarget, cause);
+
+    return new CliError(
+        'E_CONFLICT',
+        `At least one requested slug already belongs to an active Short URL in ${databaseLabel(databaseTarget)}: ${slugs.map((slug) => `/${slug}`).join(', ')}.`,
+        `Run "pnpm urls list${databaseTarget === 'local' ? ' --local' : ''}" to identify it, or retry after choosing different slugs.`,
         1,
         cause
     );
@@ -142,7 +196,7 @@ const commonOptions = `  -l, --local            Use the local test D1 database
 const globalHelp = `Manage Short URLs directly in D1.
 
 Usage:
-  pnpm urls add <slug> <destination> [options]
+  pnpm urls add <destination> <slug[,slug...]> [options]
   pnpm urls list [options]
   pnpm urls remove <slug...> [options]
 
@@ -155,7 +209,7 @@ Common options:
 ${commonOptions}
 
 Examples:
-  pnpm urls add docs https://developers.cloudflare.com
+  pnpm urls add https://developers.cloudflare.com docs,cf
   pnpm urls list
   pnpm urls remove docs old-docs
 
@@ -177,10 +231,13 @@ const commandHelp: Record<CliCommand, string> = {
     add: `Create a Short URL.
 
 Usage:
-  pnpm urls add <slug> <destination> [options]
+  pnpm urls add <destination> <slug[,slug...]> [options]
+
+Arguments:
+  <destination>          Complete web, mail, phone, or app destination URI
+  <slug[,slug...]>       One or more comma-separated slugs
 
 Options:
-  -a, --alias <slug>     Add another alias (repeatable)
   --owner <tkid>         Owner tkid (defaults to SHORT_URL_OWNER_ID)
   -e, --expires <date>   Expiry as an ISO 8601 date
   -k, --protected        Generate a 128-bit access key
@@ -189,11 +246,14 @@ Options:
 ${commonOptions}
 
 Examples:
-  pnpm urls add docs https://developers.cloudflare.com
-  pnpm urls add docs https://developers.cloudflare.com -a cf -e 2030-01-01T00:00:00Z
-  pnpm urls add private https://example.com --password -l
+  pnpm urls add https://developers.cloudflare.com docs
+  pnpm urls add https://developers.cloudflare.com docs,cf -e 2030-01-01T00:00:00Z
+  pnpm urls add mailto:tk@tkkr.dev email,mail
+  pnpm urls add 'shortcuts://run-shortcut?name=Open%20Dashboard' dashboard
+  pnpm urls add https://example.com private --password -l
 
 Expired aliases are reclaimed automatically when a new Short URL reuses them.
+Browser-executable and local-file destination protocols are rejected.
 `,
     list: `List Short URLs.
 
@@ -267,14 +327,17 @@ async function main(arguments_: string[]): Promise<void> {
 async function addShortUrl(options: CliOptions): Promise<void> {
     validateAddOptions(options);
 
-    const slug = normalizeSlug(options.positionals[0], 'slug');
-    const destinationUrl = normalizeDestinationUrl(options.positionals[1]);
-    const aliases = options.aliases.map((alias) => normalizeSlug(alias, 'alias'));
-    const slugs = [...new Set([slug, ...aliases])];
+    const destinationUrl = normalizeDestinationUrl(options.positionals[0]);
+    const slugs = normalizeSlugList(options.positionals[1]);
     const ownerId = normalizeOwnerId(options.owner ?? process.env.SHORT_URL_OWNER_ID);
     const expiresAt = normalizeExpiry(options.expires);
-    const credentials = await createProtectionCredentials(options.protection, process.env.SHORT_URL_PEPPER);
     const databaseTarget = options.databaseTarget ?? 'remote';
+    const existingSlugs = await findActiveSlugs(databaseTarget, slugs);
+    if (existingSlugs.length > 0) {
+        throw shortUrlConflictError(existingSlugs, databaseTarget);
+    }
+
+    const credentials = await createProtectionCredentials(options.protection, process.env.SHORT_URL_PEPPER);
     const id = randomUUID();
     const now = Date.now();
     const sql = createInsertSql({
@@ -287,7 +350,7 @@ async function addShortUrl(options: CliOptions): Promise<void> {
         slugs,
     });
 
-    await executeInsertSqlFile(sql, databaseTarget, id);
+    await executeInsertSqlFile(sql, databaseTarget, id, slugs);
 
     process.stdout.write(
         `${styled('green', `Created ${slugs.length === 1 ? 'a Short URL' : 'Short URLs'}`)} in ${databaseLabel(databaseTarget)}:\n`
@@ -403,7 +466,6 @@ function parseArguments(arguments_: string[]): CliOptions {
         args: arguments_,
         allowPositionals: true,
         options: {
-            alias: { type: 'string', multiple: true, short: 'a' },
             debug: { type: 'boolean' },
             expires: { type: 'string', short: 'e' },
             help: { type: 'boolean', short: 'h' },
@@ -434,7 +496,6 @@ function parseArguments(arguments_: string[]): CliOptions {
     const command = possibleCommand && isCommand(possibleCommand) ? possibleCommand : null;
 
     return {
-        aliases: values.alias ?? [],
         command,
         databaseTarget: targets[0] ?? null,
         expires: values.expires,
@@ -453,7 +514,7 @@ function isCommand(value: string): value is CliCommand {
 
 function validateAddOptions(options: CliOptions): void {
     if (options.positionals.length !== 2) {
-        throw usageError('Add expects exactly one slug and one destination URL.', 'add');
+        throw usageError('Add expects one destination URL followed by one comma-separated slug list.', 'add');
     }
     if (options.json || options.yes) {
         throw usageError('Add does not support --json or --yes.', 'add');
@@ -481,14 +542,28 @@ function validateRemoveOptions(options: CliOptions): void {
 }
 
 function rejectAddOptions(options: CliOptions, command: 'List' | 'Remove'): void {
-    if (
-        options.aliases.length > 0 ||
-        options.owner !== undefined ||
-        options.expires !== undefined ||
-        options.protection
-    ) {
+    if (options.owner !== undefined || options.expires !== undefined || options.protection) {
         throw usageError(`${command} does not support add-only options.`, command === 'List' ? 'list' : 'remove');
     }
+}
+
+function normalizeSlugList(value: string | undefined): string[] {
+    if (value === undefined) {
+        throw inputError('At least one slug is required.', 'Add slugs after the destination URL, separated by commas.');
+    }
+
+    const slugs = value.split(',').map((candidate, index) => {
+        const slug = candidate.trim();
+        if (!slug) {
+            throw inputError(
+                `Slug ${index + 1} is empty.`,
+                'Separate slugs with single commas, for example: docs,cf,cloudflare'
+            );
+        }
+        return normalizeSlug(slug, `slug ${index + 1}`);
+    });
+
+    return [...new Set(slugs)];
 }
 
 function normalizeSlug(value: string | undefined, label: string): string {
@@ -510,26 +585,26 @@ function normalizeSlug(value: string | undefined, label: string): string {
 
 function normalizeDestinationUrl(value: string | undefined): string {
     if (!value) {
-        throw inputError('Destination URL is required.', 'Provide a complete HTTP or HTTPS URL.');
+        throw inputError('Destination URI is required.', 'Provide a complete web, mail, phone, or app URI.');
     }
 
-    let url: URL;
-
-    try {
-        url = new URL(value);
-    } catch {
-        throw inputError('Destination must be a valid URL.', 'For example: https://example.com/path');
+    const result = validateShortUrlDestination(value);
+    switch (result.kind) {
+        case 'valid':
+            return result.destinationUrl;
+        case 'blocked-protocol':
+            throw inputError(
+                `Destination protocol "${result.protocol}" is not allowed.`,
+                'Use a normal web, mail, phone, or installed-app URI rather than browser code or a local file.'
+            );
+        case 'too-long':
+            throw inputError('Destination must be no longer than 2048 characters.', 'Use a shorter destination URI.');
+        case 'invalid':
+            throw inputError(
+                'Destination must be a complete URI with a protocol.',
+                'Put it first, for example: pnpm urls add mailto:hello@example.com email'
+            );
     }
-
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-        throw inputError('Destination must use HTTP or HTTPS.', 'For example: https://example.com/path');
-    }
-
-    if (url.href.length > 2048) {
-        throw inputError('Destination must be no longer than 2048 characters.', 'Use a shorter destination URL.');
-    }
-
-    return url.href;
 }
 
 function normalizeOwnerId(value: string | undefined): string {
@@ -771,6 +846,25 @@ WHERE expires_at IS NOT NULL
 `;
 }
 
+async function findActiveSlugs(databaseTarget: DatabaseTarget, slugs: readonly string[]): Promise<string[]> {
+    const results = await executeD1Command(
+        `SELECT s.slug AS slug
+FROM short_url_slugs AS s
+INNER JOIN short_urls AS q ON q.id = s.short_url_id
+WHERE s.slug IN (${slugs.map(quoteSql).join(', ')})
+  AND (q.expires_at IS NULL OR q.expires_at > ${Date.now()})
+ORDER BY s.slug ASC;`,
+        databaseTarget,
+        'D1 conflict check failed. The Short URL was not created.'
+    );
+
+    return results
+        .flatMap((result) => result.results ?? [])
+        .flatMap((row) =>
+            row && typeof row === 'object' && 'slug' in row && typeof row.slug === 'string' ? [row.slug] : []
+        );
+}
+
 async function fetchShortUrls(databaseTarget: DatabaseTarget, slugs?: readonly string[]): Promise<ShortUrlRecord[]> {
     const where = slugs
         ? `WHERE q.id IN (
@@ -850,9 +944,19 @@ function quoteSql(value: string): string {
     return `'${value.replaceAll("'", "''")}'`;
 }
 
-async function executeInsertSqlFile(sql: string, databaseTarget: DatabaseTarget, shortUrlId: string): Promise<void> {
+async function executeInsertSqlFile(
+    sql: string,
+    databaseTarget: DatabaseTarget,
+    shortUrlId: string,
+    slugs: readonly string[]
+): Promise<void> {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'tkkr-short-url-'));
     const sqlFile = join(temporaryDirectory, 'insert.sql');
+    const context: D1OperationContext = {
+        databaseTarget,
+        failureMessage: 'D1 write failed. No Short URL was created.',
+        slugs,
+    };
 
     try {
         await writeFile(sqlFile, sql, { encoding: 'utf8', mode: 0o600 });
@@ -867,9 +971,9 @@ async function executeInsertSqlFile(sql: string, databaseTarget: DatabaseTarget,
                     '--yes',
                     '--json',
                 ],
-                'D1 write failed. No Short URL was created.'
+                context
             );
-            parseD1Results(output);
+            parseD1Results(output, context);
         } catch (error) {
             await cleanupFailedInsert(shortUrlId, databaseTarget, error);
             throw error;
@@ -899,10 +1003,23 @@ WHERE id = ${quoteSql(shortUrlId)}
             'D1 cleanup failed. The incomplete Short URL may still exist.'
         );
     } catch (cleanupError) {
-        throw d1Error(
-            'D1 write failed and its incomplete Short URL could not be cleaned up.',
-            new AggregateError([originalError, cleanupError])
-        );
+        const aggregateError = new AggregateError([originalError, cleanupError]);
+        if (originalError instanceof CliError) {
+            throw new CliError(
+                originalError.code,
+                `${originalError.message} Cleanup also failed, so an incomplete Short URL may remain.`,
+                [
+                    originalError.hint,
+                    `Run "pnpm urls list${databaseTarget === 'local' ? ' --local' : ''}" after restoring D1 access.`,
+                ]
+                    .filter(Boolean)
+                    .join(' '),
+                originalError.exitCode,
+                aggregateError
+            );
+        }
+
+        throw d1Error('D1 write failed and its incomplete Short URL could not be cleaned up.', aggregateError);
     }
 }
 
@@ -911,6 +1028,7 @@ async function executeD1Command(
     databaseTarget: DatabaseTarget,
     failureMessage: string
 ): Promise<D1ExecuteResult[]> {
+    const context: D1OperationContext = { databaseTarget, failureMessage };
     const output = await runWrangler(
         [
             'd1',
@@ -921,19 +1039,14 @@ async function executeD1Command(
             '--yes',
             '--json',
         ],
-        failureMessage
+        context
     );
 
-    return parseD1Results(output);
+    return parseD1Results(output, context);
 }
 
-function parseD1Results(output: string): D1ExecuteResult[] {
-    let value: unknown;
-    try {
-        value = JSON.parse(output);
-    } catch (error) {
-        throw d1Error('Wrangler returned an unreadable D1 response.', error);
-    }
+function parseD1Results(output: string, context: D1OperationContext): D1ExecuteResult[] {
+    const value = parseWranglerJson(output);
 
     const results = Array.isArray(value) ? value : [value];
     if (
@@ -946,19 +1059,51 @@ function parseD1Results(output: string): D1ExecuteResult[] {
                 (result as D1ExecuteResult).success !== true
         )
     ) {
-        throw d1Error('D1 did not report a successful operation.');
+        const errorText = extractWranglerErrorText(value);
+        throw classifyD1Failure(errorText, context, new Error('D1 returned an unsuccessful result.'));
     }
 
     return results as D1ExecuteResult[];
 }
 
-function runWrangler(arguments_: string[], failureMessage: string): Promise<string> {
+function parseWranglerJson(output: string): unknown {
+    const attempt = tryParseWranglerJson(output);
+    if (attempt.ok) return attempt.value;
+
+    throw d1Error('Wrangler returned an unreadable D1 response.', attempt.error);
+}
+
+function tryParseWranglerJson(output: string): JsonParseAttempt {
+    const normalizedOutput = stripVTControlCharacters(output).trim();
+    const candidateStarts = [0];
+    const jsonLinePattern = /^[\t ]*[\x5b\x7b]/gm;
+
+    for (const match of normalizedOutput.matchAll(jsonLinePattern)) {
+        const leadingWhitespace = match[0].length - 1;
+        const candidateStart = match.index + leadingWhitespace;
+        if (candidateStart > 0) candidateStarts.push(candidateStart);
+    }
+
+    let parseError: unknown;
+    for (const candidateStart of [candidateStarts[0], ...candidateStarts.slice(1).reverse()]) {
+        try {
+            return { ok: true, value: JSON.parse(normalizedOutput.slice(candidateStart)) };
+        } catch (error) {
+            parseError = error;
+        }
+    }
+
+    return { error: parseError, ok: false };
+}
+
+function runWrangler(arguments_: string[], context: D1OperationContext): Promise<string> {
     return new Promise((resolve, reject) => {
         const child = spawn('pnpm', ['exec', 'wrangler', ...arguments_], {
             cwd: projectDirectory,
-            stdio: ['inherit', 'pipe', 'inherit'],
+            stdio: ['inherit', 'pipe', 'pipe'],
         });
         let output = '';
+        let errorOutput = '';
         let interrupted = false;
         const cleanupSignalHandlers = () => {
             process.off('SIGINT', interruptWithSigint);
@@ -981,24 +1126,231 @@ function runWrangler(arguments_: string[], failureMessage: string): Promise<stri
         child.stdout.on('data', (chunk: string) => {
             output += chunk;
         });
+        child.stderr.setEncoding('utf8');
+        child.stderr.on('data', (chunk: string) => {
+            errorOutput += chunk;
+        });
 
         child.once('error', (error) => {
             cleanupSignalHandlers();
-            reject(d1Error(`${failureMessage} Wrangler could not be started.`, error));
+            const isMissingExecutable = 'code' in error && error.code === 'ENOENT';
+            reject(
+                isMissingExecutable
+                    ? new CliError(
+                          'E_CONFIG',
+                          `${context.failureMessage} Wrangler could not be started.`,
+                          'Install project dependencies with "pnpm install", then retry.',
+                          2,
+                          error
+                      )
+                    : d1Error(`${context.failureMessage} Wrangler could not be started.`, error)
+            );
         });
         child.once('exit', (code, signal) => {
             cleanupSignalHandlers();
             if (interrupted) return;
 
             if (code === 0) {
+                if (errorOutput.trim()) process.stderr.write(errorOutput);
                 resolve(output);
                 return;
             }
 
             const reason = signal ? `signal ${signal}` : `exit code ${code ?? 'unknown'}`;
-            reject(d1Error(`${failureMessage} Wrangler exited with ${reason}.`));
+            const errorText = findWranglerErrorText(output, errorOutput);
+            reject(classifyD1Failure(errorText, context, new Error(`Wrangler exited with ${reason}.`)));
         });
     });
+}
+
+function findWranglerErrorText(output: string, errorOutput: string): string | undefined {
+    for (const streamOutput of [output, errorOutput]) {
+        const attempt = tryParseWranglerJson(streamOutput);
+        if (!attempt.ok) continue;
+
+        const errorText = extractWranglerErrorText(attempt.value);
+        if (errorText) return errorText;
+    }
+
+    const plainError = stripVTControlCharacters(errorOutput).trim();
+    if (plainError) return plainError;
+
+    const plainOutput = stripVTControlCharacters(output).trim();
+    return plainOutput || undefined;
+}
+
+function extractWranglerErrorText(value: unknown): string | undefined {
+    if (typeof value === 'string') return value.trim() || undefined;
+    if (Array.isArray(value)) {
+        const messages = value.flatMap((item) => extractWranglerErrorText(item) ?? []);
+        return [...new Set(messages)].join('; ') || undefined;
+    }
+    if (!value || typeof value !== 'object') return undefined;
+
+    const record = value as Record<string, unknown>;
+    const messages: string[] = [];
+    const append = (candidate: unknown) => {
+        if (typeof candidate === 'string' && candidate.trim()) messages.push(candidate.trim());
+    };
+    const appendError = (candidate: unknown) => {
+        if (typeof candidate === 'string') {
+            append(candidate);
+            return;
+        }
+        if (!candidate || typeof candidate !== 'object') return;
+
+        const errorRecord = candidate as Record<string, unknown>;
+        append(errorRecord.text);
+        append(errorRecord.message);
+        if (typeof errorRecord.code === 'string' || typeof errorRecord.code === 'number') {
+            append(`Cloudflare error code ${String(errorRecord.code)}`);
+        }
+    };
+
+    append(record.message);
+    append(record.text);
+    appendError(record.error);
+    if (Array.isArray(record.errors)) {
+        for (const error of record.errors) appendError(error);
+    }
+
+    return [...new Set(messages)].join('; ') || undefined;
+}
+
+function classifyD1Failure(errorText: string | undefined, context: D1OperationContext, cause?: unknown): CliError {
+    const detail = cleanErrorText(errorText);
+    const normalized = detail.toLowerCase();
+    const migrationCommand = `pnpm db:migrate:${context.databaseTarget}`;
+
+    if (
+        normalized.includes('unique constraint failed: short_url_slugs.slug') ||
+        (normalized.includes('sqlite_constraint_primarykey') && normalized.includes('short_url_slugs'))
+    ) {
+        if (context.slugs?.length) return possibleShortUrlConflictError(context.slugs, context.databaseTarget, cause);
+        return new CliError(
+            'E_CONFLICT',
+            `A slug already belongs to another Short URL in ${databaseLabel(context.databaseTarget)}.`,
+            `Run "pnpm urls list${context.databaseTarget === 'local' ? ' --local' : ''}" to find it.`,
+            1,
+            cause
+        );
+    }
+
+    if (
+        normalized.includes('no such table') ||
+        normalized.includes('no such column') ||
+        normalized.includes('has no column named') ||
+        normalized.includes('database schema has changed')
+    ) {
+        return new CliError(
+            'E_SCHEMA',
+            `${context.failureMessage} The ${databaseLabel(context.databaseTarget)} schema is missing or out of date.`,
+            `Apply the current migrations with "${migrationCommand}", then retry.`,
+            1,
+            cause
+        );
+    }
+
+    if (
+        normalized.includes('not authenticated') ||
+        normalized.includes('unable to authenticate') ||
+        normalized.includes('authentication error') ||
+        normalized.includes('invalid api token') ||
+        normalized.includes('api token is invalid') ||
+        normalized.includes('token has expired') ||
+        normalized.includes('expired token') ||
+        normalized.includes('unauthorized') ||
+        normalized.includes('forbidden') ||
+        normalized.includes('not authorized') ||
+        normalized.includes('do not have permission') ||
+        normalized.includes('cloudflare error code 10000') ||
+        normalized.includes('cloudflare error code 10001') ||
+        normalized.includes('cloudflare error code 6003') ||
+        normalized.includes('cloudflare error code 9109')
+    ) {
+        return new CliError(
+            'E_AUTH',
+            `${context.failureMessage} Cloudflare rejected Wrangler's credentials.`,
+            'Run "pnpm exec wrangler login", then retry.',
+            1,
+            cause
+        );
+    }
+
+    if (
+        normalized.includes("couldn't find a d1") ||
+        normalized.includes('could not find a d1') ||
+        normalized.includes('no d1 databases are configured') ||
+        (normalized.includes('database binding') && normalized.includes('not found')) ||
+        (normalized.includes('database id') && normalized.includes('not found'))
+    ) {
+        return new CliError(
+            'E_CONFIG',
+            `${context.failureMessage} Wrangler could not find ${databaseName}.`,
+            'Check the D1 database name and binding in wrangler.jsonc.',
+            2,
+            cause
+        );
+    }
+
+    if (
+        normalized.includes('database is locked') ||
+        normalized.includes('sqlite_busy') ||
+        normalized.includes('too many requests') ||
+        normalized.includes('rate limit') ||
+        normalized.includes('temporarily unavailable') ||
+        normalized.includes('service unavailable') ||
+        /\b503\b/.test(normalized) ||
+        /\b429\b/.test(normalized)
+    ) {
+        return new CliError(
+            'E_BUSY',
+            `${context.failureMessage} ${databaseLabel(context.databaseTarget)} is temporarily busy.`,
+            'Wait briefly and retry the command.',
+            1,
+            cause
+        );
+    }
+
+    if (
+        normalized.includes('fetch failed') ||
+        normalized.includes('network error') ||
+        normalized.includes('econnreset') ||
+        normalized.includes('econnrefused') ||
+        normalized.includes('econnaborted') ||
+        normalized.includes('enotfound') ||
+        normalized.includes('etimedout') ||
+        normalized.includes('getaddrinfo') ||
+        normalized.includes('und_err_') ||
+        normalized.includes('socket hang up')
+    ) {
+        return new CliError(
+            'E_NETWORK',
+            `${context.failureMessage} Wrangler could not reach Cloudflare.`,
+            'Check your connection and retry. Use --local if you intended to use the local test database.',
+            1,
+            cause
+        );
+    }
+
+    if (normalized.includes('constraint failed')) {
+        return new CliError(
+            'E_D1',
+            `${context.failureMessage} D1 rejected the Short URL data: ${detail}`,
+            `Confirm the ${databaseLabel(context.databaseTarget)} schema is current with "${migrationCommand}".`,
+            1,
+            cause
+        );
+    }
+
+    return d1Error(detail ? `${context.failureMessage} D1 reported: ${detail}` : context.failureMessage, cause);
+}
+
+function cleanErrorText(errorText: string | undefined): string {
+    if (!errorText) return '';
+
+    const compact = stripVTControlCharacters(errorText).replaceAll(/\s+/g, ' ').trim();
+    return compact.length > 600 ? `${compact.slice(0, 597)}...` : compact;
 }
 
 function databaseLabel(databaseTarget: DatabaseTarget): string {

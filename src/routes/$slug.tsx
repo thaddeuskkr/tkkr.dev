@@ -11,6 +11,7 @@ import {
     fingerprintShortUrlClient,
     recordShortUrlUnlockFailure,
 } from '@/lib/short-url-rate-limit';
+import { normalizeShortUrlDestination, shortUrlDestinationCspSource } from '@/lib/short-url-destination';
 import { lookupShortUrl, normalizeShortUrlSlug, verifyShortUrlSecret } from '@/lib/short-url-store';
 import type {
     ProtectedShortUrl,
@@ -313,13 +314,13 @@ function redirectTo(destinationUrl: string, status: 303 | 307): Response {
 function unlockPage(slug: string, shortUrl: ProtectedShortUrl, state: UnlockPageState): Response {
     const nonce = createCspNonce();
     const status = state.kind === 'locked' ? 429 : state.kind === 'rejected' ? 401 : 200;
-    const destinationOrigin = new URL(shortUrl.destinationUrl).origin;
+    const destinationCspSource = shortUrlDestinationCspSource(shortUrl.destinationUrl);
     const body = renderToStaticMarkup(
         <ShortUrlUnlockPage protection={shortUrl.protection} scriptNonce={nonce} slug={slug} state={state} />
     );
     const headers = new Headers({
         ...noStoreHeaders,
-        'Content-Security-Policy': `default-src 'none'; style-src 'self'; font-src 'self'; script-src 'nonce-${nonce}'; form-action 'self' ${destinationOrigin}; base-uri 'none'; frame-ancestors 'none'`,
+        'Content-Security-Policy': `default-src 'none'; style-src 'self'; font-src 'self'; script-src 'nonce-${nonce}'; form-action 'self' ${destinationCspSource}; base-uri 'none'; frame-ancestors 'none'`,
         'Content-Type': 'text/html; charset=utf-8',
     });
     if (state.kind === 'locked') {
@@ -526,12 +527,7 @@ function isCachedShortUrl(value: unknown): value is PublicShortUrl {
         return false;
     }
 
-    try {
-        const url = new URL(candidate.destinationUrl);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch {
-        return false;
-    }
+    return normalizeShortUrlDestination(candidate.destinationUrl) === candidate.destinationUrl;
 }
 
 function escapeHtml(value: string): string {

@@ -1,3 +1,5 @@
+import { normalizeShortUrlDestination } from '@/lib/short-url-destination';
+
 const shortUrlSlugPattern = /^[a-z0-9_-]{1,64}$/;
 const accessKeyPattern = /^[A-Za-z0-9_-]{22}$/;
 const legacyVerifierPattern = /^hmac-sha256:v1:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
@@ -85,7 +87,7 @@ export async function lookupShortUrl(
         return { kind: 'missing' };
     }
 
-    const destinationUrl = normalizeDestinationUrl(row.destination_url);
+    const destinationUrl = normalizeShortUrlDestination(row.destination_url);
     const expiresAt = row.expires_at;
     const unlockVerifier = row.unlock_verifier;
     const parsedVerifier = unlockVerifier === null ? null : parseVerifier(unlockVerifier);
@@ -206,19 +208,6 @@ function isValidSubmittedSecret(value: string, protection: ShortUrlProtection): 
 
 function signingPayload(value: string, protection: ShortUrlProtection, salt: string): string {
     return protection.kind === 'key' ? `${salt}.${value}` : `${protection.kind}.${salt}.${value}`;
-}
-
-function normalizeDestinationUrl(value: unknown): string | null {
-    if (typeof value !== 'string') {
-        return null;
-    }
-
-    try {
-        const url = new URL(value);
-        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null;
-    } catch {
-        return null;
-    }
 }
 
 async function signAccessKey(accessKey: string, salt: string, pepper: string): Promise<Uint8Array> {
