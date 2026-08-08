@@ -31,7 +31,7 @@ export async function createShortUrlHandoffToken(
 ): Promise<string> {
     const handoffSecret = await deriveShortUrlHandoffSecretBytes(shortUrlId, pepper);
     const key = await importHmacKey(handoffSecret, ['sign']);
-    const signature = await crypto.subtle.sign('HMAC', key, textEncoder.encode(handoffTokenPayload(timeStep(now))));
+    const signature = await crypto.subtle.sign('HMAC', key, textEncoder.encode(String(timeStep(now))));
 
     return encodeBase64Url(new Uint8Array(signature));
 }
@@ -63,7 +63,7 @@ export async function verifyShortUrlHandoffToken(
             'HMAC',
             key,
             tokenBytes,
-            textEncoder.encode(handoffTokenPayload(currentTimeStep - offset))
+            textEncoder.encode(String(currentTimeStep - offset))
         );
         if (valid) return true;
     }
@@ -78,16 +78,8 @@ async function deriveShortUrlHandoffSecretBytes(shortUrlId: string, pepper: stri
     }
 
     const key = await importHmacKey(pepperBytes, ['sign']);
-    const secret = await crypto.subtle.sign(
-        'HMAC',
-        key,
-        textEncoder.encode(`short-url-handoff-secret:v1:${shortUrlId}`)
-    );
+    const secret = await crypto.subtle.sign('HMAC', key, textEncoder.encode(`access:${shortUrlId}`));
     return new Uint8Array(secret);
-}
-
-function handoffTokenPayload(timeStepValue: number): string {
-    return `short-url-handoff-token:v1:${timeStepValue}`;
 }
 
 function timeStep(now: number): number {

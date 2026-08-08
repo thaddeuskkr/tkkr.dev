@@ -703,18 +703,18 @@ async function createProtectionCredentials(
 
     return {
         handoffSecret,
-        verifier: `hmac-sha256:v2:${protection}${lengthSegment}:${salt}:${signature}`,
+        verifier: `hmac-sha256:${protection}${lengthSegment}:${salt}:${signature}`,
     };
 }
 
 function createAccessCredentials(pepper: string): Pick<ProtectionCredentials, 'accessKey' | 'verifier'> {
     const accessKey = randomBytes(16).toString('base64url');
     const salt = randomBytes(16).toString('base64url');
-    const signature = createHmac('sha256', pepper).update(`${salt}.${accessKey}`).digest('base64url');
+    const signature = createHmac('sha256', pepper).update(`key.${salt}.${accessKey}`).digest('base64url');
 
     return {
         accessKey,
-        verifier: `hmac-sha256:v1:${salt}:${signature}`,
+        verifier: `hmac-sha256:key:${salt}:${signature}`,
     };
 }
 
@@ -1009,9 +1009,9 @@ ORDER BY q.created_at DESC, s.slug ASC;`,
 
 function protectionKind(verifier: string | null): ShortUrlRecord['protection'] {
     if (verifier === null) return 'public';
-    if (verifier.startsWith('hmac-sha256:v1:')) return 'key';
-    if (verifier.startsWith('hmac-sha256:v2:password:')) return 'password';
-    if (verifier.startsWith('hmac-sha256:v2:pin:')) return 'pin';
+    if (verifier.startsWith('hmac-sha256:key:')) return 'key';
+    if (verifier.startsWith('hmac-sha256:password:')) return 'password';
+    if (verifier.startsWith('hmac-sha256:pin:')) return 'pin';
     return 'protected';
 }
 

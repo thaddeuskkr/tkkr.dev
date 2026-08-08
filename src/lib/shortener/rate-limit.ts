@@ -14,11 +14,7 @@ export type ShortUrlRateLimitResult =
 
 export async function fingerprintShortUrlClient(shortUrlId: string, clientIp: string, pepper: string): Promise<string> {
     const key = await importFingerprintKey(pepper);
-    const signature = await crypto.subtle.sign(
-        'HMAC',
-        key,
-        textEncoder.encode(`short-url-rate-limit:v1:${shortUrlId}:${clientIp}`)
-    );
+    const signature = await crypto.subtle.sign('HMAC', key, textEncoder.encode(`ratelimit:${shortUrlId}:${clientIp}`));
 
     return encodeBase64Url(new Uint8Array(signature));
 }

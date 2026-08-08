@@ -2,9 +2,9 @@ import { normalizeShortUrlDestination } from '@/lib/shortener/destination';
 
 const shortUrlSlugPattern = /^[a-z0-9_-]{1,64}$/;
 const accessKeyPattern = /^[A-Za-z0-9_-]{22}$/;
-const legacyVerifierPattern = /^hmac-sha256:v1:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
-const passwordVerifierPattern = /^hmac-sha256:v2:password:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
-const pinVerifierPattern = /^hmac-sha256:v2:pin:([4-8]):([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
+const keyVerifierPattern = /^hmac-sha256:key:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
+const passwordVerifierPattern = /^hmac-sha256:password:([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
+const pinVerifierPattern = /^hmac-sha256:pin:([4-8]):([A-Za-z0-9_-]{22}):([A-Za-z0-9_-]{43})$/;
 
 const reservedShortUrlSlugs = new Set(['about', 'admin', 'api', 'links', 'projects']);
 
@@ -36,11 +36,6 @@ export type ShortUrlLookupResult =
     | { kind: 'expired' }
     | { kind: 'missing' }
     | { kind: 'unavailable'; reason: 'database' | 'invalid-record'; error?: string };
-
-export type ShortUrlAccessCredentials = {
-    accessKey: string;
-    verifier: string;
-};
 
 export function normalizeShortUrlSlug(value: string): string | null {
     const slug = value.toLowerCase();
@@ -105,14 +100,14 @@ export async function lookupShortUrl(
         return { kind: 'expired' };
     }
 
-    if (unlockVerifier) {
+    if (unlockVerifier !== null && parsedVerifier) {
         return {
             kind: 'protected',
             shortUrl: {
                 id: row.id,
                 destinationUrl,
                 expiresAt,
-                protection: parsedVerifier?.protection ?? { kind: 'key' },
+                protection: parsedVerifier.protection,
                 unlockVerifier,
             },
         };
@@ -121,19 +116,6 @@ export async function lookupShortUrl(
     return {
         kind: 'active',
         shortUrl: { destinationUrl, expiresAt },
-    };
-}
-
-export async function generateShortUrlAccessCredentials(pepper: string): Promise<ShortUrlAccessCredentials> {
-    const accessKeyBytes = crypto.getRandomValues(new Uint8Array(16));
-    const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-    const accessKey = encodeBase64Url(accessKeyBytes);
-    const salt = encodeBase64Url(saltBytes);
-    const signature = await signAccessKey(accessKey, salt, pepper);
-
-    return {
-        accessKey,
-        verifier: `hmac-sha256:v1:${salt}:${encodeBase64Url(signature)}`,
     };
 }
 
@@ -164,12 +146,12 @@ type ParsedVerifier = {
 };
 
 function parseVerifier(verifier: string): ParsedVerifier | null {
-    const legacyMatch = legacyVerifierPattern.exec(verifier);
-    if (legacyMatch?.[1] && legacyMatch[2]) {
+    const keyMatch = keyVerifierPattern.exec(verifier);
+    if (keyMatch?.[1] && keyMatch[2]) {
         return {
             protection: { kind: 'key' },
-            salt: legacyMatch[1],
-            encodedSignature: legacyMatch[2],
+            salt: keyMatch[1],
+            encodedSignature: keyMatch[2],
         };
     }
 
@@ -207,14 +189,7 @@ function isValidSubmittedSecret(value: string, protection: ShortUrlProtection): 
 }
 
 function signingPayload(value: string, protection: ShortUrlProtection, salt: string): string {
-    return protection.kind === 'key' ? `${salt}.${value}` : `${protection.kind}.${salt}.${value}`;
-}
-
-async function signAccessKey(accessKey: string, salt: string, pepper: string): Promise<Uint8Array> {
-    const key = await importHmacKey(pepper, ['sign']);
-    const signature = await crypto.subtle.sign('HMAC', key, textEncoder.encode(`${salt}.${accessKey}`));
-
-    return new Uint8Array(signature);
+    return `${protection.kind}.${salt}.${value}`;
 }
 
 function importHmacKey(pepper: string, usages: KeyUsage[]): Promise<CryptoKey> {
@@ -224,15 +199,6 @@ function importHmacKey(pepper: string, usages: KeyUsage[]): Promise<CryptoKey> {
     }
 
     return crypto.subtle.importKey('raw', pepperBytes, { name: 'HMAC', hash: 'SHA-256' }, false, usages);
-}
-
-function encodeBase64Url(bytes: Uint8Array): string {
-    let binary = '';
-    for (const byte of bytes) {
-        binary += String.fromCharCode(byte);
-    }
-
-    return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
 }
 
 function decodeBase64Url(value: string): Uint8Array<ArrayBuffer> | null {
