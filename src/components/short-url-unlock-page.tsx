@@ -86,6 +86,19 @@ export function ShortUrlUnlockPage({ protection, scriptNonce, slug, state }: Sho
                         {!locked ? <ArrowRight data-icon="inline-end" className="ml-1" aria-hidden="true" /> : null}
                     </Button>
                 </form>
+
+                <footer className="mt-7 flex justify-center">
+                    <a
+                        href="/"
+                        aria-label="Go to the tkkr.dev homepage"
+                        className="group inline-flex size-10 items-center justify-center rounded-lg opacity-55 transition-[transform,opacity] duration-300 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none motion-safe:hover:-translate-y-0.5 motion-reduce:transition-none"
+                    >
+                        <span
+                            aria-hidden="true"
+                            className="block size-6 bg-primary transition-transform duration-300 [-webkit-mask:url('/icon-dark.svg')_center/contain_no-repeat] [mask:url('/icon-dark.svg')_center/contain_no-repeat] group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transition-none"
+                        />
+                    </a>
+                </footer>
             </section>
             <script nonce={scriptNonce} dangerouslySetInnerHTML={{ __html: unlockInteractionScript }} />
         </main>

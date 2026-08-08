@@ -333,7 +333,7 @@ function unlockPage(slug: string, shortUrl: ProtectedShortUrl, state: UnlockPage
     );
     const headers = new Headers({
         ...noStoreHeaders,
-        'Content-Security-Policy': `default-src 'none'; style-src 'self'; font-src 'self'; script-src 'nonce-${nonce}'; form-action 'self' ${destinationCspSource}; base-uri 'none'; frame-ancestors 'none'`,
+        'Content-Security-Policy': `default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self'; script-src 'nonce-${nonce}'; form-action 'self' ${destinationCspSource}; base-uri 'none'; frame-ancestors 'none'`,
         'Content-Type': 'text/html; charset=utf-8',
     });
     if (state.kind === 'locked') {
