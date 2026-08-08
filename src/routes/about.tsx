@@ -69,7 +69,7 @@ const interests: readonly Interest[] = [
     {
         title: 'Photography',
         description:
-            'I enjoy capturing landscapes and memorable moments with my Nikon Z50II, especially while traveling. I also have a solid understanding of photography fundamentals and techniques.',
+            'I enjoy capturing landscapes and memorable moments with my Nikon Z50II, especially while travelling. I also have a solid understanding of photography fundamentals and techniques.',
     },
     {
         title: 'Listening to music',
