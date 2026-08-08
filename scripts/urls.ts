@@ -8,7 +8,8 @@ import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { parseArgs, stripVTControlCharacters, styleText } from 'node:util';
 
-import { validateShortUrlDestination } from '../src/lib/short-url-destination.ts';
+import { validateShortUrlDestination } from '../src/lib/shortener/destination.ts';
+import { deriveShortUrlHandoffSecret } from '../src/lib/shortener/handoff.ts';
 
 const databaseName = 'tkkr-dev-urls';
 const publicOrigins = {
@@ -52,6 +53,7 @@ type CliOptions = {
 
 type ProtectionCredentials = {
     accessKey?: string;
+    handoffSecret: string;
     verifier: string;
 };
 
@@ -255,6 +257,7 @@ Examples:
 Expired aliases are reclaimed automatically when a new Short URL reuses them.
 Compatible public destinations reuse their existing Short URL row.
 Protected destinations remain separate so their credentials are never shared implicitly.
+Protected destinations print a backend verification secret after a successful D1 write.
 Browser-executable and local-file destination protocols are rejected.
 `,
     list: `List Short URLs.
@@ -348,8 +351,8 @@ async function addShortUrl(options: CliOptions): Promise<void> {
         }
     }
 
-    const credentials = await createProtectionCredentials(options.protection, process.env.SHORT_URL_PEPPER);
     const id = randomUUID();
+    const credentials = await createProtectionCredentials(options.protection, process.env.SHORT_URL_PEPPER, id);
     const now = Date.now();
     const sql = createInsertSql({
         id,
@@ -363,7 +366,7 @@ async function addShortUrl(options: CliOptions): Promise<void> {
 
     await executeInsertSqlFile(sql, databaseTarget, id, slugs);
 
-    printAddedShortUrls(slugs, databaseTarget, expiresAt, false, credentials?.accessKey);
+    printAddedShortUrls(slugs, databaseTarget, expiresAt, false, credentials);
 }
 
 function printAddedShortUrls(
@@ -371,7 +374,7 @@ function printAddedShortUrls(
     databaseTarget: DatabaseTarget,
     expiresAt: number | null,
     reused: boolean,
-    accessKey?: string
+    credentials?: ProtectionCredentials | null
 ): void {
     const action = reused
         ? `Added ${slugs.length} slug${slugs.length === 1 ? '' : 's'} to an existing Short URL`
@@ -385,8 +388,12 @@ function printAddedShortUrls(
         process.stdout.write(`Expires: ${new Date(expiresAt).toISOString()}\n`);
     }
 
-    if (accessKey) {
-        process.stdout.write(`\nAccess key (shown once): ${accessKey}\n`);
+    if (credentials?.accessKey) {
+        process.stdout.write(`\nAccess key (shown once): ${credentials.accessKey}\n`);
+    }
+    if (credentials) {
+        process.stdout.write(`\nBackend verification secret (shown once): ${credentials.handoffSecret}\n`);
+        process.stdout.write('The backend uses this secret to validate the short-lived access_token query value.\n');
     }
 }
 
@@ -662,7 +669,8 @@ function normalizeExpiry(value: string | undefined): number | null {
 
 async function createProtectionCredentials(
     protection: CliOptions['protection'],
-    pepper: string | undefined
+    pepper: string | undefined,
+    shortUrlId: string
 ): Promise<ProtectionCredentials | null> {
     if (protection === null) {
         return null;
@@ -675,9 +683,9 @@ async function createProtectionCredentials(
         );
     }
 
-    if (protection === 'key') {
-        return createAccessCredentials(pepper);
-    }
+    const handoffSecret = await deriveShortUrlHandoffSecret(shortUrlId, pepper);
+
+    if (protection === 'key') return { ...createAccessCredentials(pepper), handoffSecret };
 
     const label = protection === 'pin' ? 'PIN' : 'Password';
     const secret = await promptAndConfirmSecret(label);
@@ -694,11 +702,12 @@ async function createProtectionCredentials(
     const lengthSegment = protection === 'pin' ? `:${secret.length}` : '';
 
     return {
+        handoffSecret,
         verifier: `hmac-sha256:v2:${protection}${lengthSegment}:${salt}:${signature}`,
     };
 }
 
-function createAccessCredentials(pepper: string): ProtectionCredentials {
+function createAccessCredentials(pepper: string): Pick<ProtectionCredentials, 'accessKey' | 'verifier'> {
     const accessKey = randomBytes(16).toString('base64url');
     const salt = randomBytes(16).toString('base64url');
     const signature = createHmac('sha256', pepper).update(`${salt}.${accessKey}`).digest('base64url');

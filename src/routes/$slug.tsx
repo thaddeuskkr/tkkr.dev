@@ -10,15 +10,16 @@ import {
     clearShortUrlUnlockFailures,
     fingerprintShortUrlClient,
     recordShortUrlUnlockFailure,
-} from '@/lib/short-url-rate-limit';
-import { normalizeShortUrlDestination, shortUrlDestinationCspSource } from '@/lib/short-url-destination';
-import { lookupShortUrl, normalizeShortUrlSlug, verifyShortUrlSecret } from '@/lib/short-url-store';
+} from '@/lib/shortener/rate-limit';
+import { normalizeShortUrlDestination, shortUrlDestinationCspSource } from '@/lib/shortener/destination';
+import { createShortUrlHandoffDestination } from '@/lib/shortener/handoff';
+import { lookupShortUrl, normalizeShortUrlSlug, verifyShortUrlSecret } from '@/lib/shortener/store';
 import type {
     ProtectedShortUrl,
     PublicShortUrl,
     ShortUrlLookupResult,
     ShortUrlProtection,
-} from '@/lib/short-url-store';
+} from '@/lib/shortener/store';
 import {
     shortUrlExpiredStatusPage,
     shortUrlMethodNotAllowedStatusPage,
@@ -272,7 +273,19 @@ async function handleShortUrlPost(request: Request, rawSlug: string): Promise<Re
         }
     }
 
-    return redirectTo(result.shortUrl.destinationUrl, 303);
+    let destinationUrl: string;
+    try {
+        destinationUrl = await createShortUrlHandoffDestination(
+            result.shortUrl.id,
+            result.shortUrl.destinationUrl,
+            pepper
+        );
+    } catch (error) {
+        logFailure(slug, 'handoff-token', error);
+        return unavailablePage(slug);
+    }
+
+    return redirectTo(destinationUrl, 303);
 }
 
 function responseForLookupResult(result: ShortUrlLookupResult, slug: string, request: Request): Response {

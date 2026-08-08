@@ -1,4 +1,4 @@
-import { normalizeShortUrlDestination } from '@/lib/short-url-destination';
+import { normalizeShortUrlDestination } from '@/lib/shortener/destination';
 
 const shortUrlSlugPattern = /^[a-z0-9_-]{1,64}$/;
 const accessKeyPattern = /^[A-Za-z0-9_-]{22}$/;

@@ -2,7 +2,7 @@ import { ArrowRight, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { ShortUrlProtection } from '@/lib/short-url-store';
+import type { ShortUrlProtection } from '@/lib/shortener/store';
 
 type UnlockPageState =
     { kind: 'idle' } | { kind: 'rejected'; attemptsRemaining?: number } | { kind: 'locked'; retryAfterSeconds: number };
