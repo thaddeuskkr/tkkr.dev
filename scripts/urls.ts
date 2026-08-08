@@ -253,6 +253,8 @@ Examples:
   pnpm urls add https://example.com private --password -l
 
 Expired aliases are reclaimed automatically when a new Short URL reuses them.
+Compatible public destinations reuse their existing Short URL row.
+Protected destinations remain separate so their credentials are never shared implicitly.
 Browser-executable and local-file destination protocols are rejected.
 `,
     list: `List Short URLs.
@@ -337,6 +339,15 @@ async function addShortUrl(options: CliOptions): Promise<void> {
         throw shortUrlConflictError(existingSlugs, databaseTarget);
     }
 
+    if (options.protection === null) {
+        const reusableShortUrlId = await findReusableShortUrlId(databaseTarget, destinationUrl, ownerId, expiresAt);
+        if (reusableShortUrlId) {
+            await addSlugsToExistingShortUrl(databaseTarget, reusableShortUrlId, slugs);
+            printAddedShortUrls(slugs, databaseTarget, expiresAt, true);
+            return;
+        }
+    }
+
     const credentials = await createProtectionCredentials(options.protection, process.env.SHORT_URL_PEPPER);
     const id = randomUUID();
     const now = Date.now();
@@ -352,9 +363,20 @@ async function addShortUrl(options: CliOptions): Promise<void> {
 
     await executeInsertSqlFile(sql, databaseTarget, id, slugs);
 
-    process.stdout.write(
-        `${styled('green', `Created ${slugs.length === 1 ? 'a Short URL' : 'Short URLs'}`)} in ${databaseLabel(databaseTarget)}:\n`
-    );
+    printAddedShortUrls(slugs, databaseTarget, expiresAt, false, credentials?.accessKey);
+}
+
+function printAddedShortUrls(
+    slugs: readonly string[],
+    databaseTarget: DatabaseTarget,
+    expiresAt: number | null,
+    reused: boolean,
+    accessKey?: string
+): void {
+    const action = reused
+        ? `Added ${slugs.length} slug${slugs.length === 1 ? '' : 's'} to an existing Short URL`
+        : `Created ${slugs.length === 1 ? 'a Short URL' : 'Short URLs'}`;
+    process.stdout.write(`${styled('green', action)} in ${databaseLabel(databaseTarget)}:\n`);
     for (const shortUrlSlug of slugs) {
         process.stdout.write(`  ${styled('cyan', `${publicOrigins[databaseTarget]}/${shortUrlSlug}`)}\n`);
     }
@@ -363,8 +385,8 @@ async function addShortUrl(options: CliOptions): Promise<void> {
         process.stdout.write(`Expires: ${new Date(expiresAt).toISOString()}\n`);
     }
 
-    if (credentials?.accessKey) {
-        process.stdout.write(`\nAccess key (shown once): ${credentials.accessKey}\n`);
+    if (accessKey) {
+        process.stdout.write(`\nAccess key (shown once): ${accessKey}\n`);
     }
 }
 
@@ -810,11 +832,21 @@ async function confirmRemoval(shortUrls: ShortUrlRecord[], databaseTarget: Datab
 }
 
 function createInsertSql({ id, destinationUrl, verifier, expiresAt, ownerId, now, slugs }: ShortUrlInsert): string {
-    const slugValues = slugs.map((slug) => `(${quoteSql(slug)}, ${quoteSql(id)})`).join(',\n    ');
+    const reusableShortUrlId = `(SELECT id
+        FROM short_urls
+        WHERE destination_url = ${quoteSql(destinationUrl)}
+          AND owner_id = ${quoteSql(ownerId)}
+          AND unlock_verifier IS NULL
+          AND IFNULL(expires_at, -1) = ${expiresAt ?? -1}
+        ORDER BY created_at ASC, id ASC
+        LIMIT 1)`;
+    const shortUrlId = verifier === null ? reusableShortUrlId : quoteSql(id);
+    const slugValues = slugs.map((slug) => `(${quoteSql(slug)}, ${shortUrlId})`).join(',\n    ');
+    const insertOperator = verifier === null ? 'INSERT OR IGNORE' : 'INSERT';
 
     return `PRAGMA foreign_keys = ON;
 
-INSERT INTO short_urls (
+${insertOperator} INTO short_urls (
     id,
     destination_url,
     unlock_verifier,
@@ -836,6 +868,14 @@ INSERT INTO short_url_slugs (slug, short_url_id) VALUES
     ${slugValues};
 
 DELETE FROM short_urls
+WHERE id = ${quoteSql(id)}
+  AND NOT EXISTS (
+      SELECT 1
+      FROM short_url_slugs
+      WHERE short_url_slugs.short_url_id = short_urls.id
+  );
+
+DELETE FROM short_urls
 WHERE expires_at IS NOT NULL
   AND expires_at <= ${now}
   AND NOT EXISTS (
@@ -844,6 +884,47 @@ WHERE expires_at IS NOT NULL
       WHERE short_url_slugs.short_url_id = short_urls.id
   );
 `;
+}
+
+async function findReusableShortUrlId(
+    databaseTarget: DatabaseTarget,
+    destinationUrl: string,
+    ownerId: string,
+    expiresAt: number | null
+): Promise<string | null> {
+    const results = await executeD1Command(
+        `SELECT id
+FROM short_urls
+WHERE destination_url = ${quoteSql(destinationUrl)}
+  AND owner_id = ${quoteSql(ownerId)}
+  AND unlock_verifier IS NULL
+  AND IFNULL(expires_at, -1) = ${expiresAt ?? -1}
+  AND (expires_at IS NULL OR expires_at > ${Date.now()})
+ORDER BY created_at ASC, id ASC
+LIMIT 1;`,
+        databaseTarget,
+        'D1 destination lookup failed. The Short URL was not created.'
+    );
+
+    for (const row of results.flatMap((result) => result.results ?? [])) {
+        if (row && typeof row === 'object' && 'id' in row && typeof row.id === 'string') return row.id;
+    }
+    return null;
+}
+
+async function addSlugsToExistingShortUrl(
+    databaseTarget: DatabaseTarget,
+    shortUrlId: string,
+    slugs: readonly string[]
+): Promise<void> {
+    const values = slugs.map((slug) => `(${quoteSql(slug)}, ${quoteSql(shortUrlId)})`).join(',\n    ');
+    await executeD1Command(
+        `INSERT INTO short_url_slugs (slug, short_url_id) VALUES
+    ${values};`,
+        databaseTarget,
+        'D1 alias write failed. No slugs were added to the existing Short URL.',
+        slugs
+    );
 }
 
 async function findActiveSlugs(databaseTarget: DatabaseTarget, slugs: readonly string[]): Promise<string[]> {
@@ -1026,9 +1107,10 @@ WHERE id = ${quoteSql(shortUrlId)}
 async function executeD1Command(
     sql: string,
     databaseTarget: DatabaseTarget,
-    failureMessage: string
+    failureMessage: string,
+    slugs?: readonly string[]
 ): Promise<D1ExecuteResult[]> {
-    const context: D1OperationContext = { databaseTarget, failureMessage };
+    const context: D1OperationContext = { databaseTarget, failureMessage, slugs };
     const output = await runWrangler(
         [
             'd1',
