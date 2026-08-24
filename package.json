@@ -50,7 +50,7 @@
         "prettier": "^3.8.3",
         "prettier-plugin-tailwindcss": "^0.8.0",
         "typescript": "^6",
-        "vite": "^8.2.1",
+        "vite": "^8.2.2",
         "wrangler": "^4.124.0"
     }
 }
