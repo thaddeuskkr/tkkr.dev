@@ -133,9 +133,9 @@ export function Profile({ groups }: { groups: readonly DirectoryGroup[] }) {
                 <div className="profile-card-wrap w-full max-w-140">
                     <div
                         className={cn(
-                            "w-full rounded-3xl border border-[#ffffff24] bg-[#20231feb] px-10.5 pt-8.5 pb-7 backdrop-blur-[24px]",
+                            "w-full rounded-3xl border border-[#ffffff24] bg-[#20231feb] px-10.5 pt-8.5 pb-7 backdrop-blur-xl",
                             "shadow-[0_32px_90px_#07100840,inset_0_1px_0_#ffffff0a] animate-card-enter",
-                            "[@media(max-width:640px)]:rounded-[20px] [@media(max-width:640px)]:px-7 [@media(max-width:640px)]:pt-7 [@media(max-width:640px)]:pb-6",
+                            "[@media(max-width:640px)]:rounded-2xl [@media(max-width:640px)]:px-7 [@media(max-width:640px)]:pt-7 [@media(max-width:640px)]:pb-6",
                         )}>
                         <div>
                             <h1
@@ -143,7 +143,7 @@ export function Profile({ groups }: { groups: readonly DirectoryGroup[] }) {
                                 className="mt-3.5 mb-6.25 font-display text-[clamp(50px,5.3vw,68px)] leading-[1.04] font-normal tracking-[-1.7px] [@media(max-width:640px)]:text-[57px]">
                                 Thaddeus <span className="block text-[#ddd9ca] italic">Kuah</span>
                             </h1>
-                            <p className="max-w-[385px] text-sm leading-[1.85] text-pretty text-[#b5b8b0] [@media(max-width:640px)]:text-[13px]">
+                            <p className="max-w-96.25 text-sm leading-[1.85] text-pretty text-[#b5b8b0] [@media(max-width:640px)]:text-[13px]">
                                 I’m a self-taught hobbyist programmer, gamer, and student who builds
                                 things with care for thoughtful details and dependable systems.
                             </p>
@@ -238,7 +238,7 @@ export function Profile({ groups }: { groups: readonly DirectoryGroup[] }) {
                                             <span className="flex items-center gap-2 text-sm font-medium">
                                                 {link.name}
                                                 {link.access && (
-                                                    <span className="rounded-[4px] border border-[#ffffff12] px-1.25 py-0.25 text-[9px] font-normal text-[#969a8d]">
+                                                    <span className="rounded-[4px] border border-[#ffffff12] px-1.25 py-px text-[9px] font-normal text-[#969a8d]">
                                                         Private
                                                     </span>
                                                 )}

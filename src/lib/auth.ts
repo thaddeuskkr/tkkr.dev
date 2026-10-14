@@ -2,9 +2,10 @@ import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { nextCookies } from "better-auth/next-js";
 import { databasePool } from "./db";
+import { authBaseURL } from "./auth-base-url";
 
 export function isAuthConfigured() {
-    return ["BETTER_AUTH_SECRET", "BETTER_AUTH_URL", "AUTH_CLIENT_ID", "AUTH_CLIENT_SECRET"].every(
+    return ["BETTER_AUTH_SECRET", "AUTH_CLIENT_ID", "AUTH_CLIENT_SECRET"].every(
         (key) => Boolean(process.env[key]?.trim()),
     );
 }
@@ -13,7 +14,7 @@ function authOptions() {
     return {
         appName: "tkkr.dev Admin",
         database: databasePool(),
-        baseURL: process.env.BETTER_AUTH_URL,
+        baseURL: authBaseURL(),
         secret: process.env.BETTER_AUTH_SECRET,
         user: {
             modelName: "admin_users",
