@@ -1,0 +1,29 @@
+.landscape {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    background: #434c48 url("/images/misty-mountains.jpg") center 60% / cover no-repeat;
+    filter: saturate(0.3);
+    animation: landscape-enter 1.8s ease-out both;
+}
+.landscape-shade {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background: linear-gradient(180deg, #11171340 0%, #12191220 35%, #0d130e88 100%);
+}
+@keyframes landscape-enter {
+    from {
+        opacity: 0.1;
+        transform: scale(1.025);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .landscape {
+        animation: none;
+    }
+}

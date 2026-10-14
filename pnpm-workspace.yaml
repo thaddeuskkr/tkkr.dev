@@ -1,0 +1,6 @@
+pmOnFail: error
+allowBuilds:
+    esbuild: true
+    sharp: true
+    unrs-resolver: true
+    fsevents: false
