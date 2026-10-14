@@ -45,5 +45,11 @@
     "packageManager": "pnpm@12.11.2",
     "engines": {
         "node": "^20.19.0 || ^22.13.0 || >=24"
+    },
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "onFail": "warn"
+        }
     }
 }
