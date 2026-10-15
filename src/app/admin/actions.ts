@@ -13,12 +13,12 @@ import {
     type ShortLinkInput,
 } from "@/lib/admin/short-links";
 
-async function perform<T>(work: (userId: string) => Promise<T>) {
+async function perform<T>(work: (userId: string) => Promise<T>, refreshHomepage = false) {
     try {
         const session = await requireAdmin();
         const data = await work(session.user.id);
         revalidatePath("/admin");
-        revalidatePath("/");
+        if (refreshHomepage) revalidatePath("/");
         return { ok: true as const, data };
     } catch (error) {
         const code = (error as { code?: string })?.code;
@@ -37,11 +37,11 @@ async function perform<T>(work: (userId: string) => Promise<T>) {
 }
 
 export async function saveDirectoryEntry(input: DirectoryEntryInput) {
-    return perform(() => saveDirectoryEntryRecord(database(), input));
+    return perform(() => saveDirectoryEntryRecord(database(), input), true);
 }
 
 export async function deleteDirectoryEntry(id: string, version: number) {
-    return perform(() => deleteDirectoryEntryRecord(database(), id, version));
+    return perform(() => deleteDirectoryEntryRecord(database(), id, version), true);
 }
 
 export async function saveShortLink(input: ShortLinkInput) {

@@ -1,14 +1,15 @@
 import { Profile } from "@/components/profile";
 import { publicDirectoryGroups } from "@/lib/admin/directory";
-import { directoryGroups } from "@/lib/directory";
-export const dynamic = "force-dynamic";
+// Cache the rendered homepage until an admin directory edit invalidates it.
+export const dynamic = "force-static";
+export const revalidate = false;
 export default async function Home() {
     let groups;
     try {
         groups = await publicDirectoryGroups();
     } catch {
-        console.error("Directory could not be loaded; using the existing site links.");
-        groups = directoryGroups;
+        // Abort regeneration so a database outage cannot replace the cached links.
+        throw new Error("Directory could not be loaded.");
     }
 
     return <Profile groups={groups} />;
